@@ -1,0 +1,764 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Lumi · User Flow Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body{margin:0;background:#F2EAD8;color:#1F1B17;font-family:'DM Sans',system-ui,sans-serif}
+  .wrap{padding:48px 32px 80px}
+  .head{max-width:1100px;margin:0 auto 28px}
+  .eyebrow{font-size:11px;font-weight:600;letter-spacing:.22em;color:#8C7B6A;text-transform:uppercase;margin-bottom:14px}
+  h1{font-family:'Fraunces',serif;font-weight:500;font-variation-settings:'SOFT' 100;font-size:50px;line-height:1.04;letter-spacing:-1.1px;margin:0 0 14px}
+  h1 em{color:#E8784E;font-style:italic}
+  .lede{font-size:16px;line-height:1.6;color:#5A4F40;max-width:720px;margin:0 0 22px}
+
+  .legend{display:flex;flex-wrap:wrap;gap:14px;background:#fff;border:1px solid #EBE3D6;border-radius:14px;padding:14px 18px;margin-bottom:28px}
+  .lg{display:flex;align-items:center;gap:8px;font-size:12px;color:#3A342C}
+  .lg i{display:inline-block;width:18px;height:18px;border-radius:5px;border:1px solid rgba(0,0,0,.06)}
+  .lg .ln{display:inline-block;width:28px;height:0;border-top-width:2px;border-top-style:solid}
+  .lg .arrow{font-size:14px;color:#8C7B6A}
+
+  .map{position:relative;width:2880px;height:2300px;margin:0 auto;background:#FAF6F0;border:1px solid #EBE3D6;border-radius:24px;overflow:hidden}
+  .map .grid-bg{position:absolute;inset:0;background-image:radial-gradient(circle,#E8DCC4 1px,transparent 1px);background-size:32px 32px;opacity:.55}
+
+  /* Cluster (group of related screens) */
+  .cluster{position:absolute;border:1.5px dashed #C8B89F;border-radius:24px;padding:16px;background:rgba(255,255,255,.4)}
+  .cluster .ctitle{position:absolute;top:-13px;left:18px;background:#FAF6F0;padding:2px 10px;font-size:10px;font-weight:700;letter-spacing:.2em;color:#7A6F5F;text-transform:uppercase}
+  .cluster .csub{position:absolute;top:-13px;right:18px;background:#FAF6F0;padding:2px 10px;font-size:10px;color:#8C7B6A;font-style:italic;font-family:Fraunces}
+
+  /* Phone screen card */
+  .scrn{position:absolute;width:200px;height:380px;border-radius:26px;background:#fff;border:1px solid #EBE3D6;box-shadow:0 12px 28px -14px rgba(60,42,18,.18);overflow:hidden;cursor:default}
+  .scrn .di{position:absolute;top:6px;left:50%;transform:translateX(-50%);width:60px;height:14px;border-radius:10px;background:#1F1B17;z-index:5}
+  .scrn .body{padding:30px 14px 16px;height:100%;display:flex;flex-direction:column;gap:6px}
+  .scrn .pcap{font-size:8px;font-weight:700;letter-spacing:.18em;color:#8C7B6A;text-transform:uppercase}
+  .scrn .stt{font-family:'Fraunces',serif;font-weight:500;font-variation-settings:'SOFT' 100;font-size:14px;line-height:1.1;letter-spacing:-.3px;margin:2px 0 6px}
+  .scrn .stt em{color:#E8784E;font-style:italic}
+  .scrn .badge{position:absolute;top:8px;right:10px;font-size:8px;font-weight:700;letter-spacing:.12em;color:#fff;background:#1F1B17;padding:2px 6px;border-radius:99px;z-index:6}
+  .scrn .badge.start{background:#3D5A4A}
+  .scrn .badge.win{background:#E8784E}
+  .scrn .badge.action{background:#7A4520;background:#E8784E}
+  .scrn .badge.ai{background:#5A3A55}
+  .scrn .num{position:absolute;top:8px;left:10px;font-family:'Fraunces',serif;font-size:13px;color:#E8784E;line-height:1;z-index:6;background:#FCEAD8;width:18px;height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-weight:600}
+  .scrn .lbl{position:absolute;left:0;right:0;bottom:-22px;text-align:center;font-size:11px;font-weight:600;color:#3A342C;letter-spacing:-.1px}
+  .scrn .lbl small{display:block;font-weight:400;font-size:9.5px;color:#8C7B6A;letter-spacing:0;margin-top:2px}
+
+  /* Mini elements */
+  .row{background:#FAF6F0;border:1px solid #EBE3D6;border-radius:8px;padding:5px 7px;font-size:8.5px;color:#5A4F40;display:flex;align-items:center;gap:5px;line-height:1.2}
+  .row .dot{width:6px;height:6px;border-radius:99px;background:#E8784E;flex-shrink:0}
+  .row.cream{background:#FCEAD8;border-color:#FCEAD8;color:#7A4520}
+  .row.green{background:#E2EBE5;border-color:#D6E1D8;color:#3D5A4A}
+  .row.dark{background:#1F1B17;border-color:#1F1B17;color:#FAF6F0}
+  .pill{display:inline-block;padding:2px 6px;border-radius:99px;background:#FCEAD8;font-size:8px;font-weight:600;color:#7A4520}
+  .big{font-family:'Fraunces',serif;font-weight:500;font-variation-settings:'SOFT' 100;color:#E8784E;font-size:22px;line-height:1;text-align:center}
+  .center{text-align:center}
+  .cta{background:#E8784E;color:#FFF6EE;text-align:center;padding:6px;border-radius:8px;font-size:9px;font-weight:700;margin-top:auto}
+  .navbar{position:absolute;left:8px;right:8px;bottom:8px;display:flex;justify-content:space-around;background:rgba(255,255,255,.92);border:1px solid #EBE3D6;border-radius:12px;padding:5px 4px;font-size:7px;color:#8C7B6A;font-weight:600}
+  .navbar .on{color:#E8784E}
+
+  /* Decision diamond */
+  .dec{position:absolute;width:140px;height:140px;display:flex;align-items:center;justify-content:center;text-align:center}
+  .dec .shape{position:absolute;inset:0;background:#FCEAD8;border:1.5px solid #E8784E;transform:rotate(45deg);border-radius:14px}
+  .dec .txt{position:relative;font-family:'Fraunces',serif;font-weight:500;font-size:13px;color:#7A4520;line-height:1.15;padding:0 18px;letter-spacing:-.2px}
+
+  /* SVG layer */
+  svg.lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+
+  /* Personas */
+  .persona{position:absolute;background:#fff;border:1px solid #EBE3D6;border-radius:14px;padding:12px 14px;width:200px;box-shadow:0 8px 18px -10px rgba(60,42,18,.2)}
+  .persona .pname{font-family:'Fraunces',serif;font-weight:500;font-variation-settings:'SOFT' 100;font-size:16px;color:#1F1B17;letter-spacing:-.2px}
+  .persona .pname em{color:#E8784E;font-style:italic}
+  .persona .pdesc{font-size:10.5px;color:#5A4F40;line-height:1.4;margin-top:4px}
+  .persona .ptag{font-size:9px;font-weight:700;letter-spacing:.16em;color:#8C7B6A;text-transform:uppercase;margin-bottom:4px}
+
+  /* Story block (top) */
+  .stories{max-width:1200px;margin:0 auto 36px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .story{background:#fff;border:1px solid #EBE3D6;border-radius:14px;padding:16px 18px}
+  .story .ix{font-family:'Fraunces',serif;color:#E8784E;font-size:24px;line-height:1;margin-bottom:6px}
+  .story .nm{font-size:13px;font-weight:600;letter-spacing:-.2px;margin-bottom:4px}
+  .story .ds{font-size:11.5px;color:#5A4F40;line-height:1.45}
+
+  .container{max-width:2980px;margin:0 auto;overflow-x:auto;padding-bottom:24px}
+</style></head>
+<body>
+<div class="wrap">
+
+  <div class="head">
+    <div class="eyebrow">Lumi · user flow map</div>
+    <h1>Every story, every screen, <em>every connection</em>.</h1>
+    <p class="lede">A single diagram covering the full Marco journey — from first launch through 26 weeks of weight loss. 12 user stories grouped into 6 clusters, mapped across 26 screens with every entry point, branch, success path and error fallback annotated.</p>
+
+    <div class="legend">
+      <div class="lg"><i style="background:#fff;border-color:#EBE3D6"></i> Screen</div>
+      <div class="lg"><i style="background:#FCEAD8;border-color:#E8784E;transform:rotate(45deg);width:14px;height:14px"></i> Decision</div>
+      <div class="lg"><span class="ln" style="border-color:#1F1B17"></span> Primary path</div>
+      <div class="lg"><span class="ln" style="border-color:#E8784E;border-top-style:solid"></span> AI / coach action</div>
+      <div class="lg"><span class="ln" style="border-color:#3D5A4A;border-top-style:dashed"></span> Branch / alt</div>
+      <div class="lg"><span class="ln" style="border-color:#8C7B6A;border-top-style:dotted"></span> Recurring loop</div>
+      <div class="lg"><span class="arrow">●</span> Entry point</div>
+      <div class="lg"><span class="arrow" style="color:#E8784E">★</span> Win moment</div>
+    </div>
+
+    <div class="stories">
+      <div class="story"><div class="ix">US-01</div><div class="nm">Set up & commit</div><div class="ds">As Marco I want to enter my body data and goal so Lumi can build a realistic plan I can stick to for 26 weeks.</div></div>
+      <div class="story"><div class="ix">US-02</div><div class="nm">See today at a glance</div><div class="ds">As Marco I want one screen that tells me what to eat, when, and how I'm tracking — without scrolling.</div></div>
+      <div class="story"><div class="ix">US-03</div><div class="nm">Log a meal in 5 seconds</div><div class="ds">As Marco I want to log food by voice, photo, barcode or search, even when I'm at a tapas bar with one hand busy.</div></div>
+      <div class="story"><div class="ix">US-04</div><div class="nm">Swap a meal I don't want</div><div class="ds">As Marco I want to ask Lumi for a different lunch and get one that fits my macros & ingredients.</div></div>
+      <div class="story"><div class="ix">US-05</div><div class="nm">Weekly weigh-in</div><div class="ds">As Marco I want a Sunday ritual that turns the scale number into a plan adjustment, not anxiety.</div></div>
+      <div class="story"><div class="ix">US-06</div><div class="nm">See the future</div><div class="ds">As Marco I want a 26-week forecast so I can trust I'll hit 68 kg without guessing.</div></div>
+      <div class="story"><div class="ix">US-07</div><div class="nm">Talk to my coach</div><div class="ds">As Marco I want to ask Lumi anything ("can I drink tonight?") and get a specific, kind answer.</div></div>
+      <div class="story"><div class="ix">US-08</div><div class="nm">Cook & shop the plan</div><div class="ds">As Marco I want recipes with portions and a shopping list auto-built from this week's meals.</div></div>
+      <div class="story"><div class="ix">US-09</div><div class="nm">Track activity</div><div class="ds">As Marco I want my workouts and steps to feed back into my calorie target automatically.</div></div>
+      <div class="story"><div class="ix">US-10</div><div class="nm">Stay motivated</div><div class="ds">As Marco I want streaks, milestones and gentle nudges — celebration when I win, no shame when I slip.</div></div>
+      <div class="story"><div class="ix">US-11</div><div class="nm">Recover from a bad day</div><div class="ds">As Marco I want a clear path back when I overeat — no spiral, just "tomorrow we adjust".</div></div>
+      <div class="story"><div class="ix">US-12</div><div class="nm">Manage my account</div><div class="ds">As Marco I want to tune coach tone, units, integrations, privacy & subscription without leaving the app.</div></div>
+    </div>
+  </div>
+
+  <div class="container">
+  <div class="map">
+    <div class="grid-bg"></div>
+
+    <!-- ─── SVG line layer ─── -->
+    <svg class="lines" viewBox="0 0 2880 2300" preserveAspectRatio="none">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#1F1B17"/>
+        </marker>
+        <marker id="ahA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#E8784E"/>
+        </marker>
+        <marker id="ahG" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#3D5A4A"/>
+        </marker>
+        <marker id="ahN" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#8C7B6A"/>
+        </marker>
+      </defs>
+
+      <!-- ONBOARDING: Welcome → Goal → Body → Activity → Diet prefs → Plan reveal → Home -->
+      <path d="M180,360 L380,360" stroke="#1F1B17" stroke-width="2.2" fill="none" marker-end="url(#ah)"/>
+      <path d="M580,360 L780,360" stroke="#1F1B17" stroke-width="2.2" fill="none" marker-end="url(#ah)"/>
+      <path d="M980,360 L1180,360" stroke="#1F1B17" stroke-width="2.2" fill="none" marker-end="url(#ah)"/>
+      <path d="M1380,360 L1580,360" stroke="#1F1B17" stroke-width="2.2" fill="none" marker-end="url(#ah)"/>
+      <!-- Plan reveal AI computation -->
+      <path d="M1780,360 L1980,360" stroke="#E8784E" stroke-width="2.2" fill="none" marker-end="url(#ahA)"/>
+      <!-- Plan reveal → Home -->
+      <path d="M2180,400 Q2300,500 2300,640 L2300,800" stroke="#1F1B17" stroke-width="2.2" fill="none" marker-end="url(#ah)"/>
+
+      <!-- Home (TODAY HUB) is the centerpiece - lots of arrows out -->
+      <!-- Home → Plan -->
+      <path d="M2200,1000 Q1900,1000 1700,1000 L1500,1000" stroke="#1F1B17" stroke-width="2.2" fill="none" marker-end="url(#ah)"/>
+      <!-- Plan → Recipe -->
+      <path d="M1300,1000 Q1100,1000 1000,1000 L850,1000" stroke="#1F1B17" stroke-width="2.2" fill="none" marker-end="url(#ah)"/>
+      <!-- Recipe → Shopping -->
+      <path d="M650,1000 L460,1000" stroke="#1F1B17" stroke-width="2.2" fill="none" marker-end="url(#ah)"/>
+
+      <!-- Plan → Swap meal (decision) -->
+      <path d="M1400,1200 L1400,1340" stroke="#3D5A4A" stroke-width="2" stroke-dasharray="6 4" fill="none" marker-end="url(#ahG)"/>
+      <!-- Decision → Coach (yes branch) -->
+      <path d="M1330,1480 Q1200,1500 1100,1500 L900,1500" stroke="#E8784E" stroke-width="2" fill="none" marker-end="url(#ahA)"/>
+      <!-- Coach → swapped meal back to Plan -->
+      <path d="M700,1430 Q700,1300 1100,1240 L1300,1200" stroke="#E8784E" stroke-width="2" stroke-dasharray="4 3" fill="none" marker-end="url(#ahA)"/>
+
+      <!-- Home → Quick log (FAB) -->
+      <path d="M2300,1200 L2300,1340" stroke="#1F1B17" stroke-width="2.2" fill="none" marker-end="url(#ah)"/>
+      <!-- Quick log decision → 4 sub-screens -->
+      <path d="M2200,1500 L2050,1500 L2050,1620" stroke="#1F1B17" stroke-width="2" fill="none" marker-end="url(#ah)"/>
+      <path d="M2280,1580 L2280,1620" stroke="#1F1B17" stroke-width="2" fill="none" marker-end="url(#ah)"/>
+      <path d="M2380,1500 L2520,1500 L2520,1620" stroke="#1F1B17" stroke-width="2" fill="none" marker-end="url(#ah)"/>
+      <path d="M2400,1500 L2720,1500 L2720,1620" stroke="#1F1B17" stroke-width="2" fill="none" marker-end="url(#ah)"/>
+      <!-- Logged → confirmation back to Home -->
+      <path d="M2280,1820 Q2280,1900 2400,1900 Q2520,1900 2520,1100 L2400,1100" stroke="#3D5A4A" stroke-width="2" stroke-dasharray="6 4" fill="none" marker-end="url(#ahG)"/>
+
+      <!-- Home → Coach Chat -->
+      <path d="M2300,940 Q2520,940 2620,800 L2620,640" stroke="#1F1B17" stroke-width="2.2" fill="none" marker-end="url(#ah)"/>
+
+      <!-- Home → Stats / Forecast -->
+      <path d="M2300,800 Q2400,700 2620,700 L2620,560" stroke="#1F1B17" stroke-width="2.2" fill="none" marker-end="url(#ah)"/>
+
+      <!-- Home → Profile -->
+      <path d="M2400,950 L2620,950 L2620,1100" stroke="#1F1B17" stroke-width="2.2" fill="none" marker-end="url(#ah)"/>
+
+      <!-- WEEKLY LOOP: Sunday weigh-in nudge → weigh-in → adjustment → home -->
+      <path d="M2300,800 L2300,640 L2200,560" stroke="#8C7B6A" stroke-width="2" stroke-dasharray="2 4" fill="none" marker-end="url(#ahN)"/>
+      <path d="M2000,560 L1800,560" stroke="#1F1B17" stroke-width="2.2" fill="none" marker-end="url(#ah)"/>
+      <!-- Weigh-in → AI adjustment -->
+      <path d="M1600,560 L1400,560" stroke="#E8784E" stroke-width="2.2" fill="none" marker-end="url(#ahA)"/>
+      <!-- Adjustment → updated forecast -->
+      <path d="M1200,560 L1000,560" stroke="#E8784E" stroke-width="2.2" fill="none" marker-end="url(#ahA)"/>
+      <!-- Forecast → milestone celebrate or back to home -->
+      <path d="M800,580 Q700,650 700,720 L700,800" stroke="#3D5A4A" stroke-width="2" stroke-dasharray="6 4" fill="none" marker-end="url(#ahG)"/>
+      <path d="M800,540 Q650,400 750,400 L750,360" stroke="#8C7B6A" stroke-width="2" stroke-dasharray="2 4" fill="none" marker-end="url(#ahN)"/>
+
+      <!-- Stats → milestone celebration -->
+      <path d="M700,1000 Q600,1100 700,1180 L700,1180" stroke="#E8784E" stroke-width="2" fill="none" marker-end="url(#ahA)"/>
+
+      <!-- Recovery branch from Home: bad day → recovery -->
+      <path d="M2200,1100 Q1900,1300 1700,1340" stroke="#3D5A4A" stroke-width="2" stroke-dasharray="6 4" fill="none" marker-end="url(#ahG)"/>
+      <path d="M1700,1500 Q1500,1700 1500,1820 L1500,1820" stroke="#E8784E" stroke-width="2" fill="none" marker-end="url(#ahA)"/>
+
+      <!-- Activity entry from Home -->
+      <path d="M2380,1100 L2520,1340" stroke="#1F1B17" stroke-width="2" fill="none" marker-end="url(#ah)"/>
+
+      <!-- Profile sub-screens -->
+      <path d="M2620,1300 L2620,1400" stroke="#1F1B17" stroke-width="2" fill="none" marker-end="url(#ah)"/>
+      <path d="M2620,1300 L2400,1400" stroke="#1F1B17" stroke-width="2" fill="none" marker-end="url(#ah)"/>
+      <path d="M2620,1300 L2840,1400" stroke="#1F1B17" stroke-width="2" fill="none" marker-end="url(#ah)"/>
+
+      <!-- Loop back: any tab -> home -->
+      <path d="M150,1000 Q60,1000 60,400 L60,400 Q60,200 2200,200 L2300,360" stroke="#8C7B6A" stroke-width="1.5" stroke-dasharray="2 5" fill="none" opacity=".5"/>
+    </svg>
+
+    <!-- ─── PERSONA TAG ─── -->
+    <div class="persona" style="left:80px;top:60px">
+      <div class="ptag">Persona</div>
+      <div class="pname">Marco · <em>34</em></div>
+      <div class="pdesc">85 kg → 68 kg in 26 weeks. Tried 3 apps before. Wants warm, specific, trustworthy guidance — not a dashboard.</div>
+    </div>
+
+    <!-- ─── ENTRY POINTS LEGEND ─── -->
+    <div class="persona" style="left:340px;top:60px;width:260px">
+      <div class="ptag">Entry points</div>
+      <div class="pdesc">● App Store install · ● App icon (returning) · ● Push: weigh-in Sunday 09:00 · ● Push: meal nudge · ● Health app handoff</div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CLUSTER 1: ONBOARDING (US-01) - top row                      -->
+    <!-- ============================================================ -->
+    <div class="cluster" style="left:120px;top:240px;width:2120px;height:240px">
+      <div class="ctitle">CL-01 · Onboarding (US-01)</div>
+      <div class="csub">first 4 minutes · build commitment</div>
+    </div>
+
+    <!-- 01 Welcome -->
+    <div class="scrn" style="left:140px;top:280px">
+      <div class="num">01</div><div class="badge start">START</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap" style="text-align:center;margin-top:24px">WELCOME</div>
+        <div class="stt center">Hi, I'm <em>Lumi</em></div>
+        <div class="row" style="text-align:center;justify-content:center">Your weight-loss partner</div>
+        <div class="cta">Let's begin</div>
+      </div>
+      <div class="lbl">Welcome<small>splash · brand intro</small></div>
+    </div>
+
+    <!-- 02 Goal -->
+    <div class="scrn" style="left:340px;top:280px">
+      <div class="num">02</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">YOUR GOAL</div>
+        <div class="stt">What do you want to <em>change</em>?</div>
+        <div class="row"><span class="dot"></span>Lose weight</div>
+        <div class="row">Build muscle</div>
+        <div class="row">Maintain</div>
+        <div class="cta">Continue</div>
+      </div>
+      <div class="lbl">Goal pick<small>1 of 5 onboarding</small></div>
+    </div>
+
+    <!-- 03 Body data -->
+    <div class="scrn" style="left:540px;top:280px">
+      <div class="num">03</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">YOUR BODY</div>
+        <div class="stt">Tell me about <em>you</em></div>
+        <div class="row">Weight · 85 kg</div>
+        <div class="row">Height · 178 cm</div>
+        <div class="row">Age · 34</div>
+        <div class="row">Target · 68 kg</div>
+        <div class="cta">Continue</div>
+      </div>
+      <div class="lbl">Body data<small>weight, height, age</small></div>
+    </div>
+
+    <!-- 04 Activity -->
+    <div class="scrn" style="left:740px;top:280px">
+      <div class="num">04</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">DAILY LIFE</div>
+        <div class="stt">How <em>active</em> are you?</div>
+        <div class="row">Sedentary</div>
+        <div class="row"><span class="dot"></span>Light · 2-3×/wk</div>
+        <div class="row">Active · daily</div>
+        <div class="row">Athlete</div>
+        <div class="cta">Continue</div>
+      </div>
+      <div class="lbl">Activity level<small>TDEE input</small></div>
+    </div>
+
+    <!-- 05 Diet prefs -->
+    <div class="scrn" style="left:940px;top:280px">
+      <div class="num">05</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">FOOD</div>
+        <div class="stt">What do you <em>love</em>?</div>
+        <div class="row">Mediterranean</div>
+        <div class="row"><span class="dot"></span>Omnivore</div>
+        <div class="row">No dairy</div>
+        <div class="row">Loves coffee</div>
+        <div class="cta">Continue</div>
+      </div>
+      <div class="lbl">Diet prefs<small>cuisine + restrictions</small></div>
+    </div>
+
+    <!-- 06 Schedule -->
+    <div class="scrn" style="left:1140px;top:280px">
+      <div class="num">06</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">RHYTHM</div>
+        <div class="stt">When do you <em>eat</em>?</div>
+        <div class="row">Wake · 07:00</div>
+        <div class="row">Lunch · 13:00</div>
+        <div class="row">Dinner · 20:00</div>
+        <div class="cta">Continue</div>
+      </div>
+      <div class="lbl">Schedule<small>meal timings</small></div>
+    </div>
+
+    <!-- 07 AI computing -->
+    <div class="scrn" style="left:1340px;top:280px">
+      <div class="num">07</div><div class="badge ai">AI</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">LUMI IS THINKING</div>
+        <div class="stt">Building your <em>plan</em>…</div>
+        <div class="row cream">Calculating TDEE</div>
+        <div class="row cream">Setting deficit</div>
+        <div class="row cream">Choosing meals</div>
+        <div class="big" style="margin-top:8px">2,180</div>
+        <div class="row" style="font-size:7.5px;justify-content:center">target kcal</div>
+      </div>
+      <div class="lbl">AI computation<small>TDEE → plan</small></div>
+    </div>
+
+    <!-- 08 Plan reveal -->
+    <div class="scrn" style="left:1540px;top:280px">
+      <div class="num">08</div><div class="badge win">★ WIN</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">YOUR PLAN</div>
+        <div class="stt">26 weeks to <em>68 kg</em></div>
+        <div class="big">0.65</div>
+        <div class="row" style="justify-content:center;font-size:7.5px">kg per week · safe</div>
+        <div class="row green">Oct 14, 2026</div>
+        <div class="cta">I'm in</div>
+      </div>
+      <div class="lbl">Plan reveal<small>commitment moment</small></div>
+    </div>
+
+    <!-- 09 Permissions -->
+    <div class="scrn" style="left:1740px;top:280px">
+      <div class="num">09</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">PERMISSIONS</div>
+        <div class="stt">A few quick <em>asks</em></div>
+        <div class="row">Notifications</div>
+        <div class="row">Health app</div>
+        <div class="row">Camera (logging)</div>
+        <div class="row">Microphone</div>
+        <div class="cta">Allow & continue</div>
+      </div>
+      <div class="lbl">Permissions<small>health, camera, mic</small></div>
+    </div>
+
+    <!-- 10 Paywall -->
+    <div class="scrn" style="left:1940px;top:280px">
+      <div class="num">10</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">UNLOCK</div>
+        <div class="stt"><em>7 days</em> free</div>
+        <div class="row dark">€8.99/mo after</div>
+        <div class="row">Cancel anytime</div>
+        <div class="row green">Money-back · 30d</div>
+        <div class="cta">Start free trial</div>
+      </div>
+      <div class="lbl">Paywall<small>trial gate</small></div>
+    </div>
+
+    <!-- 11 First-run tour -->
+    <div class="scrn" style="left:2140px;top:280px">
+      <div class="num">11</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">QUICK TOUR</div>
+        <div class="stt">Here's <em>how</em> it works</div>
+        <div class="row">1 · Today</div>
+        <div class="row">2 · Plan</div>
+        <div class="row">3 · Coach</div>
+        <div class="row cream">Tap to log anywhere</div>
+        <div class="cta">Got it</div>
+      </div>
+      <div class="lbl">Tour<small>3-step coach mark</small></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CLUSTER 2: WEEKLY LOOP (US-05, US-06) — second row left      -->
+    <!-- ============================================================ -->
+    <div class="cluster" style="left:120px;top:540px;width:2120px;height:240px">
+      <div class="ctitle">CL-02 · Weekly loop · weigh-in & adjust (US-05, US-06, US-10)</div>
+      <div class="csub">every sunday 09:00 · ritual</div>
+    </div>
+
+    <!-- 12 Sunday nudge -->
+    <div class="scrn" style="left:2040px;top:580px">
+      <div class="num">12</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">SUNDAY 09:00</div>
+        <div class="stt">Step on the <em>scale</em>?</div>
+        <div class="row cream">Weekly check-in</div>
+        <div class="row">Takes 30 seconds</div>
+        <div class="cta">Log my weight</div>
+      </div>
+      <div class="lbl">Sunday push<small>notification</small></div>
+    </div>
+
+    <!-- 13 Weigh-in entry -->
+    <div class="scrn" style="left:1640px;top:580px">
+      <div class="num">13</div><div class="badge action">ACTION</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">WEEK 4 · WEIGH-IN</div>
+        <div class="stt">What does the <em>scale</em> say?</div>
+        <div class="big">82.4</div>
+        <div class="row" style="font-size:7.5px;justify-content:center">kg · stepper ±0.1</div>
+        <div class="cta">Confirm</div>
+      </div>
+      <div class="lbl">Weigh-in<small>±0.1 stepper</small></div>
+    </div>
+
+    <!-- 14 AI adjustment -->
+    <div class="scrn" style="left:1240px;top:580px">
+      <div class="num">14</div><div class="badge ai">AI</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">LUMI'S TAKE</div>
+        <div class="stt"><em>5 days</em> ahead</div>
+        <div class="row green">−0.7 kg this week</div>
+        <div class="row cream">+80 kcal/day</div>
+        <div class="row" style="font-size:7.5px">"don't burn out gas tank"</div>
+        <div class="cta">Apply adjustment</div>
+      </div>
+      <div class="lbl">AI adjustment<small>recalibrates plan</small></div>
+    </div>
+
+    <!-- 15 Forecast -->
+    <div class="scrn" style="left:840px;top:580px">
+      <div class="num">15</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">FORECAST · 26W</div>
+        <div class="stt"><em>68 kg</em> · Oct 14</div>
+        <div class="row green">14 days early</div>
+        <div class="row">Lost · 2.6 kg</div>
+        <div class="row">To go · 14.4 kg</div>
+        <div class="cta">View milestones</div>
+      </div>
+      <div class="lbl">Forecast<small>26-week curve</small></div>
+    </div>
+
+    <!-- 16 Milestone -->
+    <div class="scrn" style="left:540px;top:580px">
+      <div class="num">16</div><div class="badge win">★ WIN</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">MILESTONE</div>
+        <div class="stt"><em>2.5 kg</em> down 🎉</div>
+        <div class="row cream">Equivalent: 5 sticks butter</div>
+        <div class="row">Streak: 21 days</div>
+        <div class="cta">Share</div>
+      </div>
+      <div class="lbl">Milestone<small>celebration</small></div>
+    </div>
+
+    <!-- 17 Stagnation handler -->
+    <div class="scrn" style="left:240px;top:580px">
+      <div class="num">17</div><div class="badge ai">AI</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">PLATEAU</div>
+        <div class="stt">3 weeks <em>stuck</em>?</div>
+        <div class="row green">Totally normal</div>
+        <div class="row cream">Try: protein +20g</div>
+        <div class="row">Or: extra walk</div>
+        <div class="cta">Adjust plan</div>
+      </div>
+      <div class="lbl">Plateau<small>fallback path</small></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- HOME / TODAY HUB (US-02) — center                            -->
+    <!-- ============================================================ -->
+    <div class="cluster" style="left:1340px;top:820px;width:1100px;height:340px">
+      <div class="ctitle">CL-03 · Today hub (US-02)</div>
+      <div class="csub">the home base · every session</div>
+    </div>
+
+    <!-- 18 Home / Today -->
+    <div class="scrn" style="left:2200px;top:830px;width:240px;height:340px">
+      <div class="num">18</div><div class="badge start">HUB</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">TUESDAY · APR 28</div>
+        <div class="stt">Morning, <em>Marco</em></div>
+        <div class="row cream">1,108 / 1,780 kcal</div>
+        <div class="row">P 88 · C 142 · F 42</div>
+        <div class="row green">Streak · 21 days</div>
+        <div class="row">Next: lunch · 13:00</div>
+        <div class="row">Workout: legs · 18:00</div>
+        <div class="cta">Quick log</div>
+      </div>
+      <div class="lbl">Today<small>tab 1 · home</small></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CLUSTER 4: PLAN, RECIPE, SHOPPING (US-04, US-08)             -->
+    <!-- ============================================================ -->
+    <div class="cluster" style="left:240px;top:820px;width:1080px;height:340px">
+      <div class="ctitle">CL-04 · Cook & shop (US-04, US-08)</div>
+      <div class="csub">today's meals · recipes · groceries</div>
+    </div>
+
+    <!-- 19 Plan -->
+    <div class="scrn" style="left:1300px;top:830px">
+      <div class="num">19</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">PLAN · TODAY</div>
+        <div class="stt">5 meals · <em>1,780</em></div>
+        <div class="row" style="opacity:.6">✓ Yogurt · 07:30</div>
+        <div class="row" style="opacity:.6">✓ Apple · 10:30</div>
+        <div class="row cream">→ Chicken bowl · 13:00</div>
+        <div class="row">Shake · 16:00</div>
+        <div class="row">Salmon · 19:30</div>
+        <div class="cta">Swap a meal</div>
+      </div>
+      <div class="lbl">Plan<small>tab 2 · today's meals</small></div>
+    </div>
+
+    <!-- 20 Recipe -->
+    <div class="scrn" style="left:660px;top:830px">
+      <div class="num">20</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">RECIPE</div>
+        <div class="stt">Chicken & <em>quinoa</em></div>
+        <div class="row">12 min · 520 kcal</div>
+        <div class="row">P 38 · C 48 · F 18</div>
+        <div class="row cream">6 ingredients</div>
+        <div class="row">Step 1 of 4</div>
+        <div class="cta">Add to shopping</div>
+      </div>
+      <div class="lbl">Recipe detail<small>portions + method</small></div>
+    </div>
+
+    <!-- 21 Shopping -->
+    <div class="scrn" style="left:260px;top:830px">
+      <div class="num">21</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">THIS WEEK</div>
+        <div class="stt">Shopping <em>list</em></div>
+        <div class="row">Produce · 8 items</div>
+        <div class="row">Protein · 4 items</div>
+        <div class="row">Pantry · 3 items</div>
+        <div class="row green">~€42 total</div>
+        <div class="cta">Order via Glovo</div>
+      </div>
+      <div class="lbl">Shopping<small>auto-built</small></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- DECISION: SWAP MEAL                                          -->
+    <!-- ============================================================ -->
+    <div class="dec" style="left:1330px;top:1340px">
+      <div class="shape"></div>
+      <div class="txt">Like the meal?</div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CLUSTER 5: COACH CHAT (US-04, US-07)                         -->
+    <!-- ============================================================ -->
+    <div class="cluster" style="left:560px;top:1370px;width:380px;height:300px">
+      <div class="ctitle">CL-05 · Coach (US-04, US-07)</div>
+      <div class="csub">talk to lumi</div>
+    </div>
+
+    <!-- 22 Coach -->
+    <div class="scrn" style="left:600px;top:1410px">
+      <div class="num">22</div><div class="badge ai">AI</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">CHAT WITH LUMI</div>
+        <div class="stt">Ask me <em>anything</em></div>
+        <div class="row cream">"Tapas tonight?"</div>
+        <div class="row green">"Yes — lighter dinner"</div>
+        <div class="row cream">"Swap lunch?"</div>
+        <div class="row green">"How about salmon poke?"</div>
+        <div class="cta">Type or speak</div>
+      </div>
+      <div class="lbl">Coach chat<small>tab 3 · ask anything</small></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- DECISION: HOW TO LOG?                                        -->
+    <!-- ============================================================ -->
+    <div class="dec" style="left:2230px;top:1340px">
+      <div class="shape"></div>
+      <div class="txt">How will you log?</div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CLUSTER 6: QUICK LOG (US-03)                                 -->
+    <!-- ============================================================ -->
+    <div class="cluster" style="left:1940px;top:1600px;width:880px;height:240px">
+      <div class="ctitle">CL-06 · Log a meal (US-03) · 4 input modes</div>
+      <div class="csub">5 seconds, one hand</div>
+    </div>
+
+    <!-- 23 Voice -->
+    <div class="scrn" style="left:1960px;top:1620px;height:200px">
+      <div class="num">23</div><div class="badge action">ACTION</div>
+      <div class="di"></div>
+      <div class="body" style="padding-top:24px">
+        <div class="pcap" style="text-align:center">VOICE LOG</div>
+        <div class="stt center">"Two eggs &<br><em>a coffee</em>"</div>
+        <div class="row dark" style="justify-content:center">●●● listening</div>
+      </div>
+      <div class="lbl">Voice<small>hold to speak</small></div>
+    </div>
+
+    <!-- 24 Photo -->
+    <div class="scrn" style="left:2180px;top:1620px;height:200px">
+      <div class="num">24</div><div class="badge action">ACTION</div>
+      <div class="di"></div>
+      <div class="body" style="padding-top:24px">
+        <div class="pcap" style="text-align:center">PHOTO LOG</div>
+        <div class="row cream" style="justify-content:center">📷 Snap plate</div>
+        <div class="row" style="justify-content:center">AI estimates portion</div>
+      </div>
+      <div class="lbl">Photo<small>plate scan</small></div>
+    </div>
+
+    <!-- 25 Barcode -->
+    <div class="scrn" style="left:2400px;top:1620px;height:200px">
+      <div class="num">25</div><div class="badge action">ACTION</div>
+      <div class="di"></div>
+      <div class="body" style="padding-top:24px">
+        <div class="pcap" style="text-align:center">BARCODE</div>
+        <div class="row" style="justify-content:center">Scan packaging</div>
+        <div class="row green" style="justify-content:center">Open Food Facts</div>
+      </div>
+      <div class="lbl">Barcode<small>scanner</small></div>
+    </div>
+
+    <!-- 26 Search -->
+    <div class="scrn" style="left:2620px;top:1620px;height:200px">
+      <div class="num">26</div><div class="badge action">ACTION</div>
+      <div class="di"></div>
+      <div class="body" style="padding-top:24px">
+        <div class="pcap" style="text-align:center">SEARCH</div>
+        <div class="row" style="justify-content:center">250k foods</div>
+        <div class="row cream" style="justify-content:center">Recents · favs</div>
+      </div>
+      <div class="lbl">Search<small>type-ahead</small></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ACTIVITY (US-09)                                             -->
+    <!-- ============================================================ -->
+    <div class="cluster" style="left:2440px;top:1340px;width:260px;height:240px">
+      <div class="ctitle">CL-07 · Activity (US-09)</div>
+      <div class="csub">workouts feed back</div>
+    </div>
+
+    <div class="scrn" style="left:2460px;top:1370px">
+      <div class="num">27</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">ACTIVITY</div>
+        <div class="stt"><em>Workouts</em> & steps</div>
+        <div class="row green">8,420 steps</div>
+        <div class="row cream">Legs · 45 min</div>
+        <div class="row">+340 kcal earned</div>
+        <div class="cta">Add workout</div>
+      </div>
+      <div class="lbl">Activity<small>auto-syncs to today</small></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- RECOVERY (US-11)                                             -->
+    <!-- ============================================================ -->
+    <div class="cluster" style="left:1340px;top:1820px;width:380px;height:240px">
+      <div class="ctitle">CL-08 · Recovery (US-11)</div>
+      <div class="csub">no shame · only forward</div>
+    </div>
+
+    <div class="scrn" style="left:1380px;top:1850px">
+      <div class="num">28</div><div class="badge ai">AI</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">YESTERDAY · OVER</div>
+        <div class="stt">Tomorrow we <em>adjust</em></div>
+        <div class="row cream">+520 kcal over</div>
+        <div class="row green">Spread over 5 days</div>
+        <div class="row">No drama. No skip.</div>
+        <div class="cta">Resume plan</div>
+      </div>
+      <div class="lbl">Bad day recovery<small>spread the deficit</small></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PROFILE (US-12) — right side                                 -->
+    <!-- ============================================================ -->
+    <div class="cluster" style="left:2440px;top:1100px;width:380px;height:480px">
+      <div class="ctitle">CL-09 · Account (US-12)</div>
+      <div class="csub">tune the experience</div>
+    </div>
+
+    <!-- 29 Profile -->
+    <div class="scrn" style="left:2460px;top:1140px">
+      <div class="num">29</div>
+      <div class="di"></div>
+      <div class="body">
+        <div class="pcap">ME</div>
+        <div class="stt">Marco · <em>−2.6 kg</em></div>
+        <div class="row">Coach tone</div>
+        <div class="row">Units</div>
+        <div class="row">Integrations</div>
+        <div class="row">Privacy</div>
+        <div class="row cream">Subscription</div>
+      </div>
+      <div class="lbl">Profile<small>tab 5 · settings hub</small></div>
+    </div>
+
+    <!-- 30 Sub-screen -->
+    <div class="scrn" style="left:2460px;top:1450px;height:160px">
+      <div class="num">30</div>
+      <div class="di"></div>
+      <div class="body" style="padding-top:24px">
+        <div class="pcap">SETTINGS</div>
+        <div class="row">Coach: warm</div>
+        <div class="row">Notifs · 4/day</div>
+      </div>
+      <div class="lbl">Settings detail<small>any sub-screen</small></div>
+    </div>
+
+  </div>
+  </div>
+
+  <div style="max-width:1100px;margin:32px auto 0;padding:24px 28px;background:#fff;border:1px solid #EBE3D6;border-radius:18px;font-size:14px;color:#5A4F40;line-height:1.65">
+    <b style="color:#1F1B17">How to read this map.</b> The diagram is wider than your screen — scroll horizontally inside the canvas. Onboarding flows top-left to right. The <b>Today hub</b> on the right is the gravitational center; every tab returns there. The <b>weekly loop</b> (weigh-in → AI adjust → forecast → milestone) lives in the second row and runs every Sunday. <b>Quick log</b> (4 modes) and <b>Coach chat</b> are the two highest-frequency actions. <b>Recovery</b> and <b>Plateau</b> branches are first-class — never dead-ends. Decision diamonds split paths; orange arrows are AI/coach actions; green dashed are branches; gray dotted are recurring loops.
+  </div>
+
+</div>
+</body></html>

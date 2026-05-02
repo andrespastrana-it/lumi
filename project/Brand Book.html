@@ -1,0 +1,906 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Lumi · Brand Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF6F0; --cream:#F4D9B5; --tint:#FCEAD8;
+    --apricot:#E8784E; --apricot-dk:#C95A30; --apricot-soft:#F0A07C;
+    --espresso:#1F1B17; --ink:#1F1B17; --muted:#5A4F40; --quiet:#8C7B6A;
+    --line:#EBE3D6; --line-strong:#D6CDB9;
+    --eucal:#3D5A4A; --eucal-soft:#E2EBE5;
+    --warn:#A33820; --warn-soft:#FCD9CC;
+    --plum:#6B3A52;
+  }
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body{margin:0;background:#EFE5D0;color:var(--ink);font-family:'DM Sans',system-ui,sans-serif;font-size:14px;line-height:1.55}
+  .page{max-width:1280px;margin:0 auto;padding:48px 36px 96px}
+  .serif{font-family:'Fraunces',serif;font-variation-settings:'SOFT' 100}
+  em.it{color:var(--apricot);font-style:italic;font-family:'Fraunces',serif;font-variation-settings:'SOFT' 100}
+
+  /* TOC + section frame */
+  .topbar{display:flex;align-items:center;gap:14px;padding:16px 22px;background:var(--paper);border:1px solid var(--line);border-radius:18px;margin-bottom:36px;position:sticky;top:12px;z-index:50;backdrop-filter:blur(20px)}
+  .logo-wrap{display:flex;align-items:center;gap:10px}
+  .toc{display:flex;gap:18px;font-size:12px;font-weight:600;color:var(--quiet);margin-left:auto;flex-wrap:wrap}
+  .toc a{color:var(--quiet);text-decoration:none}
+  .toc a:hover{color:var(--apricot)}
+
+  section{margin-bottom:64px}
+  .seclabel{font-size:11px;letter-spacing:.22em;font-weight:700;color:var(--quiet);text-transform:uppercase;display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .seclabel .num{font-family:'Fraunces',serif;font-variation-settings:'SOFT' 100;font-style:italic;color:var(--apricot);font-size:14px;letter-spacing:0;font-weight:500}
+  h1{font-family:'Fraunces',serif;font-variation-settings:'SOFT' 100;font-weight:500;font-size:96px;line-height:.95;letter-spacing:-2.4px;margin:0 0 16px;color:var(--ink)}
+  h2{font-family:'Fraunces',serif;font-variation-settings:'SOFT' 100;font-weight:500;font-size:42px;letter-spacing:-1px;margin:0 0 6px}
+  h3{font-family:'Fraunces',serif;font-variation-settings:'SOFT' 100;font-weight:500;font-size:22px;letter-spacing:-.4px;margin:0 0 8px}
+  .sub{color:var(--quiet);max-width:680px;margin:0 0 28px;font-size:15px;line-height:1.55}
+  .panel{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:30px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .grid6{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+  .grid8{display:grid;grid-template-columns:repeat(8,1fr);gap:12px}
+  .pcap{font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--quiet);text-transform:uppercase}
+
+  /* Cover */
+  .cover{position:relative;border-radius:30px;background:var(--paper);padding:72px 60px;overflow:hidden;border:1px solid var(--line);min-height:560px}
+  .cover .blob{position:absolute;border-radius:50%}
+  .b1{width:520px;height:520px;background:radial-gradient(circle at 30% 30%,#FCEAD8,#F4D9B5);right:-120px;top:-120px;opacity:.9}
+  .b2{width:280px;height:280px;background:var(--apricot);right:120px;bottom:-90px;opacity:.92}
+  .b3{width:140px;height:140px;background:var(--eucal-soft);left:60px;bottom:80px}
+  .cover .meta{position:relative;z-index:2}
+  .cover h1{font-size:170px;letter-spacing:-5px;margin:6px 0 0;line-height:.9}
+  .cover h1 em{color:var(--apricot);font-style:italic}
+  .cover .tag{display:inline-block;font-family:'Fraunces',serif;font-style:italic;color:var(--apricot);font-size:24px;margin-top:14px}
+  .cover .credits{position:absolute;bottom:36px;right:36px;text-align:right;font-size:11px;color:var(--quiet);font-weight:600;letter-spacing:.18em;z-index:2}
+  .cover .credits b{color:var(--ink);font-family:'Fraunces',serif;font-style:italic;font-weight:500;font-size:13px;letter-spacing:0;display:block}
+
+  /* Color cards */
+  .swatch{border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#fff}
+  .swatch .chip{height:120px;padding:14px;display:flex;align-items:flex-end;color:#fff;font-family:'Fraunces',serif;font-weight:500;font-size:22px;letter-spacing:-.3px}
+  .swatch .meta{padding:12px 14px;display:flex;justify-content:space-between;font-size:11px}
+  .swatch .meta .k{color:var(--quiet);font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:9.5px}
+  .swatch .meta b{color:var(--ink);font-weight:600;font-family:'DM Sans'}
+  .swatch.row{display:flex;flex-direction:column}
+  .scale{display:grid;grid-template-columns:repeat(7,1fr);gap:0;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+  .scale .s{height:64px;display:flex;align-items:flex-end;justify-content:flex-start;padding:8px;font-size:9.5px;font-weight:600;letter-spacing:.1em}
+
+  /* Type spec */
+  .typedemo{padding:34px;border-radius:18px;background:#fff;border:1px solid var(--line)}
+  .typeline{display:grid;grid-template-columns:120px 1fr 240px;gap:18px;align-items:baseline;padding:18px 0;border-bottom:1px dashed var(--line-strong)}
+  .typeline:last-child{border:0}
+  .typeline .lbl{font-size:11px;letter-spacing:.16em;font-weight:600;color:var(--quiet);text-transform:uppercase}
+  .typeline .meta{font-size:11px;color:var(--quiet);text-align:right;font-feature-settings:'tnum'}
+
+  /* Spacing scale */
+  .ssrow{display:flex;align-items:center;gap:18px;padding:10px 0;border-bottom:1px dashed var(--line-strong)}
+  .ssrow:last-child{border:0}
+  .ssrow .name{width:80px;font-weight:600;font-size:13px}
+  .ssrow .px{width:80px;font-size:11px;color:var(--quiet);font-feature-settings:'tnum'}
+  .ssbar{height:14px;background:var(--apricot);border-radius:4px}
+
+  /* Radii */
+  .rcard{background:#fff;border:1px solid var(--line);padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px}
+  .rcard .box{width:72px;height:72px;background:var(--cream);border:1.5px solid var(--apricot)}
+
+  /* Shadows */
+  .shcard{background:#fff;border-radius:14px;padding:22px;display:flex;flex-direction:column;align-items:center;gap:10px}
+  .shcard .puck{width:80px;height:80px;border-radius:14px;background:#fff}
+
+  /* Grid system */
+  .gridsys{position:relative;background:#fff;border:1px solid var(--line);border-radius:14px;height:230px;padding:18px;overflow:hidden}
+  .gridsys .col{position:absolute;top:18px;bottom:18px;background:rgba(232,120,78,.10);border-left:1px dashed rgba(232,120,78,.4);border-right:1px dashed rgba(232,120,78,.4)}
+
+  /* Logo */
+  .logos{display:grid;grid-template-columns:1.1fr 1fr;gap:18px}
+  .logobig{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:36px;display:flex;flex-direction:column;justify-content:space-between;min-height:280px}
+  .logosub{display:grid;grid-template-rows:1fr 1fr;gap:18px}
+  .logocell{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;display:flex;align-items:center;justify-content:center}
+  .logocell.dk{background:var(--espresso)}
+  .logocell.ap{background:var(--apricot)}
+
+  /* Buttons */
+  .btnrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:14px;font-weight:600;font-size:14px;border:none;cursor:default;transition:.15s}
+  .btn.pri{background:var(--apricot);color:#FFF6EE;box-shadow:0 1px 0 rgba(0,0,0,.04)}
+  .btn.pri.hover{background:var(--apricot-dk)}
+  .btn.pri.dis{opacity:.4}
+  .btn.sec{background:var(--paper);color:var(--ink);border:1px solid var(--line-strong)}
+  .btn.ghost{background:transparent;color:var(--ink)}
+  .btn.dest{background:var(--warn);color:#fff}
+  .btn.icon{width:42px;height:42px;justify-content:center;padding:0;border-radius:14px}
+  .btn.lg{padding:16px 22px;font-size:15px}
+  .btn.sm{padding:8px 12px;font-size:12px;border-radius:10px}
+  .btn.pill{border-radius:999px}
+
+  /* Inputs */
+  .input{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border:1.5px solid var(--line);border-radius:14px;font-size:14px;color:var(--ink)}
+  .input.focus{border-color:var(--apricot);box-shadow:0 0 0 4px var(--tint)}
+  .input.error{border-color:var(--warn);background:var(--warn-soft)}
+  .input.success{border-color:var(--eucal)}
+  .input .ph{color:var(--quiet)}
+  .input .lbl-up{position:absolute}
+
+  /* Cards */
+  .demo-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px}
+  .meal{display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;background:#fff;border:1px solid var(--line)}
+  .meal .icn{width:36px;height:36px;border-radius:10px;background:var(--tint);display:flex;align-items:center;justify-content:center}
+  .meal .t{font-weight:600;font-size:13px;line-height:1.2}
+  .meal .s{font-size:10px;color:var(--quiet);margin-top:2px}
+
+  /* Pills/badges */
+  .pill{padding:5px 11px;border-radius:999px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+  .pill.warm{background:var(--tint);color:#7A4520}
+  .pill.cool{background:var(--eucal-soft);color:var(--eucal)}
+  .pill.solid{background:var(--apricot);color:#fff}
+  .pill.warn{background:var(--warn-soft);color:var(--warn)}
+  .pill.ghost{background:transparent;border:1px solid var(--line-strong);color:var(--muted)}
+  .pill .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+
+  /* Toggles */
+  .toggle{width:44px;height:26px;background:var(--line-strong);border-radius:99px;position:relative;cursor:default}
+  .toggle.on{background:var(--apricot)}
+  .toggle .knob{position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;box-shadow:0 1px 2px rgba(0,0,0,.15);transition:.18s}
+  .toggle.on .knob{left:21px}
+
+  /* Slider */
+  .slider{height:6px;background:var(--line);border-radius:99px;position:relative;margin:14px 0}
+  .slider .fill{position:absolute;left:0;top:0;height:100%;background:var(--apricot);border-radius:99px}
+  .slider .knob{position:absolute;top:50%;width:18px;height:18px;border-radius:50%;background:#fff;border:2px solid var(--apricot);transform:translate(-50%,-50%);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+
+  /* Stepper */
+  .stepper{display:inline-flex;align-items:center;gap:10px;padding:6px;background:#fff;border:1px solid var(--line);border-radius:14px}
+  .stepper .b{width:28px;height:28px;border-radius:8px;background:var(--paper);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;color:var(--ink)}
+  .stepper .v{font-family:'Fraunces',serif;font-variation-settings:'SOFT' 100;font-weight:500;font-size:18px;min-width:48px;text-align:center}
+
+  /* Progress */
+  .prog{height:8px;background:var(--cream);border-radius:99px;overflow:hidden;position:relative}
+  .prog .b{position:absolute;left:0;top:0;height:100%;background:var(--apricot);border-radius:99px}
+  .ring-wrap{display:flex;align-items:center;gap:14px}
+
+  /* Avatars */
+  .avs{display:flex;gap:8px}
+  .av{width:42px;height:42px;border-radius:50%;background:var(--cream);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;color:#7A4520;font-weight:500;font-size:16px;border:2px solid #fff}
+  .av.lumi{background:var(--apricot);color:#fff}
+  .av.dk{background:var(--espresso);color:var(--cream)}
+
+  /* Toast / banner */
+  .toast{display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:14px;background:#fff;border:1px solid var(--line)}
+  .toast.success{background:var(--eucal-soft);border-color:var(--eucal-soft)}
+  .toast.warn{background:var(--warn-soft);border-color:#F5C2B0}
+  .toast.tip{background:var(--tint);border-color:#F4D9B5}
+  .toast .ic{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#fff}
+
+  /* Phones for in-context */
+  .phone{height:540px;width:260px;border-radius:34px;background:var(--paper);box-shadow:0 18px 40px -16px rgba(60,42,18,.18),0 0 0 1px rgba(60,42,18,.06);overflow:hidden;position:relative}
+  .di{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:84px;height:22px;border-radius:14px;background:var(--espresso);z-index:30}
+  .sb{position:absolute;top:0;left:0;right:0;height:42px;display:flex;justify-content:space-between;align-items:center;padding:14px 22px;font-size:11px;font-weight:600;z-index:20}
+  .home{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:96px;height:4px;border-radius:2px;background:rgba(31,27,23,.18);z-index:30}
+  .scrn{padding:48px 16px 80px;height:100%;overflow:hidden}
+  .nav{position:absolute;left:14px;right:14px;bottom:18px;display:flex;justify-content:space-around;padding:9px 6px;background:rgba(255,255,255,.85);backdrop-filter:blur(20px);border-radius:22px;border:1px solid var(--line)}
+  .ni{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--quiet);font-size:9px;font-weight:600}
+  .ni.on{color:var(--apricot)}
+
+  /* Icon grid */
+  .ig{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 8px 10px;display:flex;flex-direction:column;align-items:center;gap:8px}
+  .ig .lbl{font-size:10.5px;font-weight:500;color:var(--muted);text-align:center}
+
+  /* Motion */
+  .motion-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px}
+  .motion-card .ball{width:36px;height:36px;border-radius:12px;background:var(--apricot)}
+  .anim-bounce{animation:bounce 2s cubic-bezier(.34,1.56,.64,1) infinite}
+  .anim-ease{animation:slide 2s cubic-bezier(.4,0,.2,1) infinite}
+  .anim-soft{animation:slide 2.4s cubic-bezier(.25,.46,.45,.94) infinite}
+  @keyframes slide{0%,100%{transform:translateX(0)}50%{transform:translateX(120px)}}
+  @keyframes bounce{0%,100%{transform:translateX(0)}50%{transform:translateX(120px) scale(1.05)}}
+
+  /* Voice rules */
+  .vox{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .voxcell{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px}
+  .voxcell.do{border-left:4px solid var(--eucal)}
+  .voxcell.dont{border-left:4px solid var(--warn);opacity:.95}
+  .voxcell .tag{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px}
+  .voxcell.do .tag{color:var(--eucal)}
+  .voxcell.dont .tag{color:var(--warn)}
+  .voxcell .quote{font-family:'Fraunces',serif;font-variation-settings:'SOFT' 100;font-size:18px;line-height:1.35;letter-spacing:-.3px}
+
+  /* Footer */
+  .footer{padding:36px;background:var(--espresso);border-radius:22px;color:var(--cream);display:grid;grid-template-columns:1.4fr 1fr;gap:30px;align-items:end}
+  .footer h3{color:#fff;font-size:42px;letter-spacing:-1px;margin:0}
+  .footer .meta{font-size:11px;letter-spacing:.18em;color:#9C8A72;text-transform:uppercase;font-weight:600}
+  .footer em{color:var(--apricot);font-style:italic}
+</style></head>
+<body>
+
+<!-- =================== ICON SYMBOLS =================== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-today" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v1.6M12 19.4V21M3 12h1.6M19.4 12H21M5.6 5.6l1.1 1.1M17.3 17.3l1.1 1.1M5.6 18.4l1.1-1.1M17.3 6.7l1.1-1.1"/></g></symbol>
+    <symbol id="i-plan" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M8 3.5v3M16 3.5v3M3.5 10h17"/><path d="M9 14.5c1.5-2 3.5-2 5 0M9 17h6" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-coach" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11c0-3.3 3.6-6 8-6s8 2.7 8 6c0 3.3-3.6 6-8 6-.9 0-1.7-.1-2.5-.3L6 19l1-3.6C5.1 14.3 4 12.7 4 11z"/><path d="M12 8.5l.9 1.8 2 .3-1.4 1.4.3 2L12 13l-1.8 1 .3-2-1.4-1.4 2-.3z" fill="#E8784E" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-stats" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M7 17v-4M12 17V8M17 17v-7"/><path d="M5 8l4-3 4 4 5-5" stroke="#E8784E"/><circle cx="18" cy="4" r="1.4" fill="#E8784E" stroke="none"/></g></symbol>
+    <symbol id="i-me" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="3.4"/><path d="M5 20c1-3.5 3.8-5 7-5s6 1.5 7 5"/></g></symbol>
+    <symbol id="i-breakfast" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h13a3 3 0 010 6H8a4 4 0 01-4-4z"/><path d="M17 12h2a2 2 0 110 4h-2"/><path d="M8 8c0-1 1-1 1-2s-1-1-1-2M12 8c0-1 1-1 1-2s-1-1-1-2" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-lunch" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13h18a9 9 0 01-18 0z"/><path d="M2 18h20"/><circle cx="9" cy="9" r="2.2" stroke="#E8784E"/><circle cx="14" cy="7.5" r="1.6" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-snack" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4c2 1 3 2.5 3 4.5 0 1-.4 1.8-1 2.5l1 9-3-2-3 2 1-9c-.6-.7-1-1.5-1-2.5C9 6.5 10 5 12 4z"/><path d="M12 5.5v3M11 8l1 1 1-1" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-dinner" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11c0-3.5 3-6 7-6s7 2.5 7 6c0 1.5-.5 2.7-1.3 3.7L20 17H4l1.3-2.3C4.5 13.7 5 12.5 5 11z"/><path d="M9 11h6" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-water" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c4 4.5 6 7.5 6 10.5a6 6 0 01-12 0c0-3 2-6 6-10.5z"/><path d="M9 14a3 3 0 003 3" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-protein" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11c0-3 2-5 5-5 1.5 0 2.5.5 3.5 1.5L19 13l-2 2-5.5-5.5C11 9 10.5 8.5 10 8.5c-1.5 0-3 1.2-3 2.5 0 .5.2 1 .5 1.5L13 18l-2 2-6-6c-.7-.7-1-1.7-1-3z"/><circle cx="16" cy="8" r="1.4" fill="#E8784E" stroke="none"/></g></symbol>
+    <symbol id="i-veg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4c-2 0-4 1.5-5 3.5C7 8 5 10 5 13a6 6 0 0012 0c0-3-2-5-4-5.5C13 5.5 14 4 14 4z"/><path d="M11 4c.5 1.5 0 3-1 4" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-grain" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16"/><path d="M12 7c-2-1-4-1-5 0 0 2 2 3 5 3M12 7c2-1 4-1 5 0 0 2-2 3-5 3M12 12c-2-1-4-1-5 0 0 2 2 3 5 3M12 12c2-1 4-1 5 0 0 2-2 3-5 3M12 17c-2-1-4-1-5 0 0 2 2 3 5 3M12 17c2-1 4-1 5 0 0 2-2 3-5 3" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3.5 4 5 4 8.5 0 2.5-2 4.5-4 4.5s-4-2-4-4.5C8 9 9 7 9 5c1.5 1 2.5 2 3 4z"/><path d="M11 12c.5 1 1.5 1.5 2 1.5" stroke="#E8784E"/><path d="M12 16v3"/></g></symbol>
+    <symbol id="i-steps" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 17c-1.5 0-2.5-1-2.5-2.5 0-1.8 1-3.5 1.5-5C7.5 8 8.5 7 10 7c1.2 0 2 .8 2 2 0 1.5-1 3-1.5 4.5-.4 1.4-1 3.5-2.5 3.5z"/><path d="M16 11c-1 0-1.5-.7-1.5-1.5 0-1 .5-2 1-3 .3-.7 1-1.5 2-1.5.8 0 1.5.5 1.5 1.5 0 1-.5 2-1 3-.3.8-.8 1.5-2 1.5z" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-workout" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10v4M6.5 7v10M20.5 10v4M17.5 7v10"/><path d="M6.5 12h11" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19s-7-4.5-7-9.5c0-2.5 2-4.5 4.5-4.5 1.4 0 2.6.7 3.5 1.8.9-1.1 2.1-1.8 3.5-1.8 2.5 0 4.5 2 4.5 4.5 0 5-7 9.5-7 9.5z"/><path d="M8 11.5l2 .5 1-2 1.5 3 1-1.5h2" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-sleep" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 119.5 4a6.5 6.5 0 0010.5 10.5z"/><path d="M14 8h3l-3 3h3" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-scale" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M8 9l4-2 4 2" stroke="#E8784E"/><path d="M9.5 13h5"/></g></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9.5" y="3.5" width="5" height="10" rx="2.5"/><path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21M9 21h6"/><circle cx="12" cy="8" r="1.2" fill="#E8784E" stroke="none"/></g></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a1.5 1.5 0 011.5 1.5v9A1.5 1.5 0 0120 20H4a1.5 1.5 0 01-1.5-1.5v-9A1.5 1.5 0 014 8z"/><circle cx="12" cy="13.5" r="3.5" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-barcode" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6v12M7 6v12M10 6v12M13 6v12M16 6v12M19 6v12"/><path d="M3 4.5L3 3.5h3M21 4.5L21 3.5h-3M3 19.5L3 20.5h3M21 19.5L21 20.5h-3" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6"/><path d="M15.5 15.5l4 4" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-add" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1.4" fill="#E8784E" stroke="none"/></g></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16l5-5 4 3 7-7"/><path d="M14 7h6v6" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-streak" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c1 4 5 5.5 5 10a5 5 0 01-10 0c0-2 1-3.5 1-5.5 0 1.5 1 2.5 2 2.5 0-2 1-5 2-7z"/><path d="M10 14.5c.5 1.5 1.5 2 2 2" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-medal" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14" r="5"/><path d="M9 9.5L7 4h10l-2 5.5"/><path d="M10 14l1.5 1.5L14 13" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0112 0v5l1.5 2H4.5z"/><path d="M10 20a2 2 0 004 0"/><circle cx="17" cy="6" r="1.6" fill="#E8784E" stroke="none"/></g></symbol>
+    <symbol id="i-cart" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2.5l2 12h11l1.5-8H7"/><circle cx="9" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/><path d="M11 10h5" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-recipe" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h11a2 2 0 012 2v13a2 2 0 01-2 2H8a2 2 0 01-2-2V3.5z"/><path d="M6 7h-1.5a1 1 0 00-1 1v10a1 1 0 001 1H6"/><path d="M9 9h6M9 12h6M9 15h4" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.8" stroke="#E8784E"/><path d="M12 4v2M12 18v2M4 12H6M18 12h2M6.3 6.3l1.4 1.4M16.3 16.3l1.4 1.4M6.3 17.7l1.4-1.4M16.3 7.7l1.4-1.4"/></g></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8 12.5l3 3 5-6" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M9 9l6 6M15 9l-6 6" stroke="#E8784E"/></g></symbol>
+    <symbol id="i-sparkle" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l1.6 4.4L18 10l-4.4 1.6L12 16l-1.6-4.4L6 10l4.4-1.6z" fill="#E8784E" stroke="#E8784E"/><path d="M18.5 16l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></g></symbol>
+
+    <!-- Logo mark: drop with sparkle inside -->
+    <symbol id="lumi-mark" viewBox="0 0 64 64">
+      <path d="M32 6c8 9 14 17 14 26a14 14 0 11-28 0c0-9 6-17 14-26z" fill="#E8784E"/>
+      <path d="M32 22l1.8 5L39 28.5l-4.5 3 .7 5L32 33.7l-3.2 2.8.7-5L25 28.5l5.2-1.5z" fill="#FAF6F0"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="page">
+
+<!-- =================== TOPBAR =================== -->
+<div class="topbar">
+  <div class="logo-wrap"><svg width="28" height="28"><use href="#lumi-mark"/></svg><div class="serif" style="font-size:20px;font-weight:500;letter-spacing:-.4px">Lumi</div></div>
+  <div class="serif" style="font-style:italic;color:var(--apricot);font-size:14px">Brand Book · v1.0</div>
+  <nav class="toc">
+    <a href="#cover">Cover</a>
+    <a href="#ethos">Ethos</a>
+    <a href="#logo">Logo</a>
+    <a href="#color">Color</a>
+    <a href="#type">Type</a>
+    <a href="#layout">Layout</a>
+    <a href="#icons">Icons</a>
+    <a href="#components">Components</a>
+    <a href="#patterns">Patterns</a>
+    <a href="#motion">Motion</a>
+    <a href="#voice">Voice</a>
+  </nav>
+</div>
+
+<!-- =================== 01 · COVER =================== -->
+<section id="cover">
+  <div class="cover">
+    <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+    <div class="meta">
+      <div class="seclabel"><span class="num">01</span> The brand book</div>
+      <h1 class="serif">A pencil-soft<br><em class="it">weight-loss</em> partner.</h1>
+      <div class="tag">Lumi · Apricot Sun · Friendly Modern · v1.0</div>
+    </div>
+    <div class="credits"><b>Lumi Health, 2026</b>Design system · 1 file · everything<br>Owners: Brand & Product Design</div>
+  </div>
+</section>
+
+<!-- =================== 02 · ETHOS =================== -->
+<section id="ethos">
+  <div class="seclabel"><span class="num">02</span> Ethos</div>
+  <h2 class="serif">A coach that <em class="it">smiles</em>, not scolds.</h2>
+  <p class="sub">Lumi helps people lose weight without losing their joy. Every interaction is warm, specific, and a little playful — like a friend who happens to be a great nutritionist. We celebrate small wins, never shame slips, and keep the math out of the user's way.</p>
+
+  <div class="grid3">
+    <div class="panel"><div class="pcap">PRINCIPLE 01</div><h3 class="serif" style="margin-top:6px">Soft, never <em class="it">clinical</em></h3><p style="color:var(--muted);margin:0">Pencil curves, warm paper tones, organic blobs. The opposite of a hospital chart.</p></div>
+    <div class="panel"><div class="pcap">PRINCIPLE 02</div><h3 class="serif" style="margin-top:6px">Specific, not <em class="it">vague</em></h3><p style="color:var(--muted);margin:0">"5 days ahead — bumping +80 kcal/day" beats "great progress!" every time.</p></div>
+    <div class="panel"><div class="pcap">PRINCIPLE 03</div><h3 class="serif" style="margin-top:6px">Earn trust by <em class="it">showing math</em></h3><p style="color:var(--muted);margin:0">Reveal the model when it adjusts. The user is a partner, not a passenger.</p></div>
+  </div>
+</section>
+
+<!-- =================== 03 · LOGO =================== -->
+<section id="logo">
+  <div class="seclabel"><span class="num">03</span> Logo & mark</div>
+  <h2 class="serif">A <em class="it">drop with a spark</em>.</h2>
+  <p class="sub">A water-drop silhouette holds a four-pointed sparkle — health that lights up. Wordmark sits in Fraunces Soft 100, italic on the "i" dot replaced by the spark when scale allows.</p>
+
+  <div class="logos">
+    <div class="logobig">
+      <div></div>
+      <div style="display:flex;align-items:center;gap:18px">
+        <svg width="92" height="92"><use href="#lumi-mark"/></svg>
+        <div class="serif" style="font-size:120px;font-weight:500;letter-spacing:-3.5px;line-height:1">Lumi</div>
+      </div>
+      <div class="pcap" style="margin-top:18px">PRIMARY LOCKUP · MIN 28PX HEIGHT</div>
+    </div>
+    <div class="logosub">
+      <div class="logocell ap"><svg width="60" height="60" style="filter:brightness(0) invert(1)"><use href="#lumi-mark"/></svg><div class="serif" style="font-size:62px;color:#FFF6EE;margin-left:14px">Lumi</div></div>
+      <div class="logocell dk"><svg width="60" height="60"><use href="#lumi-mark"/></svg><div class="serif" style="font-size:62px;color:var(--cream);margin-left:14px">Lumi</div></div>
+    </div>
+  </div>
+
+  <div class="grid4" style="margin-top:18px">
+    <div class="panel" style="padding:18px"><div class="pcap">CLEAR SPACE</div><div style="margin-top:8px;display:flex;justify-content:center;padding:18px;background:#fff;border:1px dashed var(--apricot);border-radius:12px;position:relative"><svg width="40" height="40"><use href="#lumi-mark"/></svg></div><div style="font-size:11px;color:var(--quiet);margin-top:8px">Padding = ½ mark height on all sides</div></div>
+    <div class="panel" style="padding:18px"><div class="pcap">MIN SIZE · 16PX</div><div style="display:flex;align-items:center;gap:10px;justify-content:center;padding:18px;background:#fff;border-radius:12px;margin-top:8px"><svg width="16" height="16"><use href="#lumi-mark"/></svg><svg width="24" height="24"><use href="#lumi-mark"/></svg><svg width="40" height="40"><use href="#lumi-mark"/></svg></div></div>
+    <div class="panel" style="padding:18px"><div class="pcap">MARK ALONE</div><div style="display:flex;justify-content:center;padding:18px;background:#fff;border-radius:12px;margin-top:8px"><svg width="60" height="60"><use href="#lumi-mark"/></svg></div><div style="font-size:11px;color:var(--quiet);margin-top:8px">Only when "Lumi" appears nearby in product</div></div>
+    <div class="panel" style="padding:18px;background:#fff"><div class="pcap" style="color:var(--warn)">DON'T</div><div style="display:flex;justify-content:center;padding:18px;background:#fff;border-radius:12px;margin-top:8px;position:relative"><svg width="60" height="60" style="filter:hue-rotate(120deg)"><use href="#lumi-mark"/></svg><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:90%;height:2px;background:var(--warn);transform:rotate(-20deg)"></div></div></div><div style="font-size:11px;color:var(--warn);margin-top:8px">Recolor outside palette · Outline · Skew</div></div>
+  </div>
+</section>
+
+<!-- =================== 04 · COLOR =================== -->
+<section id="color">
+  <div class="seclabel"><span class="num">04</span> Color</div>
+  <h2 class="serif">Apricot Sun, on warm <em class="it">paper</em>.</h2>
+  <p class="sub">Apricot is the only colour that earns attention. Cream and tint set warmth without weight. Eucalyptus and warn stay quiet until they have something to say.</p>
+
+  <div class="grid4" style="margin-bottom:18px">
+    <div class="swatch"><div class="chip" style="background:var(--apricot);color:#FFF6EE">Apricot</div><div class="meta"><span class="k">PRIMARY · ACTION</span><b>#E8784E</b></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--cream);color:#7A4520">Cream</div><div class="meta"><span class="k">WARM SURFACE</span><b>#F4D9B5</b></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--tint);color:#7A4520">Tint</div><div class="meta"><span class="k">ICON BACKGROUND</span><b>#FCEAD8</b></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--paper);color:var(--ink)">Paper</div><div class="meta"><span class="k">DEFAULT SURFACE</span><b>#FAF6F0</b></div></div>
+  </div>
+
+  <div class="grid4" style="margin-bottom:18px">
+    <div class="swatch"><div class="chip" style="background:var(--espresso);color:#FAF6F0">Espresso</div><div class="meta"><span class="k">INK · TEXT</span><b>#1F1B17</b></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--muted);color:#fff">Muted</div><div class="meta"><span class="k">BODY COPY</span><b>#5A4F40</b></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--quiet);color:#fff">Quiet</div><div class="meta"><span class="k">CAPTIONS · ICONS OFF</span><b>#8C7B6A</b></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--line-strong);color:var(--ink)">Line</div><div class="meta"><span class="k">DIVIDERS · BORDERS</span><b>#D6CDB9</b></div></div>
+  </div>
+
+  <div class="grid4">
+    <div class="swatch"><div class="chip" style="background:var(--eucal);color:#fff">Eucalyptus</div><div class="meta"><span class="k">SUCCESS · GAIN</span><b>#3D5A4A</b></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--eucal-soft);color:var(--eucal)">Eucal soft</div><div class="meta"><span class="k">SUCCESS SURFACE</span><b>#E2EBE5</b></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--warn);color:#fff">Warn</div><div class="meta"><span class="k">DESTRUCTIVE · ALERT</span><b>#A33820</b></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--plum);color:#fff">Plum</div><div class="meta"><span class="k">RARE · MILESTONE</span><b>#6B3A52</b></div></div>
+  </div>
+
+  <div style="margin-top:24px">
+    <div class="pcap" style="margin-bottom:8px">APRICOT SCALE · 50 → 900</div>
+    <div class="scale">
+      <div class="s" style="background:#FCEAD8;color:#7A4520">50</div>
+      <div class="s" style="background:#F8C9A6;color:#7A4520">100</div>
+      <div class="s" style="background:#F2A87C;color:#FFF">300</div>
+      <div class="s" style="background:#E8784E;color:#FFF">500</div>
+      <div class="s" style="background:#C95A30;color:#FFF">700</div>
+      <div class="s" style="background:#9A4022;color:#FFF">800</div>
+      <div class="s" style="background:#5C2811;color:#FCEAD8">900</div>
+    </div>
+  </div>
+  <div style="margin-top:14px">
+    <div class="pcap" style="margin-bottom:8px">NEUTRAL SCALE · 50 → 900</div>
+    <div class="scale">
+      <div class="s" style="background:#FAF6F0;color:#1F1B17">50</div>
+      <div class="s" style="background:#F2EAD8;color:#1F1B17">100</div>
+      <div class="s" style="background:#EBE3D6;color:#1F1B17">200</div>
+      <div class="s" style="background:#D6CDB9;color:#1F1B17">300</div>
+      <div class="s" style="background:#8C7B6A;color:#fff">500</div>
+      <div class="s" style="background:#5A4F40;color:#fff">700</div>
+      <div class="s" style="background:#1F1B17;color:#FAF6F0">900</div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== 05 · TYPE =================== -->
+<section id="type">
+  <div class="seclabel"><span class="num">05</span> Typography</div>
+  <h2 class="serif">Fraunces × <em class="it">DM Sans</em>.</h2>
+  <p class="sub">Fraunces (SOFT 100) handles display, headlines, and numerals — the warm voice. DM Sans handles body, captions, labels, navigation — the clear voice.</p>
+
+  <div class="typedemo">
+    <div class="typeline">
+      <div class="lbl">Display</div>
+      <div class="serif" style="font-size:64px;font-weight:500;letter-spacing:-1.6px;line-height:1">Hello, <em class="it">Marco</em>.</div>
+      <div class="meta">Fraunces · 64 / 1.05 · −1.6 · SOFT 100</div>
+    </div>
+    <div class="typeline">
+      <div class="lbl">Headline</div>
+      <div class="serif" style="font-size:36px;font-weight:500;letter-spacing:-.8px">Sunday <em class="it">weigh-in</em></div>
+      <div class="meta">Fraunces · 36 / 1.1 · −0.8</div>
+    </div>
+    <div class="typeline">
+      <div class="lbl">Title</div>
+      <div class="serif" style="font-size:24px;font-weight:500;letter-spacing:-.4px">Today's plan · 5 meals</div>
+      <div class="meta">Fraunces · 24 / 1.2 · −0.4</div>
+    </div>
+    <div class="typeline">
+      <div class="lbl">Numeral</div>
+      <div class="serif" style="font-size:72px;font-weight:500;letter-spacing:-2.6px;color:var(--apricot);line-height:1">82.4</div>
+      <div class="meta">Fraunces · 72 · tabular · color apricot</div>
+    </div>
+    <div class="typeline">
+      <div class="lbl">Body</div>
+      <div style="font-size:16px;line-height:1.55;color:var(--muted)">A coach that smiles, not scolds. We celebrate small wins, never shame slips, and keep the math out of your way.</div>
+      <div class="meta">DM Sans · 16 / 1.55 · weight 400</div>
+    </div>
+    <div class="typeline">
+      <div class="lbl">Body strong</div>
+      <div style="font-size:16px;line-height:1.55;color:var(--ink);font-weight:600">Bumping +80 kcal/day so you don't burn out the gas tank.</div>
+      <div class="meta">DM Sans · 16 / weight 600</div>
+    </div>
+    <div class="typeline">
+      <div class="lbl">Label</div>
+      <div style="font-size:13px;font-weight:600;letter-spacing:.02em">Daily calorie target</div>
+      <div class="meta">DM Sans · 13 / weight 600</div>
+    </div>
+    <div class="typeline">
+      <div class="lbl">Caption</div>
+      <div class="pcap" style="font-size:11px">EYEBROW · ALL CAPS · 0.22 EM</div>
+      <div class="meta">DM Sans · 11 / 700 · uppercase · 0.22em</div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== 06 · LAYOUT =================== -->
+<section id="layout">
+  <div class="seclabel"><span class="num">06</span> Layout & space</div>
+  <h2 class="serif">A <em class="it">4-pt</em> rhythm.</h2>
+  <p class="sub">Spacing scales by 4. Radii are soft and consistent. Shadows are warm-tinted, never grey.</p>
+
+  <div class="grid2">
+    <div class="panel">
+      <div class="pcap" style="margin-bottom:14px">SPACING · 4PT BASE</div>
+      <div class="ssrow"><div class="name">2xs</div><div class="px">4px</div><div class="ssbar" style="width:4px"></div></div>
+      <div class="ssrow"><div class="name">xs</div><div class="px">8px</div><div class="ssbar" style="width:8px"></div></div>
+      <div class="ssrow"><div class="name">sm</div><div class="px">12px</div><div class="ssbar" style="width:12px"></div></div>
+      <div class="ssrow"><div class="name">md</div><div class="px">16px</div><div class="ssbar" style="width:16px"></div></div>
+      <div class="ssrow"><div class="name">lg</div><div class="px">24px</div><div class="ssbar" style="width:24px"></div></div>
+      <div class="ssrow"><div class="name">xl</div><div class="px">32px</div><div class="ssbar" style="width:32px"></div></div>
+      <div class="ssrow"><div class="name">2xl</div><div class="px">48px</div><div class="ssbar" style="width:48px"></div></div>
+      <div class="ssrow"><div class="name">3xl</div><div class="px">64px</div><div class="ssbar" style="width:64px"></div></div>
+    </div>
+    <div class="panel">
+      <div class="pcap" style="margin-bottom:14px">RADIUS</div>
+      <div class="grid4">
+        <div class="rcard"><div class="box" style="border-radius:6px"></div><div style="font-weight:600">sm · 6</div><div class="pcap" style="font-size:9px">PILLS · MICRO</div></div>
+        <div class="rcard"><div class="box" style="border-radius:10px"></div><div style="font-weight:600">md · 10</div><div class="pcap" style="font-size:9px">CHIPS · ICONS</div></div>
+        <div class="rcard"><div class="box" style="border-radius:14px"></div><div style="font-weight:600">lg · 14</div><div class="pcap" style="font-size:9px">CARDS · INPUTS</div></div>
+        <div class="rcard"><div class="box" style="border-radius:22px"></div><div style="font-weight:600">xl · 22</div><div class="pcap" style="font-size:9px">PANELS · SHEETS</div></div>
+      </div>
+      <div class="pcap" style="margin:22px 0 14px">SHADOW</div>
+      <div class="grid3">
+        <div class="shcard"><div class="puck" style="box-shadow:0 1px 2px rgba(60,42,18,.06)"></div><div style="font-weight:600;font-size:12px">soft</div></div>
+        <div class="shcard"><div class="puck" style="box-shadow:0 8px 20px -10px rgba(60,42,18,.18)"></div><div style="font-weight:600;font-size:12px">card</div></div>
+        <div class="shcard"><div class="puck" style="box-shadow:0 22px 50px -22px rgba(60,42,18,.30)"></div><div style="font-weight:600;font-size:12px">lift</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:18px">
+    <div class="pcap" style="margin-bottom:14px">PHONE GRID · 4 COL · 16 GUTTER · 16 MARGIN</div>
+    <div class="gridsys">
+      <div class="col" style="left:18px;width:23%"></div>
+      <div class="col" style="left:calc(18px + 25%);width:23%"></div>
+      <div class="col" style="left:calc(18px + 50%);width:23%"></div>
+      <div class="col" style="right:18px;width:23%"></div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== 07 · ICONS =================== -->
+<section id="icons">
+  <div class="seclabel"><span class="num">07</span> Icon library</div>
+  <h2 class="serif">32 icons, one <em class="it">apricot</em> stroke.</h2>
+  <p class="sub">24×24 grid · 1.6 px round strokes · body in <code>currentColor</code> · one apricot accent per glyph.</p>
+
+  <div class="grid8" style="margin-top:18px">
+    <div class="ig"><svg width="30" height="30"><use href="#i-today"/></svg><div class="lbl">Today</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-plan"/></svg><div class="lbl">Plan</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-coach"/></svg><div class="lbl">Coach</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-stats"/></svg><div class="lbl">Stats</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-me"/></svg><div class="lbl">Me</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-breakfast"/></svg><div class="lbl">Breakfast</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-lunch"/></svg><div class="lbl">Lunch</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-dinner"/></svg><div class="lbl">Dinner</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-snack"/></svg><div class="lbl">Snack</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-water"/></svg><div class="lbl">Water</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-protein"/></svg><div class="lbl">Protein</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-veg"/></svg><div class="lbl">Veg</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-grain"/></svg><div class="lbl">Grain</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-flame"/></svg><div class="lbl">Calories</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-steps"/></svg><div class="lbl">Steps</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-workout"/></svg><div class="lbl">Workout</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-heart"/></svg><div class="lbl">Heart</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-sleep"/></svg><div class="lbl">Sleep</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-scale"/></svg><div class="lbl">Weigh-in</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-mic"/></svg><div class="lbl">Voice</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-camera"/></svg><div class="lbl">Photo</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-barcode"/></svg><div class="lbl">Barcode</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-search"/></svg><div class="lbl">Search</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-add"/></svg><div class="lbl">Add</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-target"/></svg><div class="lbl">Goal</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-trend"/></svg><div class="lbl">Trend</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-streak"/></svg><div class="lbl">Streak</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-medal"/></svg><div class="lbl">Milestone</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-bell"/></svg><div class="lbl">Reminders</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-cart"/></svg><div class="lbl">Shopping</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-recipe"/></svg><div class="lbl">Recipe</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-settings"/></svg><div class="lbl">Settings</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-check"/></svg><div class="lbl">Done</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-close"/></svg><div class="lbl">Dismiss</div></div>
+    <div class="ig"><svg width="30" height="30"><use href="#i-sparkle"/></svg><div class="lbl">Spark</div></div>
+  </div>
+</section>
+
+<!-- =================== 08 · COMPONENTS =================== -->
+<section id="components">
+  <div class="seclabel"><span class="num">08</span> Components</div>
+  <h2 class="serif">Every <em class="it">control</em>, every state.</h2>
+  <p class="sub">Default, hover, focused, disabled, error, success — laid out so you don't have to imagine them.</p>
+
+  <!-- BUTTONS -->
+  <div class="panel" style="margin-bottom:18px">
+    <div class="pcap" style="margin-bottom:14px">BUTTONS</div>
+    <div style="display:grid;grid-template-columns:140px 1fr;gap:14px;align-items:center">
+      <div class="lbl pcap">Primary</div>
+      <div class="btnrow">
+        <button class="btn pri">Apply adjustment</button>
+        <button class="btn pri hover">Hover</button>
+        <button class="btn pri" style="box-shadow:0 0 0 4px var(--tint)">Focused</button>
+        <button class="btn pri" style="background:var(--apricot-dk)">Pressed</button>
+        <button class="btn pri dis">Disabled</button>
+      </div>
+      <div class="lbl pcap">Secondary</div>
+      <div class="btnrow">
+        <button class="btn sec">Skip for now</button>
+        <button class="btn sec" style="background:var(--cream)">Hover</button>
+        <button class="btn sec" style="opacity:.4">Disabled</button>
+      </div>
+      <div class="lbl pcap">Ghost</div>
+      <div class="btnrow">
+        <button class="btn ghost">Cancel</button>
+        <button class="btn ghost" style="color:var(--apricot)">Hover</button>
+      </div>
+      <div class="lbl pcap">Destructive</div>
+      <div class="btnrow"><button class="btn dest">Delete log</button><button class="btn dest" style="background:#7A2814">Pressed</button></div>
+      <div class="lbl pcap">Sizes</div>
+      <div class="btnrow">
+        <button class="btn pri sm">Small</button>
+        <button class="btn pri">Default</button>
+        <button class="btn pri lg">Large</button>
+        <button class="btn pri pill">Pill</button>
+        <button class="btn pri icon"><svg width="20" height="20" style="color:#fff"><use href="#i-add"/></svg></button>
+      </div>
+      <div class="lbl pcap">With icon</div>
+      <div class="btnrow">
+        <button class="btn pri"><svg width="18" height="18" style="color:#fff"><use href="#i-mic"/></svg>Voice log</button>
+        <button class="btn sec"><svg width="18" height="18"><use href="#i-camera"/></svg>Add photo</button>
+        <button class="btn ghost" style="color:var(--apricot)"><svg width="18" height="18"><use href="#i-sparkle"/></svg>Ask Lumi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- INPUTS -->
+  <div class="panel" style="margin-bottom:18px">
+    <div class="pcap" style="margin-bottom:14px">INPUTS · TEXT FIELDS</div>
+    <div class="grid3">
+      <div>
+        <div class="pcap" style="font-size:9px;margin-bottom:6px">DEFAULT</div>
+        <div class="input"><svg width="18" height="18" style="color:var(--quiet)"><use href="#i-search"/></svg><span class="ph">Search 250k foods</span></div>
+      </div>
+      <div>
+        <div class="pcap" style="font-size:9px;margin-bottom:6px">FOCUS</div>
+        <div class="input focus"><svg width="18" height="18" style="color:var(--apricot)"><use href="#i-search"/></svg><span>chicken qu|</span></div>
+      </div>
+      <div>
+        <div class="pcap" style="font-size:9px;margin-bottom:6px">FILLED</div>
+        <div class="input"><svg width="18" height="18" style="color:var(--ink)"><use href="#i-search"/></svg><span style="color:var(--ink);font-weight:500">Chicken quinoa bowl</span></div>
+      </div>
+      <div>
+        <div class="pcap" style="font-size:9px;margin-bottom:6px">ERROR</div>
+        <div class="input error"><svg width="18" height="18" style="color:var(--warn)"><use href="#i-close"/></svg><span style="color:var(--warn)">Weight must be 30–250 kg</span></div>
+      </div>
+      <div>
+        <div class="pcap" style="font-size:9px;margin-bottom:6px">SUCCESS</div>
+        <div class="input success"><svg width="18" height="18" style="color:var(--eucal)"><use href="#i-check"/></svg><span>marco@kavren.com</span></div>
+      </div>
+      <div>
+        <div class="pcap" style="font-size:9px;margin-bottom:6px">DISABLED</div>
+        <div class="input" style="opacity:.5;background:var(--paper)"><svg width="18" height="18"><use href="#i-search"/></svg><span class="ph">Locked</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SELECTION -->
+  <div class="panel" style="margin-bottom:18px">
+    <div class="pcap" style="margin-bottom:14px">SELECTION · TOGGLES, RADIOS, CHECKS, SLIDERS</div>
+    <div class="grid4">
+      <div>
+        <div class="pcap" style="font-size:9px;margin-bottom:8px">TOGGLE</div>
+        <div style="display:flex;gap:14px;align-items:center">
+          <div class="toggle"></div><div class="toggle on"></div>
+          <span style="font-size:12px;color:var(--quiet)">off / on</span>
+        </div>
+      </div>
+      <div>
+        <div class="pcap" style="font-size:9px;margin-bottom:8px">RADIO</div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <div style="width:22px;height:22px;border-radius:50%;border:2px solid var(--line-strong);background:#fff"></div>
+          <div style="width:22px;height:22px;border-radius:50%;border:2px solid var(--apricot);background:#fff;display:flex;align-items:center;justify-content:center"><div style="width:10px;height:10px;border-radius:50%;background:var(--apricot)"></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="pcap" style="font-size:9px;margin-bottom:8px">CHECKBOX</div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <div style="width:22px;height:22px;border-radius:6px;border:2px solid var(--line-strong);background:#fff"></div>
+          <div style="width:22px;height:22px;border-radius:6px;background:var(--apricot);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700">✓</div>
+        </div>
+      </div>
+      <div>
+        <div class="pcap" style="font-size:9px;margin-bottom:8px">STEPPER</div>
+        <div class="stepper"><div class="b">−</div><div class="v">82.4</div><div class="b">+</div></div>
+      </div>
+    </div>
+    <div style="margin-top:18px">
+      <div class="pcap" style="font-size:9px;margin-bottom:8px">SLIDER · weight goal</div>
+      <div class="slider"><div class="fill" style="width:55%"></div><div class="knob" style="left:55%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--quiet);font-weight:600"><span>60 kg</span><span style="color:var(--apricot)">68 kg</span><span>100 kg</span></div>
+    </div>
+  </div>
+
+  <!-- PILLS / BADGES / CHIPS -->
+  <div class="panel" style="margin-bottom:18px">
+    <div class="pcap" style="margin-bottom:14px">PILLS · BADGES · CHIPS</div>
+    <div class="btnrow" style="gap:8px">
+      <span class="pill warm"><span class="dot"></span>520 kcal</span>
+      <span class="pill cool"><span class="dot"></span>−2.6 kg</span>
+      <span class="pill solid">Next meal</span>
+      <span class="pill warn"><span class="dot"></span>Above target</span>
+      <span class="pill ghost">Optional</span>
+      <span class="pill" style="background:var(--espresso);color:var(--cream)">Pro tip</span>
+      <span class="pill warm"><svg width="12" height="12"><use href="#i-flame"/></svg>520</span>
+      <span class="pill cool"><svg width="12" height="12"><use href="#i-protein"/></svg>32g</span>
+    </div>
+  </div>
+
+  <!-- AVATARS / RING / PROGRESS -->
+  <div class="grid2" style="margin-bottom:18px">
+    <div class="panel">
+      <div class="pcap" style="margin-bottom:14px">AVATARS</div>
+      <div class="avs">
+        <div class="av lumi"><svg width="22" height="22" style="filter:brightness(0) invert(1)"><use href="#lumi-mark"/></svg></div>
+        <div class="av">M</div>
+        <div class="av">S</div>
+        <div class="av dk">A</div>
+        <div class="av" style="background:url('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop&crop=face') center/cover"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="pcap" style="margin-bottom:14px">PROGRESS · LINEAR & RADIAL</div>
+      <div class="ring-wrap">
+        <svg viewBox="0 0 88 88" width="80" height="80"><circle cx="44" cy="44" r="38" stroke="var(--cream)" stroke-width="6" fill="none"/><circle cx="44" cy="44" r="38" stroke="var(--apricot)" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="238" stroke-dashoffset="90" transform="rotate(-90 44 44)"/></svg>
+        <div style="flex:1">
+          <div class="pcap" style="margin-bottom:6px">DAILY · 62%</div>
+          <div class="prog"><div class="b" style="width:62%"></div></div>
+          <div class="pcap" style="margin:14px 0 6px">JOURNEY · 15%</div>
+          <div class="prog" style="background:var(--eucal-soft)"><div class="b" style="width:15%;background:var(--eucal)"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST / BANNER -->
+  <div class="panel" style="margin-bottom:18px">
+    <div class="pcap" style="margin-bottom:14px">FEEDBACK · TOASTS, BANNERS</div>
+    <div class="grid2">
+      <div class="toast success"><div class="ic" style="color:var(--eucal)"><svg width="20" height="20"><use href="#i-check"/></svg></div><div><div style="font-weight:600;font-size:13px">Logged · breakfast</div><div style="font-size:11px;color:var(--muted)">Yogurt parfait · 340 kcal</div></div></div>
+      <div class="toast warn"><div class="ic" style="color:var(--warn)"><svg width="20" height="20"><use href="#i-bell"/></svg></div><div><div style="font-weight:600;font-size:13px">Above today's target</div><div style="font-size:11px;color:var(--muted)">+220 kcal · we'll smooth this over tomorrow</div></div></div>
+      <div class="toast tip"><div class="ic" style="color:var(--apricot)"><svg width="20" height="20"><use href="#i-sparkle"/></svg></div><div><div style="font-weight:600;font-size:13px;color:#3A2410">Lumi tip</div><div style="font-size:11px;color:#5A3A1E">Add 1 boiled egg to hit your protein target.</div></div></div>
+      <div class="toast"><div class="ic" style="color:var(--ink)"><svg width="20" height="20"><use href="#i-coach"/></svg></div><div><div style="font-weight:600;font-size:13px">Lumi sent a message</div><div style="font-size:11px;color:var(--muted)">"Want to swap dinner for something lighter?"</div></div></div>
+    </div>
+  </div>
+
+  <!-- LIST ITEMS -->
+  <div class="panel" style="margin-bottom:18px">
+    <div class="pcap" style="margin-bottom:14px">LIST ITEMS · MEAL CARDS</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="meal"><div class="icn"><svg width="22" height="22" style="color:var(--apricot)"><use href="#i-breakfast"/></svg></div><div><div class="t">Yogurt parfait</div><div class="s">07:30 · 340 kcal</div></div></div>
+      <div class="meal" style="border:1.5px solid var(--apricot)"><div class="icn"><svg width="22" height="22" style="color:var(--apricot)"><use href="#i-lunch"/></svg></div><div><div class="t">Chicken & quinoa bowl</div><div class="s">13:00 · 520 kcal · NEXT</div></div></div>
+      <div class="meal" style="opacity:.55"><div class="icn"><svg width="22" height="22" style="color:var(--apricot)"><use href="#i-snack"/></svg></div><div><div class="t" style="text-decoration:line-through">Apple + almond</div><div class="s">10:30 · DONE</div></div></div>
+      <div class="meal" style="background:var(--warn-soft);border-color:#F5C2B0"><div class="icn" style="background:#F5C2B0"><svg width="22" height="22" style="color:var(--warn)"><use href="#i-close"/></svg></div><div><div class="t" style="color:var(--warn)">Pizza, large slice</div><div class="s">+340 kcal over plan</div></div></div>
+    </div>
+  </div>
+
+  <!-- NAV BAR + APP BAR -->
+  <div class="grid2" style="margin-bottom:18px">
+    <div class="panel">
+      <div class="pcap" style="margin-bottom:14px">TAB BAR · BOTTOM NAV</div>
+      <div style="background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:12px;display:flex;justify-content:space-around">
+        <div class="ni on"><svg width="22" height="22" style="color:var(--apricot)"><use href="#i-today"/></svg>Today</div>
+        <div class="ni"><svg width="22" height="22" style="color:var(--quiet)"><use href="#i-plan"/></svg>Plan</div>
+        <div class="ni"><svg width="22" height="22" style="color:var(--quiet)"><use href="#i-coach"/></svg>Coach</div>
+        <div class="ni"><svg width="22" height="22" style="color:var(--quiet)"><use href="#i-stats"/></svg>Stats</div>
+        <div class="ni"><svg width="22" height="22" style="color:var(--quiet)"><use href="#i-me"/></svg>Me</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="pcap" style="margin-bottom:14px">APP BAR · HEADER</div>
+      <div style="display:flex;align-items:center;gap:10px;padding:14px;background:var(--paper);border:1px solid var(--line);border-radius:14px">
+        <svg width="20" height="20" style="color:var(--ink);transform:rotate(180deg)"><use href="#i-trend"/></svg>
+        <div class="serif" style="font-size:18px;font-weight:500;letter-spacing:-.3px">Sunday weigh-in</div>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <span class="pill warm"><svg width="12" height="12"><use href="#i-streak"/></svg>21</span>
+          <button class="btn icon" style="width:34px;height:34px;background:#fff;border:1px solid var(--line)"><svg width="18" height="18"><use href="#i-bell"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMPTY · LOADING · ERROR STATES -->
+  <div class="panel">
+    <div class="pcap" style="margin-bottom:14px">SYSTEM STATES · EMPTY · LOADING · ERROR</div>
+    <div class="grid3">
+      <div class="demo-card" style="text-align:center;padding:30px 18px">
+        <svg width="44" height="44" style="color:var(--quiet);margin-bottom:8px"><use href="#i-recipe"/></svg>
+        <h3 class="serif" style="margin:6px 0">Nothing logged <em class="it">yet</em></h3>
+        <p style="color:var(--muted);font-size:12px;margin:0 0 12px">Tell Lumi what you ate to get started.</p>
+        <button class="btn pri sm">Log a meal</button>
+      </div>
+      <div class="demo-card" style="display:flex;flex-direction:column;gap:8px;padding:18px">
+        <div style="height:14px;border-radius:6px;background:var(--line);width:60%"></div>
+        <div style="height:10px;border-radius:6px;background:var(--line);width:90%"></div>
+        <div style="height:10px;border-radius:6px;background:var(--line);width:80%"></div>
+        <div style="display:flex;gap:8px;margin-top:6px"><div style="flex:1;height:60px;border-radius:10px;background:var(--line)"></div><div style="flex:1;height:60px;border-radius:10px;background:var(--line)"></div></div>
+        <div class="pcap" style="font-size:9px;color:var(--quiet);margin-top:4px;text-align:center">SHIMMER · 1.8s ease</div>
+      </div>
+      <div class="demo-card" style="text-align:center;padding:30px 18px;background:var(--warn-soft);border-color:#F5C2B0">
+        <svg width="44" height="44" style="color:var(--warn);margin-bottom:8px"><use href="#i-close"/></svg>
+        <h3 class="serif" style="margin:6px 0;color:var(--warn)">Lost <em class="it" style="color:var(--warn)">connection</em></h3>
+        <p style="color:#7A2814;font-size:12px;margin:0 0 12px">Your log will sync when you're back online.</p>
+        <button class="btn dest sm">Try again</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== 09 · PATTERNS =================== -->
+<section id="patterns">
+  <div class="seclabel"><span class="num">09</span> Patterns in context</div>
+  <h2 class="serif">The system, <em class="it">assembled</em>.</h2>
+  <p class="sub">How the parts come together: hero stat, plan timeline, weigh-in flow, AI coach.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+
+    <!-- TODAY -->
+    <div class="phone"><div class="di"></div><div class="sb"><span>9:41</span><span>● ● ●</span></div>
+      <div class="scrn">
+        <div class="pcap">TUESDAY · APR 28</div>
+        <h3 class="serif" style="font-size:24px;margin:4px 0 12px">Morning, <em class="it">Marco</em></h3>
+        <div class="demo-card" style="display:flex;gap:12px;align-items:center;margin-bottom:8px;padding:12px">
+          <svg viewBox="0 0 88 88" width="60" height="60"><circle cx="44" cy="44" r="38" stroke="var(--cream)" stroke-width="6" fill="none"/><circle cx="44" cy="44" r="38" stroke="var(--apricot)" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="238" stroke-dashoffset="90" transform="rotate(-90 44 44)"/></svg>
+          <div><div class="pcap" style="font-size:9px">EATEN</div><div class="serif" style="font-size:22px;line-height:1">1,108 <span style="font-size:10px;color:var(--quiet);font-family:DM Sans">/ 1,780</span></div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+          <div class="demo-card" style="padding:8px;text-align:center"><svg width="18" height="18"><use href="#i-protein"/></svg><div class="serif" style="font-size:14px">88g</div></div>
+          <div class="demo-card" style="padding:8px;text-align:center"><svg width="18" height="18"><use href="#i-grain"/></svg><div class="serif" style="font-size:14px">142g</div></div>
+          <div class="demo-card" style="padding:8px;text-align:center"><svg width="18" height="18"><use href="#i-veg"/></svg><div class="serif" style="font-size:14px">42g</div></div>
+        </div>
+        <div class="meal" style="border:1.5px solid var(--apricot)"><div class="icn"><svg width="20" height="20" style="color:var(--apricot)"><use href="#i-lunch"/></svg></div><div><div class="t">Chicken & quinoa</div><div class="s">13:00 · 520 kcal</div></div></div>
+        <div class="nav"><div class="ni on"><svg width="18" height="18" style="color:var(--apricot)"><use href="#i-today"/></svg>Today</div><div class="ni"><svg width="18" height="18" style="color:var(--quiet)"><use href="#i-plan"/></svg>Plan</div><div class="ni"><svg width="18" height="18" style="color:var(--quiet)"><use href="#i-coach"/></svg>Coach</div><div class="ni"><svg width="18" height="18" style="color:var(--quiet)"><use href="#i-stats"/></svg>Stats</div><div class="ni"><svg width="18" height="18" style="color:var(--quiet)"><use href="#i-me"/></svg>Me</div></div>
+      </div><div class="home"></div>
+    </div>
+
+    <!-- WEIGH-IN -->
+    <div class="phone"><div class="di"></div><div class="sb"><span>9:41</span><span>● ● ●</span></div>
+      <div class="scrn" style="display:flex;flex-direction:column;align-items:center;padding-top:62px">
+        <div class="pcap">SUNDAY · WEEK 4</div>
+        <h3 class="serif" style="font-size:22px;margin:6px 0 14px;text-align:center">Sunday <em class="it">weigh-in</em></h3>
+        <div class="demo-card" style="width:100%;text-align:center;padding:18px 14px">
+          <div class="pcap" style="font-size:9px">YOUR WEIGHT</div>
+          <div class="serif" style="font-size:60px;color:var(--apricot);letter-spacing:-2.4px;line-height:1;margin:6px 0">82.4</div>
+          <div style="font-size:11px;color:var(--quiet)">kg · <span style="color:var(--eucal);font-weight:600">−0.7 vs last week</span></div>
+        </div>
+        <div class="demo-card" style="width:100%;margin-top:8px;background:var(--cream);border:none;padding:12px">
+          <div class="pcap" style="font-size:9px;color:#7A4520">LUMI'S ADJUSTMENT</div>
+          <div style="font-size:11.5px;color:#3A2410;line-height:1.5;margin-top:4px"><b>5 days ahead</b> — bumping +80 kcal/day.</div>
+        </div>
+        <button class="btn pri" style="width:100%;margin-top:auto;margin-bottom:30px">Apply adjustment</button>
+      </div><div class="home"></div>
+    </div>
+
+    <!-- COACH -->
+    <div class="phone"><div class="di"></div><div class="sb"><span>9:41</span><span>● ● ●</span></div>
+      <div class="scrn" style="background:var(--paper)">
+        <div class="pcap">CHAT WITH</div>
+        <h3 class="serif" style="font-size:22px;margin:4px 0 14px"><em class="it">Lumi</em></h3>
+        <div style="display:flex;gap:8px;margin-bottom:8px"><div class="av lumi" style="width:30px;height:30px"><svg width="16" height="16" style="filter:brightness(0) invert(1)"><use href="#lumi-mark"/></svg></div><div style="background:#fff;border:1px solid var(--line);border-radius:14px 14px 14px 4px;padding:10px;font-size:12px;max-width:170px">Nice work on lunch! Want to swap dinner for something lighter?</div></div>
+        <div style="display:flex;gap:8px;margin-bottom:8px;justify-content:flex-end"><div style="background:var(--apricot);color:#fff;border-radius:14px 14px 4px 14px;padding:10px;font-size:12px;max-width:170px">Sure, what do you suggest?</div></div>
+        <div style="display:flex;gap:8px;margin-bottom:8px"><div class="av lumi" style="width:30px;height:30px"><svg width="16" height="16" style="filter:brightness(0) invert(1)"><use href="#lumi-mark"/></svg></div><div style="background:#fff;border:1px solid var(--line);border-radius:14px 14px 14px 4px;padding:10px;font-size:12px;max-width:170px">A lemon-herb cod with greens — 380 kcal, 38g protein. ✨</div></div>
+        <div style="position:absolute;left:14px;right:14px;bottom:18px"><div class="input" style="background:#fff"><svg width="18" height="18" style="color:var(--quiet)"><use href="#i-mic"/></svg><span class="ph" style="font-size:12px">Message Lumi</span><svg width="22" height="22" style="color:var(--apricot);margin-left:auto"><use href="#i-add"/></svg></div></div>
+      </div><div class="home"></div>
+    </div>
+
+    <!-- FORECAST -->
+    <div class="phone"><div class="di"></div><div class="sb"><span>9:41</span><span>● ● ●</span></div>
+      <div class="scrn">
+        <div class="pcap">FORECAST · 26 WK</div>
+        <h3 class="serif" style="font-size:20px;margin:4px 0 4px"><em class="it">68 kg</em> by Oct 14</h3>
+        <div style="font-size:10px;color:var(--eucal);font-weight:700;margin-bottom:10px">14 DAYS AHEAD</div>
+        <div class="demo-card" style="padding:12px 6px">
+          <svg viewBox="0 0 240 130" width="100%"><line x1="20" x2="230" y1="20" y2="20" stroke="var(--line)"/><line x1="20" x2="230" y1="60" y2="60" stroke="var(--line)"/><line x1="20" x2="230" y1="100" y2="100" stroke="var(--line)"/><path d="M22,28 Q80,40 130,60 T228,100" stroke="var(--quiet)" stroke-width="1.4" fill="none" stroke-dasharray="3 4"/><path d="M22,28 L42,38 L62,48 L82,52 L102,58" stroke="var(--apricot)" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="102" cy="58" r="4" fill="var(--apricot)" stroke="var(--paper)" stroke-width="2"/></svg>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px">
+          <div class="demo-card" style="padding:8px;text-align:center"><div class="pcap" style="font-size:8px">LOST</div><div class="serif" style="font-size:16px">2.6</div></div>
+          <div class="demo-card" style="padding:8px;text-align:center"><div class="pcap" style="font-size:8px">AVG/WK</div><div class="serif" style="font-size:16px">0.65</div></div>
+          <div class="demo-card" style="padding:8px;text-align:center"><div class="pcap" style="font-size:8px">TO GO</div><div class="serif" style="font-size:16px">14.4</div></div>
+        </div>
+        <div class="nav"><div class="ni"><svg width="18" height="18" style="color:var(--quiet)"><use href="#i-today"/></svg>Today</div><div class="ni"><svg width="18" height="18" style="color:var(--quiet)"><use href="#i-plan"/></svg>Plan</div><div class="ni"><svg width="18" height="18" style="color:var(--quiet)"><use href="#i-coach"/></svg>Coach</div><div class="ni on"><svg width="18" height="18" style="color:var(--apricot)"><use href="#i-stats"/></svg>Stats</div><div class="ni"><svg width="18" height="18" style="color:var(--quiet)"><use href="#i-me"/></svg>Me</div></div>
+      </div><div class="home"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- =================== 10 · MOTION =================== -->
+<section id="motion">
+  <div class="seclabel"><span class="num">10</span> Motion</div>
+  <h2 class="serif">Calm, with a <em class="it">bounce</em>.</h2>
+  <p class="sub">UI moves with soft easing; celebratory moments earn a gentle overshoot. No bouncy springs for everyday actions — that's reserved for milestones.</p>
+
+  <div class="grid3">
+    <div class="motion-card">
+      <div class="pcap">UTILITY · 180MS</div>
+      <div class="ball anim-ease"></div>
+      <div style="font-size:12px;color:var(--muted)">Tabs, hovers, dismissals.<br><b>cubic-bezier(.4,0,.2,1)</b></div>
+    </div>
+    <div class="motion-card">
+      <div class="pcap">SOFT · 240MS</div>
+      <div class="ball anim-soft"></div>
+      <div style="font-size:12px;color:var(--muted)">Sheets, panel slides.<br><b>cubic-bezier(.25,.46,.45,.94)</b></div>
+    </div>
+    <div class="motion-card">
+      <div class="pcap">CELEBRATE · 600MS</div>
+      <div class="ball anim-bounce"></div>
+      <div style="font-size:12px;color:var(--muted)">Streak unlocks, milestones.<br><b>cubic-bezier(.34,1.56,.64,1)</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== 11 · VOICE =================== -->
+<section id="voice">
+  <div class="seclabel"><span class="num">11</span> Voice & writing</div>
+  <h2 class="serif">Warm, <em class="it">specific</em>, never preachy.</h2>
+  <p class="sub">We sound like a friend with a clipboard. Numbers and feelings, never one without the other.</p>
+
+  <div class="vox">
+    <div class="voxcell do"><div class="tag">Do</div><div class="quote">"5 days ahead — bumping +80 kcal/day so you don't burn out the gas tank."</div><div style="font-size:12px;color:var(--quiet);margin-top:8px">Specific math, warm metaphor.</div></div>
+    <div class="voxcell dont"><div class="tag">Don't</div><div class="quote" style="color:var(--warn)">"Great progress this week, keep going!!"</div><div style="font-size:12px;color:var(--quiet);margin-top:8px">Empty calories. No specifics.</div></div>
+
+    <div class="voxcell do"><div class="tag">Do</div><div class="quote">"Add a boiled egg — protein's the easy fix."</div></div>
+    <div class="voxcell dont"><div class="tag">Don't</div><div class="quote" style="color:var(--warn)">"You should consume more protein-rich foods."</div></div>
+
+    <div class="voxcell do"><div class="tag">Do</div><div class="quote">"That pizza was real good — let's smooth it over with a lighter dinner."</div></div>
+    <div class="voxcell dont"><div class="tag">Don't</div><div class="quote" style="color:var(--warn)">"You've exceeded your daily caloric target."</div></div>
+  </div>
+
+  <div class="panel" style="margin-top:18px">
+    <div class="pcap" style="margin-bottom:14px">VOCABULARY</div>
+    <div class="grid3">
+      <div><div style="font-size:12px;color:var(--quiet);font-weight:600;margin-bottom:8px">Use</div><div style="font-size:14px;line-height:1.7">journey · plan · today · partner · gentle · bumping · smoothing · warm-up</div></div>
+      <div><div style="font-size:12px;color:var(--quiet);font-weight:600;margin-bottom:8px">Avoid</div><div style="font-size:14px;line-height:1.7;color:var(--warn)">deficit · burn · diet · restrict · cheat · failure · weakness · perfect</div></div>
+      <div><div style="font-size:12px;color:var(--quiet);font-weight:600;margin-bottom:8px">Numerals</div><div style="font-size:14px;line-height:1.7">Always tabular. Round kg to 0.1, kcal to 10s, % to whole numbers. Use <b>−</b> for losses, <b>+</b> for gains.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== FOOTER =================== -->
+<div class="footer">
+  <div>
+    <div class="meta" style="margin-bottom:10px">END OF BOOK · v1.0 · APR 2026</div>
+    <h3 class="serif">A coach <em>worth</em> showing up for.</h3>
+  </div>
+  <div style="text-align:right">
+    <svg width="48" height="48"><use href="#lumi-mark"/></svg>
+    <div class="meta" style="margin-top:8px;color:var(--apricot)">Lumi Health · Brand & Product Design</div>
+    <div style="font-size:11px;color:#9C8A72;margin-top:4px">Questions → design@lumi.health</div>
+  </div>
+</div>
+
+</div>
+</body></html>

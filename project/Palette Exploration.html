@@ -1,0 +1,384 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Lumi · Palette Exploration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Instrument+Serif&family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#FAF8F5;color:#1F1B17;font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:64px 48px 96px}
+  .eyebrow{font-size:12px;font-weight:600;letter-spacing:.2em;color:#8A8275;text-transform:uppercase;margin-bottom:16px}
+  h1{font-family:'Fraunces',serif;font-weight:500;font-size:54px;line-height:1.05;letter-spacing:-1.5px;margin:0 0 18px}
+  .lede{font-size:17px;line-height:1.6;color:#5C564D;max-width:620px;margin:0 0 56px}
+  .meta{display:flex;gap:32px;padding:24px 28px;background:#fff;border:1px solid #EDE7DE;border-radius:18px;margin-bottom:72px}
+  .meta div{flex:1}
+  .meta .k{font-size:11px;font-weight:600;letter-spacing:.18em;color:#8A8275;text-transform:uppercase;margin-bottom:6px}
+  .meta .v{font-size:14px;line-height:1.5;color:#1F1B17}
+
+  .palette{margin-bottom:64px;border:1px solid #EDE7DE;border-radius:24px;background:#fff;overflow:hidden}
+  .palette.pick{border:2px solid #1F1B17;box-shadow:0 24px 48px -24px rgba(31,27,23,.18)}
+  .ph{display:flex;align-items:flex-start;justify-content:space-between;padding:28px 32px 24px;gap:24px}
+  .ph h2{margin:0;font-size:28px;letter-spacing:-.6px;font-weight:600}
+  .ph .sub{font-size:13px;color:#8A8275;margin-top:4px}
+  .badge{font-size:11px;font-weight:700;letter-spacing:.18em;padding:6px 10px;border-radius:999px;text-transform:uppercase}
+
+  .swatches{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr;gap:0}
+  .sw{padding:28px 22px;min-height:160px;display:flex;flex-direction:column;justify-content:space-between;font-size:11px;font-weight:600;letter-spacing:.06em}
+  .sw .role{opacity:.65;text-transform:uppercase;font-size:10px}
+  .sw .hex{font-family:'Geist',ui-monospace,monospace;font-size:13px;letter-spacing:0}
+  .sw .name{font-size:16px;font-weight:600;letter-spacing:-.2px;margin-bottom:4px}
+
+  .body{display:grid;grid-template-columns:1.2fr 1fr;gap:0;border-top:1px solid #EDE7DE}
+  .rationale{padding:28px 32px}
+  .rationale h3{margin:0 0 10px;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8A8275}
+  .rationale p{margin:0 0 16px;font-size:15px;line-height:1.6;color:#3A342C}
+  .types{padding:28px 32px;border-left:1px solid #EDE7DE;background:#FAF8F5}
+  .types h3{margin:0 0 14px;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8A8275}
+  .typeRow{padding:14px 0;border-bottom:1px solid #EDE7DE}
+  .typeRow:last-child{border-bottom:none}
+  .typeRow .label{font-size:11px;color:#8A8275;font-weight:500;margin-bottom:4px;letter-spacing:.04em}
+  .typeRow .specimen{font-size:32px;letter-spacing:-.6px;line-height:1.1}
+  .typeRow .specimen.body{font-size:15px;line-height:1.55}
+  .typeRow .pair{font-size:11px;color:#5C564D;margin-top:6px;font-family:'Geist',monospace}
+
+  .preview{padding:28px 32px;border-top:1px solid #EDE7DE}
+  .device{width:100%;max-width:380px;margin:0 auto;border-radius:36px;padding:18px;background:#fff}
+  .stat{font-size:14px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+  .big{font-size:64px;letter-spacing:-2.4px;line-height:1;margin:8px 0 4px;font-weight:500}
+  .pillrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .pill{padding:7px 12px;border-radius:999px;font-size:12px;font-weight:600}
+  .cta{padding:14px;border-radius:14px;text-align:center;font-weight:600;font-size:15px;margin-top:18px}
+  .meal{display:flex;gap:12px;align-items:center;padding:12px;border-radius:14px;margin-top:14px}
+  .meal .icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px}
+  .meal .t{font-weight:600;font-size:14px}
+  .meal .s{font-size:11px;margin-top:2px;opacity:.7}
+
+  .top{padding:28px 32px;border-top:1px solid #EDE7DE;background:#FAF8F5}
+  .top h3{margin:0 0 12px;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8A8275}
+  .top p{margin:0;font-size:15px;line-height:1.65;color:#3A342C}
+
+  .summary{padding:36px 40px;border:1px solid #EDE7DE;border-radius:24px;background:#fff;margin-top:24px}
+  .summary h2{margin:0 0 18px;font-family:'Fraunces',serif;font-weight:500;font-size:32px;letter-spacing:-.6px}
+  .summary p{font-size:15px;line-height:1.65;color:#3A342C;margin:0 0 12px}
+  .summary ol{padding-left:20px;color:#3A342C;font-size:15px;line-height:1.7}
+  .summary li{margin-bottom:6px}
+  .summary li b{color:#1F1B17}
+
+  .footer{margin-top:56px;text-align:center;font-size:12px;color:#8A8275}
+</style></head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Palette exploration · Lumi</div>
+  <h1>White stays. Now the question is — which voice<br>does the accent speak in?</h1>
+  <p class="lede">Five directions for the AI weight-loss companion. Each is built around white as the dominant ground, with a softer, more intentional accent color, supporting tones, a warm off-black for text, and a typeface pairing that matches the personality.</p>
+
+  <div class="meta">
+    <div><div class="k">Audience</div><div class="v">Marco — 34, motivated, has tried apps that felt clinical or punitive. Wants a gentle, smart partner for a 26-week journey.</div></div>
+    <div><div class="k">Tone</div><div class="v">Playful & motivating. Warm. Conversational, never preachy. Optimistic about progress.</div></div>
+    <div><div class="k">Mood</div><div class="v">Calm, encouraging, daylight-bright. Software that feels like a friend, not a dashboard.</div></div>
+  </div>
+
+  <!-- ───── PALETTE 01 ───── -->
+  <section class="palette">
+    <div class="ph">
+      <div>
+        <h2>01 · Sage Garden</h2>
+        <div class="sub">Botanical, calm, grounded — a palette of growth</div>
+      </div>
+      <span class="badge" style="background:#EAF1E5;color:#3F5A33">Considered</span>
+    </div>
+    <div class="swatches">
+      <div class="sw" style="background:#3F5A33;color:#F4F1EA"><div><div class="role">Primary accent</div><div class="name">Forest sage</div></div><div class="hex">#3F5A33</div></div>
+      <div class="sw" style="background:#A9C088;color:#1F2818"><div><div class="role">Support</div><div class="name">Meadow</div></div><div class="hex">#A9C088</div></div>
+      <div class="sw" style="background:#E8B36B;color:#1F1B17"><div><div class="role">Support</div><div class="name">Honey</div></div><div class="hex">#E8B36B</div></div>
+      <div class="sw" style="background:#F4F1EA;color:#1F1B17"><div><div class="role">Surface</div><div class="name">Linen</div></div><div class="hex">#F4F1EA</div></div>
+      <div class="sw" style="background:#231F1B;color:#F4F1EA"><div><div class="role">Text</div><div class="name">Bark</div></div><div class="hex">#231F1B</div></div>
+    </div>
+
+    <div class="body">
+      <div class="rationale">
+        <h3>Why it fits</h3>
+        <p>Sage carries an immediate semantic of <em>growth, vegetables, wellbeing</em> — without screaming "fitness app green". Pairing it with a warm honey gives the interface the feel of a kitchen on a sunny afternoon. The off-black is genuinely warm (3% red shift) so contrast against white feels soft, not cold.</p>
+        <p>Best for users who want their app to feel <strong>human and trustworthy</strong>. Reads as gentle expertise — like a nutritionist, not an algorithm.</p>
+      </div>
+      <div class="types">
+        <h3>Typography</h3>
+        <div class="typeRow">
+          <div class="label">Display · Fraunces</div>
+          <div class="specimen" style="font-family:'Fraunces',serif;font-weight:500;color:#3F5A33">Morning, Marco</div>
+          <div class="pair">Soft-contrast modern serif · warm + literary</div>
+        </div>
+        <div class="typeRow">
+          <div class="label">Body · General Sans</div>
+          <div class="specimen body" style="font-family:'General Sans',sans-serif">Lunch in 38 minutes — chicken & quinoa power bowl is plated and ready in your meal plan.</div>
+          <div class="pair">Warm humanist sans · friendly without being childlike</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview" style="background:#fff">
+      <div class="device" style="background:#F4F1EA;color:#231F1B;font-family:'General Sans',sans-serif">
+        <div class="stat" style="color:#7A7567">SUNDAY · WEEK 4</div>
+        <div class="big" style="font-family:'Fraunces',serif;color:#3F5A33">82.4 kg</div>
+        <div style="font-size:13px;color:#5C564D">−0.7 kg vs last week</div>
+        <div class="pillrow">
+          <div class="pill" style="background:#EAF1E5;color:#3F5A33">on track</div>
+          <div class="pill" style="background:#F8E9CE;color:#7A4F12">+80 kcal/day</div>
+        </div>
+        <div class="meal" style="background:#fff;border:1px solid #EDE7DE">
+          <div class="icon" style="background:#EAF1E5">🍗</div>
+          <div><div class="t">Chicken & quinoa bowl</div><div class="s" style="color:#7A7567">520 kcal · 13:00</div></div>
+        </div>
+        <div class="cta" style="background:#3F5A33;color:#F4F1EA">Apply Lumi's adjustment</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───── PALETTE 02 ───── -->
+  <section class="palette pick">
+    <div class="ph">
+      <div>
+        <h2>02 · Apricot Sun</h2>
+        <div class="sub">Warm, optimistic, energizing — without being loud</div>
+      </div>
+      <span class="badge" style="background:#1F1B17;color:#F4D9B5">Top pick</span>
+    </div>
+    <div class="swatches">
+      <div class="sw" style="background:#E8784E;color:#FFF6EE"><div><div class="role">Primary accent</div><div class="name">Apricot</div></div><div class="hex">#E8784E</div></div>
+      <div class="sw" style="background:#F4D9B5;color:#5A3A20"><div><div class="role">Support</div><div class="name">Cream</div></div><div class="hex">#F4D9B5</div></div>
+      <div class="sw" style="background:#3D5A4A;color:#F4D9B5"><div><div class="role">Support</div><div class="name">Eucalyptus</div></div><div class="hex">#3D5A4A</div></div>
+      <div class="sw" style="background:#FAF6F0;color:#1F1B17"><div><div class="role">Surface</div><div class="name">Paper</div></div><div class="hex">#FAF6F0</div></div>
+      <div class="sw" style="background:#1F1B17;color:#FAF6F0"><div><div class="role">Text</div><div class="name">Espresso</div></div><div class="hex">#1F1B17</div></div>
+    </div>
+
+    <div class="body">
+      <div class="rationale">
+        <h3>Why it fits</h3>
+        <p>Apricot is the hero — <em>warm, alive, generous</em>. It signals daylight, fruit, energy. Paired with cream as the soft fill and eucalyptus as the grounding "vegetables and progress" green, the whole palette feels like a healthy breakfast on a Saturday.</p>
+        <p>Most importantly: it's <strong>encouraging without being cheerful-by-default</strong>. The accent is saturated enough to celebrate a weigh-in win, but the cream support carries 80% of the surfaces, so the eye rests on white and warm neutrals — never on candy.</p>
+        <p>This is the most distinctive of the five. Marco won't confuse it with MyFitnessPal, Noom, or Lose It.</p>
+      </div>
+      <div class="types">
+        <h3>Typography</h3>
+        <div class="typeRow">
+          <div class="label">Display · Instrument Serif</div>
+          <div class="specimen" style="font-family:'Instrument Serif',serif;color:#E8784E">82.4 kg</div>
+          <div class="pair">High-contrast editorial serif · gentle, intentional</div>
+        </div>
+        <div class="typeRow">
+          <div class="label">Body · Geist</div>
+          <div class="specimen body" style="font-family:'Geist',sans-serif">You're 5 days ahead of pace — I'm bumping calories +80/day so we don't burn out the gas tank.</div>
+          <div class="pair">Modern geometric sans · clean numerics, friendly weights</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview" style="background:#fff">
+      <div class="device" style="background:#FAF6F0;color:#1F1B17;font-family:'Geist',sans-serif">
+        <div class="stat" style="color:#8C7B6A">SUNDAY · WEEK 4</div>
+        <div class="big" style="font-family:'Instrument Serif',serif;color:#E8784E">82.4 kg</div>
+        <div style="font-size:13px;color:#5A4F40">−0.7 kg vs last week</div>
+        <div class="pillrow">
+          <div class="pill" style="background:#F4D9B5;color:#7A4520">on track</div>
+          <div class="pill" style="background:#E2EBE5;color:#3D5A4A">+80 kcal/day</div>
+        </div>
+        <div class="meal" style="background:#fff;border:1px solid #EBE3D6">
+          <div class="icon" style="background:#FCEAD8">🍗</div>
+          <div><div class="t">Chicken & quinoa bowl</div><div class="s" style="color:#8C7B6A">520 kcal · 13:00</div></div>
+        </div>
+        <div class="cta" style="background:#E8784E;color:#FFF6EE">Apply Lumi's adjustment</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───── PALETTE 03 ───── -->
+  <section class="palette">
+    <div class="ph">
+      <div>
+        <h2>03 · Quiet Plum</h2>
+        <div class="sub">Refined, considered, grown-up — the literary direction</div>
+      </div>
+      <span class="badge" style="background:#EFE7EE;color:#5A3A55">Editorial</span>
+    </div>
+    <div class="swatches">
+      <div class="sw" style="background:#5A3A55;color:#F8F4F2"><div><div class="role">Primary accent</div><div class="name">Plum ink</div></div><div class="hex">#5A3A55</div></div>
+      <div class="sw" style="background:#D9B7C9;color:#3A1F35"><div><div class="role">Support</div><div class="name">Mauve</div></div><div class="hex">#D9B7C9</div></div>
+      <div class="sw" style="background:#C7A66B;color:#1F1B17"><div><div class="role">Support</div><div class="name">Brass</div></div><div class="hex">#C7A66B</div></div>
+      <div class="sw" style="background:#F8F4F2;color:#1F1B17"><div><div class="role">Surface</div><div class="name">Bone</div></div><div class="hex">#F8F4F2</div></div>
+      <div class="sw" style="background:#2A2229;color:#F8F4F2"><div><div class="role">Text</div><div class="name">Walnut</div></div><div class="hex">#2A2229</div></div>
+    </div>
+
+    <div class="body">
+      <div class="rationale">
+        <h3>Why it fits</h3>
+        <p>Plum is unusual in this category — and that's the point. It signals <em>quality, restraint, taste</em>. Marco sees this and thinks "spa app" or "Aesop bottle", not "calorie counter".</p>
+        <p>Trade-off: less immediately energetic. The brass accent does most of the celebration work. <strong>Best if Marco wants the app to feel like a private journal</strong> rather than a coach who's hyped up.</p>
+      </div>
+      <div class="types">
+        <h3>Typography</h3>
+        <div class="typeRow">
+          <div class="label">Display · Newsreader</div>
+          <div class="specimen" style="font-family:'Newsreader',serif;color:#5A3A55">Morning, Marco</div>
+          <div class="pair">Optical-size serif · reads like good paperback</div>
+        </div>
+        <div class="typeRow">
+          <div class="label">Body · Inter</div>
+          <div class="specimen body" style="font-family:'Inter',sans-serif">A lighter dinner gives you room for tapas tonight without slipping out of your weekly deficit.</div>
+          <div class="pair">Workhorse sans · neutral so the serif sings</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview" style="background:#fff">
+      <div class="device" style="background:#F8F4F2;color:#2A2229;font-family:'Inter',sans-serif">
+        <div class="stat" style="color:#8A7383">SUNDAY · WEEK 4</div>
+        <div class="big" style="font-family:'Newsreader',serif;color:#5A3A55">82.4 kg</div>
+        <div style="font-size:13px;color:#5A4555">−0.7 kg vs last week</div>
+        <div class="pillrow">
+          <div class="pill" style="background:#EFE0EA;color:#5A3A55">on track</div>
+          <div class="pill" style="background:#F2E6CC;color:#7A5C20">+80 kcal/day</div>
+        </div>
+        <div class="meal" style="background:#fff;border:1px solid #EFE7EE">
+          <div class="icon" style="background:#EFE0EA">🍗</div>
+          <div><div class="t">Chicken & quinoa bowl</div><div class="s" style="color:#8A7383">520 kcal · 13:00</div></div>
+        </div>
+        <div class="cta" style="background:#5A3A55;color:#F8F4F2">Apply Lumi's adjustment</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───── PALETTE 04 ───── -->
+  <section class="palette">
+    <div class="ph">
+      <div>
+        <h2>04 · Coastal Slate</h2>
+        <div class="sub">Cool, focused, technical — but warmed at the edges</div>
+      </div>
+      <span class="badge" style="background:#E5ECEF;color:#2C4A5C">Confident</span>
+    </div>
+    <div class="swatches">
+      <div class="sw" style="background:#2C4A5C;color:#F2EFE9"><div><div class="role">Primary accent</div><div class="name">Slate blue</div></div><div class="hex">#2C4A5C</div></div>
+      <div class="sw" style="background:#9BBFCC;color:#13262E"><div><div class="role">Support</div><div class="name">Mist</div></div><div class="hex">#9BBFCC</div></div>
+      <div class="sw" style="background:#E8A87C;color:#3A1F10"><div><div class="role">Support</div><div class="name">Terracotta</div></div><div class="hex">#E8A87C</div></div>
+      <div class="sw" style="background:#F2EFE9;color:#1F1B17"><div><div class="role">Surface</div><div class="name">Sand</div></div><div class="hex">#F2EFE9</div></div>
+      <div class="sw" style="background:#1F262A;color:#F2EFE9"><div><div class="role">Text</div><div class="name">Storm</div></div><div class="hex">#1F262A</div></div>
+    </div>
+
+    <div class="body">
+      <div class="rationale">
+        <h3>Why it fits</h3>
+        <p>If you want trust + clinical credibility (this is a body app — data matters), slate blue earns it. The terracotta accent rescues the palette from feeling like a hospital app — it's the warmth that says "this is a partner, not a chart".</p>
+        <p>Strong choice if Marco values <strong>discipline more than coaching</strong>. The data screens (Forecast, Tracker) will look especially crisp.</p>
+      </div>
+      <div class="types">
+        <h3>Typography</h3>
+        <div class="typeRow">
+          <div class="label">Display · DM Serif Display</div>
+          <div class="specimen" style="font-family:'DM Serif Display',serif;color:#2C4A5C">Forecast: 68 kg</div>
+          <div class="pair">High-contrast modern serif · authoritative</div>
+        </div>
+        <div class="typeRow">
+          <div class="label">Body · Manrope</div>
+          <div class="specimen body" style="font-family:'Manrope',sans-serif">14 days ahead of plan. Holding the new target through next Sunday's check-in.</div>
+          <div class="pair">Geometric sans · precise, modern, trustworthy</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview" style="background:#fff">
+      <div class="device" style="background:#F2EFE9;color:#1F262A;font-family:'Manrope',sans-serif">
+        <div class="stat" style="color:#7A8189">SUNDAY · WEEK 4</div>
+        <div class="big" style="font-family:'DM Serif Display',serif;color:#2C4A5C">82.4 kg</div>
+        <div style="font-size:13px;color:#4A5A66">−0.7 kg vs last week</div>
+        <div class="pillrow">
+          <div class="pill" style="background:#E5ECEF;color:#2C4A5C">on track</div>
+          <div class="pill" style="background:#F8DDC8;color:#7A4A20">+80 kcal/day</div>
+        </div>
+        <div class="meal" style="background:#fff;border:1px solid #E0DCD3">
+          <div class="icon" style="background:#E5ECEF">🍗</div>
+          <div><div class="t">Chicken & quinoa bowl</div><div class="s" style="color:#7A8189">520 kcal · 13:00</div></div>
+        </div>
+        <div class="cta" style="background:#2C4A5C;color:#F2EFE9">Apply Lumi's adjustment</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───── PALETTE 05 ───── -->
+  <section class="palette">
+    <div class="ph">
+      <div>
+        <h2>05 · Citrus & Clay</h2>
+        <div class="sub">Joyful, nutritious, modern-California</div>
+      </div>
+      <span class="badge" style="background:#FFEFC2;color:#7A5C0E">Playful</span>
+    </div>
+    <div class="swatches">
+      <div class="sw" style="background:#D85A2A;color:#FFF6EE"><div><div class="role">Primary accent</div><div class="name">Clay red</div></div><div class="hex">#D85A2A</div></div>
+      <div class="sw" style="background:#F2B441;color:#3A2410"><div><div class="role">Support</div><div class="name">Citrus</div></div><div class="hex">#F2B441</div></div>
+      <div class="sw" style="background:#5C7A4F;color:#F4F1EA"><div><div class="role">Support</div><div class="name">Olive</div></div><div class="hex">#5C7A4F</div></div>
+      <div class="sw" style="background:#FFFAF2;color:#1F1B17"><div><div class="role">Surface</div><div class="name">Cream</div></div><div class="hex">#FFFAF2</div></div>
+      <div class="sw" style="background:#2A1F18;color:#FFFAF2"><div><div class="role">Text</div><div class="name">Cocoa</div></div><div class="hex">#2A1F18</div></div>
+    </div>
+
+    <div class="body">
+      <div class="rationale">
+        <h3>Why it fits</h3>
+        <p>The most extroverted of the five. Clay red + citrus + olive evoke <em>actual food</em> — tomato, lemon, herb. The personality is "sunday market", "farmer's grocery", "bowl of fruit on the counter".</p>
+        <p>Trade-off: visually noisier when many cards are on screen at once. Demands disciplined surface use — accent only on hero moments. <strong>Best if Marco wants the app to feel like a celebration of food</strong>, not a constraint on it.</p>
+      </div>
+      <div class="types">
+        <h3>Typography</h3>
+        <div class="typeRow">
+          <div class="label">Display · Fraunces (soft)</div>
+          <div class="specimen" style="font-family:'Fraunces',serif;font-weight:600;font-variation-settings:'SOFT' 100;color:#D85A2A">Morning, Marco</div>
+          <div class="pair">Same family as P1 but with SOFT axis cranked · curvy, warm</div>
+        </div>
+        <div class="typeRow">
+          <div class="label">Body · Plus Jakarta Sans</div>
+          <div class="specimen body" style="font-family:'Plus Jakarta Sans',sans-serif">Tapas tonight, no problem. Lighter dinner, glass of red, you'll still close at −420 kcal.</div>
+          <div class="pair">Friendly geometric sans · rounded but disciplined</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview" style="background:#fff">
+      <div class="device" style="background:#FFFAF2;color:#2A1F18;font-family:'Plus Jakarta Sans',sans-serif">
+        <div class="stat" style="color:#9A8A78">SUNDAY · WEEK 4</div>
+        <div class="big" style="font-family:'Fraunces',serif;font-weight:600;color:#D85A2A">82.4 kg</div>
+        <div style="font-size:13px;color:#5A4A38">−0.7 kg vs last week</div>
+        <div class="pillrow">
+          <div class="pill" style="background:#FCE5D6;color:#A33820">on track</div>
+          <div class="pill" style="background:#FFEFC2;color:#7A5C0E">+80 kcal/day</div>
+        </div>
+        <div class="meal" style="background:#fff;border:1px solid #F2E5D2">
+          <div class="icon" style="background:#FCE5D6">🍗</div>
+          <div><div class="t">Chicken & quinoa bowl</div><div class="s" style="color:#9A8A78">520 kcal · 13:00</div></div>
+        </div>
+        <div class="cta" style="background:#D85A2A;color:#FFF6EE">Apply Lumi's adjustment</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───── RECOMMENDATION ───── -->
+  <div class="summary">
+    <h2>My pick — <span style="color:#E8784E">02 · Apricot Sun</span></h2>
+    <p>It's the rare palette that handles every emotional beat in this app. Apricot is genuinely <b>celebratory</b> on weigh-in wins, but the cream and paper neutrals carry 85% of the surface area — so day-to-day screens feel calm, not overstimulating. Eucalyptus does the supporting "you're on track, you're well" job without the cliché of fitness-app green.</p>
+    <p><b>Type pairing:</b> Instrument Serif's gentle high contrast makes the big weight number feel intentional and human — not a stock-ticker readout. Geist below it is clean, has excellent tabular numerics for macros, and never feels corporate.</p>
+
+    <h3 style="font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8A8275;margin:24px 0 12px">Trade-offs</h3>
+    <ol>
+      <li><b>Sage Garden</b> is the safer choice — would land well, but feels closer to existing wellness app conventions.</li>
+      <li><b>Quiet Plum</b> is gorgeous but emotionally introverted. Better for a journaling product than a daily coach.</li>
+      <li><b>Coastal Slate</b> wins on data clarity but loses on warmth — Marco will feel coached by a spreadsheet.</li>
+      <li><b>Citrus & Clay</b> is the most fun but the hardest to make calm at density. One screen too many cards and it goes loud.</li>
+    </ol>
+
+    <h3 style="font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8A8275;margin:24px 0 12px">If you lock 02</h3>
+    <p>I'll apply Apricot Sun across all 10 screens — repaint cards, swap the gradient ring to apricot→cream, replace the dark navy bottom nav with paper + espresso text, retype the big weight numerals in Instrument Serif, and rebuild Lumi's voice bubbles in the warm cream support color.</p>
+  </div>
+
+  <div class="footer">Reply with a number (or a remix — e.g. "02 with the eucalyptus from 02 swapped for sage from 01") and I'll apply it.</div>
+</div>
+</body></html>

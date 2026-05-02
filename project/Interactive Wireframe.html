@@ -1,0 +1,145 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Lumi · Interactive Wireframe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#1a1612;font-family:'DM Sans',system-ui;color:#FAF6F0;-webkit-font-smoothing:antialiased;height:100%}
+  #root{height:100vh}
+  @keyframes scan {0%{transform:translateY(-50px)}50%{transform:translateY(50px)}100%{transform:translateY(-50px)}}
+  @keyframes pulse {0%,100%{opacity:.4}50%{opacity:1}}
+  @keyframes pulse-ring {0%{transform:scale(.8);opacity:.7}100%{transform:scale(1.6);opacity:0}}
+  @keyframes bar {0%{transform:scaleY(.3)}100%{transform:scaleY(1.4)}}
+  button:hover{filter:brightness(1.04)}
+  *::-webkit-scrollbar{width:6px;height:6px}
+  *::-webkit-scrollbar-track{background:transparent}
+  *::-webkit-scrollbar-thumb{background:rgba(140,123,106,.3);border-radius:3px}
+</style></head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="mascot.jsx"></script>
+<script type="text/babel" src="wireframe-screens.jsx"></script>
+<script type="text/babel">
+
+const SCREEN_INDEX = [
+  { group: 'Onboarding', items: [
+    ['welcome','01 Welcome'], ['goal','02 Goal'], ['body','03 Body data'], ['activity','04 Activity'],
+    ['diet','05 Diet'], ['schedule','06 Schedule'], ['compute','07 AI compute'], ['plan_reveal','08 Plan reveal'],
+    ['permissions','09 Permissions'], ['paywall','10 Paywall'],
+  ]},
+  { group: 'Today hub', items: [['today','11 Today (home)']] },
+  { group: 'Plan & Cook', items: [['plan','12 Plan'], ['recipe','13 Recipe'], ['shopping','14 Shopping']] },
+  { group: 'Coach', items: [['coach','15 Coach chat']] },
+  { group: 'Log a meal', items: [
+    ['logChoose','16 Log: choose mode'], ['logVoice','17 Voice'], ['logPhoto','18 Photo'],
+    ['logBarcode','19 Barcode'], ['logSearch','20 Search'], ['logConfirm','21 Confirm'],
+  ]},
+  { group: 'Weekly loop', items: [
+    ['weighIn','22 Weigh-in'], ['weighInResult','23 AI adjust'], ['forecast','24 Forecast'],
+    ['milestone','25 Milestone'], ['plateau','26 Plateau'], ['badday','27 Bad day'],
+  ]},
+  { group: 'Activity & Me', items: [
+    ['activity2','28 Activity log'], ['profile','29 Profile'],
+    ['profileEdit','30 Edit profile'], ['notifications','31 Notifications'],
+    ['coachTone','32 Coach tone'], ['units','33 Units & locale'],
+    ['integrations','34 Integrations'], ['privacy','35 Privacy'],
+    ['subscription','36 Subscription'], ['help','37 Help & FAQ'],
+    ['profileSettings','38 Settings (legacy)'],
+  ]},
+  { group: 'Mascot', items: [['mascotGallery','39 Lumi gallery']] },
+];
+
+function App() {
+  const [route, setRoute] = React.useState('welcome');
+  const [history, setHistory] = React.useState(['welcome']);
+  const [state, setState] = React.useState({
+    weight: 85, height: 178, age: 34, target: 68,
+    goal: null, activity: null, diet: [],
+    weighInDue: true, lastWeight: null,
+  });
+
+  const go = (r) => {
+    if (!window.LUMI_ROUTES[r]) { console.warn('unknown route', r); return; }
+    setRoute(r);
+    setHistory(h => [...h, r]);
+    // scroll device viewport to top on route change
+    setTimeout(() => {
+      const v = document.getElementById('device-viewport');
+      if (v) v.scrollTop = 0;
+    }, 10);
+  };
+  const set = (k, v) => setState(s => ({ ...s, [k]: v }));
+
+  const Screen = window.LUMI_ROUTES[route] || (() => <div style={{padding:40}}>Unknown route: {route}</div>);
+
+  return (
+    <div style={{ display:'flex', height:'100vh' }}>
+      {/* sidebar */}
+      <aside style={{ width: 280, background:'#211c17', borderRight:'1px solid #2e2620', overflowY:'auto', flexShrink: 0 }}>
+        <div style={{ padding:'24px 22px 20px', borderBottom:'1px solid #2e2620' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing:'.22em', color:'#8C7B6A', textTransform:'uppercase' }}>Lumi · prototype</div>
+          <div style={{ fontFamily:'"Fraunces",serif', fontSize: 22, color:'#FAF6F0', fontWeight: 500, marginTop: 4, letterSpacing:'-.4px' }}>Interactive wireframe</div>
+          <div style={{ fontSize: 12, color:'#8C7B6A', marginTop: 6, lineHeight: 1.5 }}>Tap any screen to jump there. Or walk through naturally — every button, tab, and card is wired.</div>
+        </div>
+        {SCREEN_INDEX.map(g => (
+          <div key={g.group} style={{ padding:'14px 14px 6px' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing:'.18em', color:'#E8784E', textTransform:'uppercase', padding:'6px 8px' }}>{g.group}</div>
+            {g.items.map(([r,l]) => (
+              <button key={r} onClick={() => { setRoute(r); setHistory(h => [...h, r]); }} style={{
+                display:'block', width:'100%', textAlign:'left', padding:'8px 10px', borderRadius: 8,
+                background: route===r ? 'rgba(232,120,78,.15)' : 'transparent',
+                color: route===r ? '#E8784E' : '#FAF6F0',
+                border: 0, fontFamily:'inherit', fontSize: 12.5, fontWeight: route===r ? 600 : 400,
+                cursor:'pointer', marginBottom: 2,
+              }}>{l}</button>
+            ))}
+          </div>
+        ))}
+        <div style={{ padding:'20px 22px', borderTop:'1px solid #2e2620', fontSize: 11, color:'#8C7B6A', lineHeight: 1.6 }}>
+          <b style={{ color:'#FAF6F0' }}>30 screens · 12 user stories.</b><br/>Tap • drag input fields are simulated.<br/>State persists across sessions.
+        </div>
+      </aside>
+
+      {/* device area */}
+      <main style={{ flex: 1, display:'flex', alignItems:'center', justifyContent:'center', padding: 32, position:'relative' }}>
+        {/* breadcrumb */}
+        <div style={{ position:'absolute', top: 24, left: 24, right: 24, display:'flex', alignItems:'center', gap: 12, color:'#8C7B6A', fontSize: 12 }}>
+          <button onClick={() => { if (history.length > 1) { const h = [...history]; h.pop(); setHistory(h); setRoute(h[h.length-1]); } }} disabled={history.length<2} style={{ background:'rgba(255,255,255,.05)', border:'1px solid #2e2620', color:'#FAF6F0', padding:'6px 12px', borderRadius: 8, cursor:'pointer', fontFamily:'inherit', fontSize: 12, opacity: history.length<2 ? .3 : 1 }}>← back</button>
+          <button onClick={() => { setRoute('welcome'); setHistory(['welcome']); setState(s => ({...s, weighInDue: true })); }} style={{ background:'rgba(255,255,255,.05)', border:'1px solid #2e2620', color:'#FAF6F0', padding:'6px 12px', borderRadius: 8, cursor:'pointer', fontFamily:'inherit', fontSize: 12 }}>↺ restart</button>
+          <div style={{ flex: 1 }}></div>
+          <div>route: <b style={{ color:'#E8784E' }}>{route}</b></div>
+        </div>
+
+        {/* device frame */}
+        <div style={{
+          width: 390, height: 800, borderRadius: 48, background:'#000', padding: 12,
+          boxShadow:'0 60px 100px -20px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.05)',
+          position:'relative',
+        }}>
+          {/* dynamic island */}
+          <div style={{ position:'absolute', top: 22, left:'50%', transform:'translateX(-50%)', width: 110, height: 32, borderRadius: 18, background:'#000', zIndex: 100 }}></div>
+          {/* status bar */}
+          <div style={{ position:'absolute', top: 18, left: 30, color:'#FAF6F0', fontSize: 14, fontWeight: 600, zIndex: 99, fontFamily:'-apple-system,system-ui' }}>9:41</div>
+          <div style={{ position:'absolute', top: 18, right: 30, color:'#FAF6F0', fontSize: 12, zIndex: 99, fontFamily:'-apple-system,system-ui' }}>● ●●●● ◼</div>
+
+          <div id="device-viewport" style={{
+            width:'100%', height:'100%', borderRadius: 38, overflow:'auto', overflowX:'hidden',
+            background:'#FAF6F0', position:'relative', paddingTop: 50,
+          }}>
+            <Screen go={go} state={state} set={set} />
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body></html>

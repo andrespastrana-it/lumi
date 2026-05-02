@@ -1,0 +1,427 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Lumi · Icon System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body{margin:0;background:#F2EAD8;color:#1F1B17;font-family:'DM Sans',system-ui,sans-serif}
+  .wrap{max-width:1240px;margin:0 auto;padding:56px 40px 96px}
+  .eyebrow{font-size:11px;font-weight:600;letter-spacing:.22em;color:#8C7B6A;text-transform:uppercase;margin-bottom:14px}
+  h1{font-family:'Fraunces',serif;font-weight:500;font-variation-settings:'SOFT' 100;font-size:50px;line-height:1.04;letter-spacing:-1.1px;margin:0 0 14px}
+  h1 em{color:#E8784E;font-style:italic}
+  .lede{font-size:16px;line-height:1.6;color:#5A4F40;max-width:720px;margin:0 0 44px}
+  h2{font-family:'Fraunces',serif;font-weight:500;font-variation-settings:'SOFT' 100;font-size:28px;letter-spacing:-.5px;margin:0 0 6px}
+  h2 em{color:#E8784E;font-style:italic}
+  .sub{font-size:13px;color:#8C7B6A;margin-bottom:22px}
+
+  .section{margin-bottom:56px}
+  .panel{background:#FAF6F0;border:1px solid #EBE3D6;border-radius:22px;padding:28px}
+
+  /* Spec table */
+  .spec{display:grid;grid-template-columns:1.05fr 1fr;gap:24px;align-items:start}
+  .grid-demo{background:#fff;border:1px solid #EBE3D6;border-radius:18px;padding:24px;display:flex;align-items:center;justify-content:center;min-height:340px}
+  .rules{display:grid;gap:14px}
+  .rule{background:#fff;border:1px solid #EBE3D6;border-radius:14px;padding:16px 18px}
+  .rule .k{font-size:11px;font-weight:600;letter-spacing:.18em;color:#8C7B6A;text-transform:uppercase;margin-bottom:6px}
+  .rule .v{font-size:15px;color:#1F1B17;font-weight:500;letter-spacing:-.2px}
+  .rule .v b{color:#E8784E;font-weight:600}
+
+  /* Icon grid */
+  .iconwrap{display:grid;grid-template-columns:repeat(8,1fr);gap:14px}
+  .ig{background:#FAF6F0;border:1px solid #EBE3D6;border-radius:14px;padding:16px 8px 12px;display:flex;flex-direction:column;align-items:center;gap:10px;transition:.2s}
+  .ig:hover{background:#fff;border-color:#E8784E;transform:translateY(-2px)}
+  .ig svg{display:block}
+  .ig .lbl{font-size:10.5px;font-weight:500;color:#5A4F40;letter-spacing:-.1px;text-align:center}
+
+  /* Color treatments row */
+  .treat{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .tcard{background:#fff;border:1px solid #EBE3D6;border-radius:14px;padding:18px;display:flex;flex-direction:column;align-items:center;gap:10px}
+  .tcard.dark{background:#1F1B17;border-color:#1F1B17}
+  .tcard.dark .tlbl{color:#C8B89F}
+  .tcard.apricot{background:#E8784E;border-color:#E8784E}
+  .tcard.apricot .tlbl{color:#FCEAD8}
+  .tcard.cream{background:#F4D9B5;border-color:#F4D9B5}
+  .tlbl{font-size:11px;font-weight:600;letter-spacing:.14em;color:#8C7B6A;text-transform:uppercase}
+
+  /* Sizes */
+  .sizes{display:flex;align-items:flex-end;gap:32px;background:#fff;border:1px solid #EBE3D6;border-radius:14px;padding:28px}
+  .sz{display:flex;flex-direction:column;align-items:center;gap:8px}
+  .sz .szlbl{font-size:11px;color:#8C7B6A;font-weight:600;letter-spacing:.1em}
+
+  /* In-context phones */
+  .ctxrow{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+  .phone{height:560px;border-radius:36px;background:#FAF6F0;
+    box-shadow:0 18px 40px -16px rgba(60,42,18,.18),0 0 0 1px rgba(60,42,18,.06);
+    overflow:hidden;position:relative}
+  .di{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:88px;height:24px;border-radius:16px;background:#1F1B17;z-index:30}
+  .sb{position:absolute;top:0;left:0;right:0;height:42px;display:flex;justify-content:space-between;align-items:center;padding:14px 22px;font-size:11px;font-weight:600;z-index:20}
+  .home{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:96px;height:4px;border-radius:2px;background:rgba(31,27,23,.18);z-index:30}
+  .scrn{padding:48px 18px 80px;height:100%;overflow:hidden}
+  .pcap{font-size:10px;font-weight:700;letter-spacing:.18em;color:#8C7B6A;text-transform:uppercase;margin-bottom:6px}
+  .stitle{font-family:'Fraunces',serif;font-weight:500;font-variation-settings:'SOFT' 100;font-size:24px;letter-spacing:-.5px;margin:0 0 14px}
+  .stitle em{color:#E8784E;font-style:italic}
+  .crd{background:#fff;border:1px solid #EBE3D6;border-radius:14px;padding:14px;margin-bottom:10px}
+  .meal{display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;background:#fff;border:1px solid #EBE3D6;margin-top:8px}
+  .meal .icn{width:36px;height:36px;border-radius:10px;background:#FCEAD8;display:flex;align-items:center;justify-content:center}
+  .meal .t{font-weight:600;font-size:13px;line-height:1.2}
+  .meal .s{font-size:10px;color:#8C7B6A;margin-top:2px}
+  .nav{position:absolute;left:14px;right:14px;bottom:18px;display:flex;justify-content:space-around;padding:10px 6px;background:rgba(255,255,255,.85);backdrop-filter:blur(20px);border-radius:22px;border:1px solid #EBE3D6}
+  .ni{display:flex;flex-direction:column;align-items:center;gap:3px;color:#8C7B6A;font-size:9.5px;font-weight:600}
+  .ni.on{color:#E8784E}
+
+  .footer{margin-top:48px;padding:22px 26px;background:#fff;border:1px solid #EBE3D6;border-radius:18px;font-size:14px;color:#5A4F40;line-height:1.6}
+  .footer b{color:#1F1B17}
+</style></head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- ============ LUMI ICON SET ============
+         Grid: 24×24, 1.5px corners use 2.4 radius, strokes 1.6 round caps & joins.
+         Body strokes use currentColor. Apricot accent fills are inside the symbol where used.
+    -->
+
+    <!-- Navigation: Today (sun) -->
+    <symbol id="i-today" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v1.6M12 19.4V21M3 12h1.6M19.4 12H21M5.6 5.6l1.1 1.1M17.3 17.3l1.1 1.1M5.6 18.4l1.1-1.1M17.3 6.7l1.1-1.1"/></g></symbol>
+
+    <!-- Plan (calendar leaf) -->
+    <symbol id="i-plan" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M8 3.5v3M16 3.5v3M3.5 10h17"/><path d="M9 14.5c1.5-2 3.5-2 5 0M9 17h6" stroke="#E8784E"/></g></symbol>
+
+    <!-- Coach (Lumi mark — soft chat with spark) -->
+    <symbol id="i-coach" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11c0-3.3 3.6-6 8-6s8 2.7 8 6c0 3.3-3.6 6-8 6-.9 0-1.7-.1-2.5-.3L6 19l1-3.6C5.1 14.3 4 12.7 4 11z"/><path d="M12 8.5l.9 1.8 2 .3-1.4 1.4.3 2L12 13l-1.8 1 .3-2-1.4-1.4 2-.3z" fill="#E8784E" stroke="#E8784E"/></g></symbol>
+
+    <!-- Stats (rising bars + line) -->
+    <symbol id="i-stats" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M7 17v-4M12 17V8M17 17v-7"/><path d="M5 8l4-3 4 4 5-5" stroke="#E8784E"/><circle cx="18" cy="4" r="1.4" fill="#E8784E" stroke="none"/></g></symbol>
+
+    <!-- Profile (drop + person silhouette) -->
+    <symbol id="i-me" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="3.4"/><path d="M5 20c1-3.5 3.8-5 7-5s6 1.5 7 5"/></g></symbol>
+
+    <!-- Meals -->
+    <symbol id="i-breakfast" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h13a3 3 0 010 6H8a4 4 0 01-4-4z"/><path d="M17 12h2a2 2 0 110 4h-2"/><path d="M8 8c0-1 1-1 1-2s-1-1-1-2M12 8c0-1 1-1 1-2s-1-1-1-2" stroke="#E8784E"/></g></symbol>
+
+    <symbol id="i-lunch" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13h18a9 9 0 01-18 0z"/><path d="M2 18h20"/><circle cx="9" cy="9" r="2.2" stroke="#E8784E"/><circle cx="14" cy="7.5" r="1.6" stroke="#E8784E"/></g></symbol>
+
+    <symbol id="i-snack" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4c2 1 3 2.5 3 4.5 0 1-.4 1.8-1 2.5l1 9-3-2-3 2 1-9c-.6-.7-1-1.5-1-2.5C9 6.5 10 5 12 4z"/><path d="M12 5.5v3M11 8l1 1 1-1" stroke="#E8784E"/></g></symbol>
+
+    <symbol id="i-dinner" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11c0-3.5 3-6 7-6s7 2.5 7 6c0 1.5-.5 2.7-1.3 3.7L20 17H4l1.3-2.3C4.5 13.7 5 12.5 5 11z"/><path d="M9 11h6" stroke="#E8784E"/></g></symbol>
+
+    <symbol id="i-water" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c4 4.5 6 7.5 6 10.5a6 6 0 01-12 0c0-3 2-6 6-10.5z"/><path d="M9 14a3 3 0 003 3" stroke="#E8784E"/></g></symbol>
+
+    <symbol id="i-protein" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11c0-3 2-5 5-5 1.5 0 2.5.5 3.5 1.5L19 13l-2 2-5.5-5.5C11 9 10.5 8.5 10 8.5c-1.5 0-3 1.2-3 2.5 0 .5.2 1 .5 1.5L13 18l-2 2-6-6c-.7-.7-1-1.7-1-3z"/><circle cx="16" cy="8" r="1.4" fill="#E8784E" stroke="none"/></g></symbol>
+
+    <symbol id="i-veg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4c-2 0-4 1.5-5 3.5C7 8 5 10 5 13a6 6 0 0012 0c0-3-2-5-4-5.5C13 5.5 14 4 14 4z"/><path d="M11 4c.5 1.5 0 3-1 4" stroke="#E8784E"/></g></symbol>
+
+    <symbol id="i-grain" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16"/><path d="M12 7c-2-1-4-1-5 0 0 2 2 3 5 3M12 7c2-1 4-1 5 0 0 2-2 3-5 3M12 12c-2-1-4-1-5 0 0 2 2 3 5 3M12 12c2-1 4-1 5 0 0 2-2 3-5 3M12 17c-2-1-4-1-5 0 0 2 2 3 5 3M12 17c2-1 4-1 5 0 0 2-2 3-5 3" stroke="#E8784E"/></g></symbol>
+
+    <!-- Activity -->
+    <symbol id="i-flame" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3.5 4 5 4 8.5 0 2.5-2 4.5-4 4.5s-4-2-4-4.5C8 9 9 7 9 5c1.5 1 2.5 2 3 4z"/><path d="M11 12c.5 1 1.5 1.5 2 1.5" stroke="#E8784E"/><path d="M12 16v3" stroke="currentColor"/></g></symbol>
+
+    <symbol id="i-steps" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 17c-1.5 0-2.5-1-2.5-2.5 0-1.8 1-3.5 1.5-5C7.5 8 8.5 7 10 7c1.2 0 2 .8 2 2 0 1.5-1 3-1.5 4.5-.4 1.4-1 3.5-2.5 3.5z"/><path d="M16 11c-1 0-1.5-.7-1.5-1.5 0-1 .5-2 1-3 .3-.7 1-1.5 2-1.5.8 0 1.5.5 1.5 1.5 0 1-.5 2-1 3-.3.8-.8 1.5-2 1.5z" stroke="#E8784E"/></g></symbol>
+
+    <symbol id="i-workout" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10v4M6.5 7v10M20.5 10v4M17.5 7v10"/><path d="M6.5 12h11" stroke="#E8784E"/></g></symbol>
+
+    <symbol id="i-heart" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19s-7-4.5-7-9.5c0-2.5 2-4.5 4.5-4.5 1.4 0 2.6.7 3.5 1.8.9-1.1 2.1-1.8 3.5-1.8 2.5 0 4.5 2 4.5 4.5 0 5-7 9.5-7 9.5z"/><path d="M8 11.5l2 .5 1-2 1.5 3 1-1.5h2" stroke="#E8784E"/></g></symbol>
+
+    <symbol id="i-sleep" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 119.5 4a6.5 6.5 0 0010.5 10.5z"/><path d="M14 8h3l-3 3h3" stroke="#E8784E"/></g></symbol>
+
+    <!-- Tracking -->
+    <symbol id="i-scale" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M8 9l4-2 4 2" stroke="#E8784E"/><path d="M9.5 13h5" stroke="currentColor"/></g></symbol>
+
+    <symbol id="i-mic" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9.5" y="3.5" width="5" height="10" rx="2.5"/><path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21M9 21h6"/><circle cx="12" cy="8" r="1.2" fill="#E8784E" stroke="none"/></g></symbol>
+
+    <symbol id="i-camera" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a1.5 1.5 0 011.5 1.5v9A1.5 1.5 0 0120 20H4a1.5 1.5 0 01-1.5-1.5v-9A1.5 1.5 0 014 8z"/><circle cx="12" cy="13.5" r="3.5" stroke="#E8784E"/></g></symbol>
+
+    <symbol id="i-barcode" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6v12M7 6v12M10 6v12M13 6v12M16 6v12M19 6v12" stroke="currentColor"/><path d="M3 4.5L3 3.5h3M21 4.5L21 3.5h-3M3 19.5L3 20.5h3M21 19.5L21 20.5h-3" stroke="#E8784E"/></g></symbol>
+
+    <symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6"/><path d="M15.5 15.5l4 4" stroke="#E8784E"/></g></symbol>
+
+    <symbol id="i-add" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8" stroke="#E8784E"/></g></symbol>
+
+    <!-- Goals & status -->
+    <symbol id="i-target" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1.4" fill="#E8784E" stroke="none"/></g></symbol>
+
+    <symbol id="i-trend" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16l5-5 4 3 7-7"/><path d="M14 7h6v6" stroke="#E8784E"/></g></symbol>
+
+    <symbol id="i-streak" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c1 4 5 5.5 5 10a5 5 0 01-10 0c0-2 1-3.5 1-5.5 0 1.5 1 2.5 2 2.5 0-2 1-5 2-7z"/><path d="M10 14.5c.5 1.5 1.5 2 2 2" stroke="#E8784E"/></g></symbol>
+
+    <symbol id="i-medal" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14" r="5"/><path d="M9 9.5L7 4h10l-2 5.5"/><path d="M10 14l1.5 1.5L14 13" stroke="#E8784E"/></g></symbol>
+
+    <!-- Tools -->
+    <symbol id="i-bell" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0112 0v5l1.5 2H4.5z"/><path d="M10 20a2 2 0 004 0"/><circle cx="17" cy="6" r="1.6" fill="#E8784E" stroke="none"/></g></symbol>
+
+    <symbol id="i-cart" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2.5l2 12h11l1.5-8H7"/><circle cx="9" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/><path d="M11 10h5" stroke="#E8784E"/></g></symbol>
+
+    <symbol id="i-recipe" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h11a2 2 0 012 2v13a2 2 0 01-2 2H8a2 2 0 01-2-2V3.5z"/><path d="M6 7h-1.5a1 1 0 00-1 1v10a1 1 0 001 1H6"/><path d="M9 9h6M9 12h6M9 15h4" stroke="#E8784E"/></g></symbol>
+
+    <symbol id="i-settings" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.8" stroke="#E8784E"/><path d="M12 4v2M12 18v2M4 12H6M18 12h2M6.3 6.3l1.4 1.4M16.3 16.3l1.4 1.4M6.3 17.7l1.4-1.4M16.3 7.7l1.4-1.4"/></g></symbol>
+
+    <symbol id="i-check" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8 12.5l3 3 5-6" stroke="#E8784E"/></g></symbol>
+
+    <symbol id="i-close" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M9 9l6 6M15 9l-6 6" stroke="#E8784E"/></g></symbol>
+
+    <symbol id="i-sparkle" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l1.6 4.4L18 10l-4.4 1.6L12 16l-1.6-4.4L6 10l4.4-1.6z" fill="#E8784E" stroke="#E8784E"/><path d="M18.5 16l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z" stroke="currentColor"/></g></symbol>
+
+  </defs>
+</svg>
+
+<div class="wrap">
+
+  <div class="eyebrow">Lumi · custom icon system</div>
+  <h1>A pencil-soft icon set <em>built for Lumi</em>.</h1>
+  <p class="lede">32 icons drawn on a single 24px grid: 1.6px strokes, rounded caps, gentle organic curvature, with a single apricot accent that highlights the meaningful stroke in each glyph. The set echoes the Friendly Modern type voice — soft, optimistic, never clinical.</p>
+
+  <!-- Spec -->
+  <section class="section">
+    <h2>The <em>system</em></h2>
+    <div class="sub">Drawn once, used everywhere — every icon is a <code style="background:#fff;padding:1px 6px;border-radius:5px;border:1px solid #EBE3D6;font-size:12px">&lt;use&gt;</code> reference.</div>
+    <div class="panel">
+      <div class="spec">
+        <div class="grid-demo">
+          <svg viewBox="0 0 240 240" width="100%" style="max-width:340px">
+            <!-- grid -->
+            <g stroke="#EBE3D6" fill="none" stroke-width="1">
+              <rect x="20" y="20" width="200" height="200" rx="12"/>
+              <line x1="20" y1="60" x2="220" y2="60"/><line x1="20" y1="100" x2="220" y2="100"/><line x1="20" y1="140" x2="220" y2="140"/><line x1="20" y1="180" x2="220" y2="180"/>
+              <line x1="60" y1="20" x2="60" y2="220"/><line x1="100" y1="20" x2="100" y2="220"/><line x1="140" y1="20" x2="140" y2="220"/><line x1="180" y1="20" x2="180" y2="220"/>
+            </g>
+            <!-- safe area -->
+            <rect x="40" y="40" width="160" height="160" rx="20" stroke="#E8784E" stroke-dasharray="3 3" fill="none" opacity=".5"/>
+            <!-- the icon at scale -->
+            <g transform="translate(40,40) scale(6.667)" color="#1F1B17"><use href="#i-coach"/></g>
+            <!-- labels -->
+            <text x="120" y="234" text-anchor="middle" fill="#8C7B6A" font-family="DM Sans" font-size="10" font-weight="600" letter-spacing="1.5">24×24 GRID · 20×20 SAFE AREA</text>
+          </svg>
+        </div>
+        <div class="rules">
+          <div class="rule"><div class="k">Grid</div><div class="v"><b>24 × 24</b> · 20px live area · 2px keyline</div></div>
+          <div class="rule"><div class="k">Stroke</div><div class="v"><b>1.6 px</b> · round caps · round joins</div></div>
+          <div class="rule"><div class="k">Corners</div><div class="v"><b>2.4px radius</b> · gentle, never sharp</div></div>
+          <div class="rule"><div class="k">Color</div><div class="v">body in <b>currentColor</b> · one accent stroke in <b>Apricot #E8784E</b></div></div>
+          <div class="rule"><div class="k">Personality</div><div class="v">organic curvature · slightly soft · echoes Fraunces' SOFT axis</div></div>
+          <div class="rule"><div class="k">Sizes</div><div class="v"><b>16</b> nav · <b>20</b> inline · <b>24</b> default · <b>32</b> tile · <b>48</b> feature</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Full set -->
+  <section class="section">
+    <h2>The <em>full set</em></h2>
+    <div class="sub">32 icons covering navigation, meals, activity, tracking, goals, and tools.</div>
+
+    <div style="margin-bottom:18px">
+      <div class="pcap" style="font-size:10px;font-weight:700;letter-spacing:.2em;color:#8C7B6A;margin-bottom:10px;text-transform:uppercase">Navigation · 5</div>
+      <div class="iconwrap">
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-today"/></svg><div class="lbl">Today</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-plan"/></svg><div class="lbl">Plan</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-coach"/></svg><div class="lbl">Coach</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-stats"/></svg><div class="lbl">Stats</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-me"/></svg><div class="lbl">Me</div></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:18px">
+      <div class="pcap" style="font-size:10px;font-weight:700;letter-spacing:.2em;color:#8C7B6A;margin-bottom:10px;text-transform:uppercase">Meals & food · 8</div>
+      <div class="iconwrap">
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-breakfast"/></svg><div class="lbl">Breakfast</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-lunch"/></svg><div class="lbl">Lunch</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-dinner"/></svg><div class="lbl">Dinner</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-snack"/></svg><div class="lbl">Snack</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-water"/></svg><div class="lbl">Water</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-protein"/></svg><div class="lbl">Protein</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-veg"/></svg><div class="lbl">Veg</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-grain"/></svg><div class="lbl">Grain</div></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:18px">
+      <div class="pcap" style="font-size:10px;font-weight:700;letter-spacing:.2em;color:#8C7B6A;margin-bottom:10px;text-transform:uppercase">Activity · 5</div>
+      <div class="iconwrap">
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-flame"/></svg><div class="lbl">Calories</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-steps"/></svg><div class="lbl">Steps</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-workout"/></svg><div class="lbl">Workout</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-heart"/></svg><div class="lbl">Heart</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-sleep"/></svg><div class="lbl">Sleep</div></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:18px">
+      <div class="pcap" style="font-size:10px;font-weight:700;letter-spacing:.2em;color:#8C7B6A;margin-bottom:10px;text-transform:uppercase">Tracking · 6</div>
+      <div class="iconwrap">
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-scale"/></svg><div class="lbl">Weigh-in</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-mic"/></svg><div class="lbl">Voice log</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-camera"/></svg><div class="lbl">Photo</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-barcode"/></svg><div class="lbl">Barcode</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-search"/></svg><div class="lbl">Search</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-add"/></svg><div class="lbl">Add</div></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:18px">
+      <div class="pcap" style="font-size:10px;font-weight:700;letter-spacing:.2em;color:#8C7B6A;margin-bottom:10px;text-transform:uppercase">Goals & status · 4</div>
+      <div class="iconwrap">
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-target"/></svg><div class="lbl">Goal</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-trend"/></svg><div class="lbl">Trend</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-streak"/></svg><div class="lbl">Streak</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-medal"/></svg><div class="lbl">Milestone</div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="pcap" style="font-size:10px;font-weight:700;letter-spacing:.2em;color:#8C7B6A;margin-bottom:10px;text-transform:uppercase">Tools & system · 7</div>
+      <div class="iconwrap">
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-bell"/></svg><div class="lbl">Reminders</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-cart"/></svg><div class="lbl">Shopping</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-recipe"/></svg><div class="lbl">Recipe</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-settings"/></svg><div class="lbl">Settings</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-check"/></svg><div class="lbl">Done</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-close"/></svg><div class="lbl">Dismiss</div></div>
+        <div class="ig"><svg width="32" height="32" color="#1F1B17"><use href="#i-sparkle"/></svg><div class="lbl">Lumi spark</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Color treatments -->
+  <section class="section">
+    <h2>Surface <em>treatments</em></h2>
+    <div class="sub">The same icon recolors cleanly via <code style="background:#fff;padding:1px 6px;border-radius:5px;border:1px solid #EBE3D6;font-size:12px">color</code> — accent stays apricot in light, flips to cream on dark/apricot.</div>
+    <div class="treat">
+      <div class="tcard"><svg width="48" height="48" color="#1F1B17"><use href="#i-coach"/></svg><div class="tlbl">Paper / Default</div></div>
+      <div class="tcard cream"><svg width="48" height="48" color="#1F1B17"><use href="#i-coach"/></svg><div class="tlbl" style="color:#7A4520">Cream tint</div></div>
+      <div class="tcard apricot"><svg width="48" height="48" color="#FAF6F0" style="--accent:#FCEAD8"><use href="#i-coach"/></svg><div class="tlbl">Apricot fill</div></div>
+      <div class="tcard dark"><svg width="48" height="48" color="#FAF6F0"><use href="#i-coach"/></svg><div class="tlbl">Espresso</div></div>
+    </div>
+  </section>
+
+  <!-- Sizes -->
+  <section class="section">
+    <h2>Size <em>scale</em></h2>
+    <div class="sub">Same path, five sizes — strokes scale geometrically and stay legible from 16 → 48.</div>
+    <div class="sizes">
+      <div class="sz"><svg width="16" height="16" color="#1F1B17"><use href="#i-flame"/></svg><div class="szlbl">16 · NAV</div></div>
+      <div class="sz"><svg width="20" height="20" color="#1F1B17"><use href="#i-flame"/></svg><div class="szlbl">20 · INLINE</div></div>
+      <div class="sz"><svg width="24" height="24" color="#1F1B17"><use href="#i-flame"/></svg><div class="szlbl">24 · DEFAULT</div></div>
+      <div class="sz"><svg width="32" height="32" color="#1F1B17"><use href="#i-flame"/></svg><div class="szlbl">32 · TILE</div></div>
+      <div class="sz"><svg width="48" height="48" color="#1F1B17"><use href="#i-flame"/></svg><div class="szlbl">48 · FEATURE</div></div>
+    </div>
+  </section>
+
+  <!-- In context -->
+  <section class="section">
+    <h2>In <em>context</em></h2>
+    <div class="sub">The set, applied across navigation, meal cards, and stat tiles.</div>
+
+    <div class="ctxrow">
+
+      <!-- Today screen -->
+      <div class="phone"><div class="di"></div>
+        <div class="sb"><span>9:41</span><span>● ● ●</span></div>
+        <div class="scrn">
+          <div class="pcap">TUESDAY · APR 28</div>
+          <h3 class="stitle">Morning, <em>Marco</em></h3>
+          <div class="crd">
+            <div style="display:flex;gap:14px;align-items:center">
+              <div style="width:46px;height:46px;border-radius:12px;background:#FCEAD8;display:flex;align-items:center;justify-content:center"><svg width="26" height="26" color="#E8784E"><use href="#i-flame"/></svg></div>
+              <div>
+                <div style="font-size:10px;font-weight:700;letter-spacing:.16em;color:#8C7B6A">EATEN</div>
+                <div style="font-family:Fraunces,serif;font-weight:500;font-variation-settings:'SOFT' 100;font-size:24px;line-height:1">1,108 <span style="font-size:11px;color:#8C7B6A">/ 1,780</span></div>
+              </div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+            <div class="crd" style="padding:10px;text-align:center">
+              <svg width="22" height="22" color="#1F1B17"><use href="#i-protein"/></svg>
+              <div style="font-family:Fraunces,serif;font-size:16px;font-weight:500;margin-top:4px">88g</div>
+              <div style="font-size:9px;color:#8C7B6A;font-weight:600;letter-spacing:.1em">PROTEIN</div>
+            </div>
+            <div class="crd" style="padding:10px;text-align:center">
+              <svg width="22" height="22" color="#1F1B17"><use href="#i-grain"/></svg>
+              <div style="font-family:Fraunces,serif;font-size:16px;font-weight:500;margin-top:4px">142g</div>
+              <div style="font-size:9px;color:#8C7B6A;font-weight:600;letter-spacing:.1em">CARBS</div>
+            </div>
+            <div class="crd" style="padding:10px;text-align:center">
+              <svg width="22" height="22" color="#1F1B17"><use href="#i-veg"/></svg>
+              <div style="font-family:Fraunces,serif;font-size:16px;font-weight:500;margin-top:4px">42g</div>
+              <div style="font-size:9px;color:#8C7B6A;font-weight:600;letter-spacing:.1em">FATS</div>
+            </div>
+          </div>
+          <div class="meal" style="border:1.5px solid #E8784E"><div class="icn"><svg width="22" height="22" color="#E8784E"><use href="#i-lunch"/></svg></div><div><div class="t">Chicken & quinoa bowl</div><div class="s">LUNCH · 13:00 · 520 kcal</div></div></div>
+          <div class="nav">
+            <div class="ni on"><svg width="20" height="20" color="#E8784E"><use href="#i-today"/></svg>Today</div>
+            <div class="ni"><svg width="20" height="20" color="#8C7B6A"><use href="#i-plan"/></svg>Plan</div>
+            <div class="ni"><svg width="20" height="20" color="#8C7B6A"><use href="#i-coach"/></svg>Coach</div>
+            <div class="ni"><svg width="20" height="20" color="#8C7B6A"><use href="#i-stats"/></svg>Stats</div>
+            <div class="ni"><svg width="20" height="20" color="#8C7B6A"><use href="#i-me"/></svg>Me</div>
+          </div>
+        </div>
+        <div class="home"></div>
+      </div>
+
+      <!-- Tracker screen -->
+      <div class="phone"><div class="di"></div>
+        <div class="sb"><span>9:41</span><span>● ● ●</span></div>
+        <div class="scrn">
+          <div class="pcap">QUICK LOG</div>
+          <h3 class="stitle">Tell <em>Lumi</em> what you ate</h3>
+          <div class="crd" style="display:flex;gap:10px;align-items:center;padding:10px">
+            <svg width="20" height="20" color="#8C7B6A"><use href="#i-search"/></svg>
+            <div style="font-size:13px;color:#8C7B6A">Search 250k foods</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0">
+            <div class="crd" style="display:flex;flex-direction:column;align-items:center;padding:14px;gap:6px"><svg width="26" height="26" color="#1F1B17"><use href="#i-camera"/></svg><div style="font-size:11px;font-weight:600">Photo</div></div>
+            <div class="crd" style="display:flex;flex-direction:column;align-items:center;padding:14px;gap:6px"><svg width="26" height="26" color="#1F1B17"><use href="#i-barcode"/></svg><div style="font-size:11px;font-weight:600">Barcode</div></div>
+          </div>
+          <div class="crd" style="background:#1F1B17;border-color:#1F1B17;padding:18px;text-align:center">
+            <svg width="36" height="36" color="#FAF6F0" style="margin-bottom:6px"><use href="#i-mic"/></svg>
+            <div style="color:#FAF6F0;font-family:Fraunces,serif;font-size:16px">Hold to speak</div>
+            <div style="color:#C8B89F;font-size:10px;margin-top:4px">"Two eggs and a coffee"</div>
+          </div>
+          <div class="meal"><div class="icn"><svg width="22" height="22" color="#E8784E"><use href="#i-breakfast"/></svg></div><div><div class="t">Yogurt parfait <svg width="14" height="14" color="#3D5A4A" style="vertical-align:-2px"><use href="#i-check"/></svg></div><div class="s">07:30 · 340 kcal</div></div></div>
+          <div class="nav">
+            <div class="ni"><svg width="20" height="20" color="#8C7B6A"><use href="#i-today"/></svg>Today</div>
+            <div class="ni on"><svg width="20" height="20" color="#E8784E"><use href="#i-plan"/></svg>Plan</div>
+            <div class="ni"><svg width="20" height="20" color="#8C7B6A"><use href="#i-coach"/></svg>Coach</div>
+            <div class="ni"><svg width="20" height="20" color="#8C7B6A"><use href="#i-stats"/></svg>Stats</div>
+            <div class="ni"><svg width="20" height="20" color="#8C7B6A"><use href="#i-me"/></svg>Me</div>
+          </div>
+        </div>
+        <div class="home"></div>
+      </div>
+
+      <!-- Stats screen -->
+      <div class="phone"><div class="di"></div>
+        <div class="sb"><span>9:41</span><span>● ● ●</span></div>
+        <div class="scrn">
+          <div class="pcap">YOUR JOURNEY</div>
+          <h3 class="stitle">Week 4 <em>summary</em></h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+            <div class="crd" style="padding:12px"><svg width="22" height="22" color="#1F1B17"><use href="#i-scale"/></svg><div style="font-family:Fraunces,serif;font-size:22px;font-weight:500;margin-top:4px">82.4<span style="font-size:11px;color:#8C7B6A;font-family:DM Sans"> kg</span></div><div style="font-size:10px;color:#3D5A4A;font-weight:600">−2.6 vs start</div></div>
+            <div class="crd" style="padding:12px"><svg width="22" height="22" color="#1F1B17"><use href="#i-streak"/></svg><div style="font-family:Fraunces,serif;font-size:22px;font-weight:500;margin-top:4px">21<span style="font-size:11px;color:#8C7B6A;font-family:DM Sans"> days</span></div><div style="font-size:10px;color:#3D5A4A;font-weight:600">Logging streak</div></div>
+            <div class="crd" style="padding:12px"><svg width="22" height="22" color="#1F1B17"><use href="#i-trend"/></svg><div style="font-family:Fraunces,serif;font-size:22px;font-weight:500;margin-top:4px">0.65</div><div style="font-size:10px;color:#8C7B6A;font-weight:600">kg/week avg</div></div>
+            <div class="crd" style="padding:12px"><svg width="22" height="22" color="#1F1B17"><use href="#i-target"/></svg><div style="font-family:Fraunces,serif;font-size:22px;font-weight:500;margin-top:4px">Oct 14</div><div style="font-size:10px;color:#3D5A4A;font-weight:600">14 days early</div></div>
+          </div>
+          <div class="crd" style="background:#FCEAD8;border:none;padding:12px;display:flex;gap:10px;align-items:center">
+            <svg width="24" height="24" color="#7A4520"><use href="#i-medal"/></svg>
+            <div><div style="font-size:12px;font-weight:600;color:#3A2410">Milestone unlocked</div><div style="font-size:10px;color:#7A4520">First 2.5 kg — well done!</div></div>
+          </div>
+          <div class="nav">
+            <div class="ni"><svg width="20" height="20" color="#8C7B6A"><use href="#i-today"/></svg>Today</div>
+            <div class="ni"><svg width="20" height="20" color="#8C7B6A"><use href="#i-plan"/></svg>Plan</div>
+            <div class="ni"><svg width="20" height="20" color="#8C7B6A"><use href="#i-coach"/></svg>Coach</div>
+            <div class="ni on"><svg width="20" height="20" color="#E8784E"><use href="#i-stats"/></svg>Stats</div>
+            <div class="ni"><svg width="20" height="20" color="#8C7B6A"><use href="#i-me"/></svg>Me</div>
+          </div>
+        </div>
+        <div class="home"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="footer">
+    The complete set lives as inline <b>SVG &lt;symbol&gt;</b> definitions — drop the <code style="background:#FAF6F0;padding:1px 6px;border-radius:5px;border:1px solid #EBE3D6;font-size:12px">&lt;defs&gt;</code> block once and reference any icon with <code style="background:#FAF6F0;padding:1px 6px;border-radius:5px;border:1px solid #EBE3D6;font-size:12px">&lt;use href="#i-coach"/&gt;</code>. Each icon recolors via the parent's <code style="background:#FAF6F0;padding:1px 6px;border-radius:5px;border:1px solid #EBE3D6;font-size:12px">color</code> for the body strokes; the apricot accent stays consistent. Say the word and I'll wire this into the main 10-screen Lumi prototype next.
+  </div>
+
+</div>
+</body></html>

@@ -1,0 +1,383 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Lumi · Friendly Modern · 3 variations across screens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Nunito:wght@400;500;600;700&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body{margin:0;background:#F2EAD8;color:#1F1B17}
+  body{font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+  .wrap{padding:48px 32px 96px}
+  .eyebrow{font-size:11px;font-weight:600;letter-spacing:.22em;color:#8C7B6A;text-transform:uppercase;margin-bottom:14px}
+  h1{font-family:'Fraunces',serif;font-weight:500;font-size:46px;line-height:1.05;letter-spacing:-1px;margin:0 0 12px;color:#1F1B17;font-variation-settings:'SOFT' 50}
+  h1 em{color:#E8784E;font-style:italic}
+  .lede{font-size:16px;line-height:1.6;color:#5A4F40;max-width:760px;margin:0 0 48px}
+
+  .variant{margin-bottom:64px}
+  .vhead{display:flex;align-items:baseline;gap:18px;padding:0 8px 18px;border-bottom:1px dashed #D6CDB9;margin-bottom:22px}
+  .vhead .tag{font-family:'Fraunces',serif;font-weight:600;font-size:30px;color:#E8784E;line-height:1}
+  .vhead h2{margin:0;font-size:24px;letter-spacing:-.4px;font-weight:600}
+  .vhead .pair{margin-left:auto;font-size:12px;color:#8C7B6A}
+
+  .row{display:flex;gap:22px;overflow-x:auto;padding:6px 8px 30px;scroll-snap-type:x mandatory}
+  .row::-webkit-scrollbar{height:6px}
+  .row::-webkit-scrollbar-thumb{background:#D6CDB9;border-radius:3px}
+  .phone{flex:0 0 280px;width:280px;height:606px;border-radius:36px;background:#FAF6F0;
+    box-shadow:0 16px 40px -16px rgba(60,42,18,.18),0 0 0 1px rgba(60,42,18,.06);
+    overflow:hidden;position:relative;scroll-snap-align:start}
+  .di{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:88px;height:24px;border-radius:16px;background:#1F1B17;z-index:30}
+  .sb{position:absolute;top:0;left:0;right:0;height:42px;display:flex;justify-content:space-between;align-items:center;padding:14px 22px;font-size:11px;font-weight:600;z-index:20}
+  .home{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:96px;height:4px;border-radius:2px;background:rgba(31,27,23,.18);z-index:30}
+  .scrn{padding:48px 16px 26px;height:100%;overflow:hidden}
+
+  /* shared module styles */
+  .pcap{font-size:9px;font-weight:700;letter-spacing:.2em;color:#8C7B6A;text-transform:uppercase}
+  .pillrow{display:flex;gap:5px;flex-wrap:wrap}
+  .pill{padding:4px 9px;border-radius:999px;font-size:10px;font-weight:600}
+  .pill.a{background:#F4D9B5;color:#7A4520}
+  .pill.b{background:#E2EBE5;color:#3D5A4A}
+  .pill.c{background:#FCEAD8;color:#A33820}
+  .crd{background:#fff;border:1px solid #EBE3D6;border-radius:14px;padding:12px}
+  .meal{display:flex;gap:9px;align-items:center;padding:9px;border-radius:12px;background:#fff;border:1px solid #EBE3D6;margin-top:8px}
+  .meal .icon{width:32px;height:32px;border-radius:9px;background:#FCEAD8;display:flex;align-items:center;justify-content:center;font-size:16px}
+  .meal .t{font-weight:600;font-size:12px;color:#1F1B17;line-height:1.2}
+  .meal .s{font-size:9.5px;margin-top:2px;color:#8C7B6A;line-height:1.2}
+  .cta{padding:11px;border-radius:12px;text-align:center;font-weight:700;font-size:13px;background:#E8784E;color:#FFF6EE;margin-top:auto}
+  .ring{position:relative;width:88px;height:88px}
+  .num-cap{font-size:9px;font-weight:600;letter-spacing:.16em;color:#8C7B6A;text-transform:uppercase}
+  .delta{color:#3D5A4A;font-weight:600}
+  .nav{position:absolute;left:14px;right:14px;bottom:18px;display:flex;justify-content:space-around;padding:8px;background:rgba(255,255,255,.78);backdrop-filter:blur(20px);border-radius:22px;border:1px solid #EBE3D6}
+  .nav .ni{display:flex;flex-direction:column;align-items:center;gap:2px;color:#8C7B6A;font-size:9px;font-weight:600}
+  .nav .ni.on{color:#E8784E}
+  .dot{width:18px;height:18px;border-radius:6px;background:#FCEAD8;display:inline-block}
+  .ni.on .dot{background:#E8784E}
+
+  .footer{margin-top:48px;padding:24px 28px;background:#fff;border:1px solid #EBE3D6;border-radius:18px;font-size:14px;color:#5A4F40;line-height:1.6}
+  .footer b{color:#1F1B17}
+</style></head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Friendly Modern · primary + secondary applied</div>
+  <h1>Three voices, four screens each — see the <em>full system</em>.</h1>
+  <p class="lede">Each row is one variant applied across <b>Today</b>, <b>Plan</b>, <b>Weigh-in</b>, and <b>Forecast</b>. Display headlines + numerals use the primary serif; body, captions, labels, navigation, pills and macros use the secondary sans. This is what locking the variant actually looks like in the app.</p>
+
+  <!-- =========== B1 · Soft Apricot · Fraunces (SOFT 100) × DM Sans =========== -->
+  <section class="variant" style="font-family:'DM Sans',sans-serif">
+    <div class="vhead">
+      <div class="tag" style="font-family:'Fraunces',serif;font-variation-settings:'SOFT' 100">B1</div>
+      <h2 style="font-family:'DM Sans',sans-serif">Soft Apricot</h2>
+      <div class="pair">Fraunces (SOFT 100) · DM Sans</div>
+    </div>
+    <div class="row">
+
+      <!-- Today -->
+      <div class="phone"><div class="di"></div>
+        <div class="sb"><span>9:41</span><span>● ● ●</span></div>
+        <div class="scrn" style="display:flex;flex-direction:column;height:100%;padding-bottom:80px">
+          <div class="pcap">TUESDAY · APR 28</div>
+          <h3 style="font-family:'Fraunces',serif;font-variation-settings:'SOFT' 100;font-size:30px;font-weight:500;letter-spacing:-.6px;margin:4px 0 14px;color:#1F1B17">Morning, <span style="color:#E8784E;font-style:italic">Marco</span></h3>
+          <div class="crd" style="display:flex;gap:14px;align-items:center;margin-bottom:10px">
+            <svg viewBox="0 0 88 88" class="ring"><circle cx="44" cy="44" r="38" stroke="#F4D9B5" stroke-width="6" fill="none"/><circle cx="44" cy="44" r="38" stroke="#E8784E" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="238" stroke-dashoffset="90" transform="rotate(-90 44 44)"/></svg>
+            <div>
+              <div class="num-cap">EATEN</div>
+              <div style="font-family:'Fraunces',serif;font-variation-settings:'SOFT' 100;font-size:28px;font-weight:500;line-height:1;color:#1F1B17">1,108</div>
+              <div style="font-size:10px;color:#8C7B6A;margin-top:2px">of 1,780 kcal</div>
+            </div>
+          </div>
+          <div class="crd" style="margin-bottom:10px">
+            <div class="num-cap" style="margin-bottom:8px">JOURNEY</div>
+            <div style="display:flex;align-items:baseline;gap:6px">
+              <div style="font-family:'Fraunces',serif;font-variation-settings:'SOFT' 100;font-size:28px;font-weight:500;color:#E8784E;letter-spacing:-1px">−2.6</div>
+              <div style="font-size:11px;color:#8C7B6A">kg of 17</div>
+            </div>
+            <div style="height:3px;border-radius:2px;background:#F4D9B5;margin-top:6px;position:relative"><div style="position:absolute;left:0;top:0;height:100%;width:15%;background:#E8784E;border-radius:2px"></div></div>
+          </div>
+          <div class="meal"><div class="icon">🍗</div><div><div class="t">Chicken & quinoa bowl</div><div class="s">LUNCH · 13:00 · 520 kcal</div></div></div>
+          <div class="nav">
+            <div class="ni on"><span class="dot"></span>Today</div>
+            <div class="ni"><span class="dot"></span>Plan</div>
+            <div class="ni"><span class="dot"></span>Coach</div>
+            <div class="ni"><span class="dot"></span>Stats</div>
+            <div class="ni"><span class="dot"></span>Me</div>
+          </div>
+        </div>
+        <div class="home"></div>
+      </div>
+
+      <!-- Plan -->
+      <div class="phone"><div class="di"></div>
+        <div class="sb"><span>9:41</span><span>● ● ●</span></div>
+        <div class="scrn" style="padding-bottom:80px">
+          <div class="pcap">TODAY'S PLAN</div>
+          <h3 style="font-family:'Fraunces',serif;font-variation-settings:'SOFT' 100;font-size:24px;font-weight:500;letter-spacing:-.4px;margin:4px 0 14px">5 meals <span style="color:#E8784E;font-style:italic">· 1,780 kcal</span></h3>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="meal" style="opacity:.55"><div class="icon">🥣</div><div><div class="t" style="text-decoration:line-through">Yogurt parfait</div><div class="s">07:30 · 340 kcal · DONE</div></div></div>
+            <div class="meal" style="opacity:.55"><div class="icon">🍎</div><div><div class="t" style="text-decoration:line-through">Apple + almond</div><div class="s">10:30 · 180 kcal · DONE</div></div></div>
+            <div class="meal" style="border:1.5px solid #E8784E"><div class="icon">🍗</div><div><div class="t">Chicken & quinoa bowl</div><div class="s">13:00 · 520 kcal · NEXT</div></div></div>
+            <div class="meal"><div class="icon">🥤</div><div><div class="t">Protein shake</div><div class="s">16:00 · 160 kcal</div></div></div>
+            <div class="meal"><div class="icon">🐟</div><div><div class="t">Salmon & sweet potato</div><div class="s">19:30 · 580 kcal</div></div></div>
+          </div>
+        </div>
+        <div class="home"></div>
+      </div>
+
+      <!-- Weigh-in -->
+      <div class="phone"><div class="di"></div>
+        <div class="sb"><span>9:41</span><span>● ● ●</span></div>
+        <div class="scrn" style="display:flex;flex-direction:column;align-items:center;padding-top:64px">
+          <div class="pcap">SUNDAY · WEEK 4</div>
+          <h3 style="font-family:'Fraunces',serif;font-variation-settings:'SOFT' 100;font-size:24px;font-weight:500;letter-spacing:-.4px;margin:6px 0 18px;text-align:center">Sunday <span style="color:#E8784E;font-style:italic">weigh-in</span></h3>
+          <div class="crd" style="width:100%;text-align:center;padding:22px 14px">
+            <div class="num-cap">YOUR WEIGHT</div>
+            <div style="font-family:'Fraunces',serif;font-variation-settings:'SOFT' 100;font-size:64px;font-weight:500;color:#E8784E;letter-spacing:-2.4px;line-height:1;margin:8px 0 4px">82.4</div>
+            <div style="font-size:11px;color:#8C7B6A">kg · <span class="delta">−0.7 vs last week</span></div>
+          </div>
+          <div class="crd" style="width:100%;margin-top:10px;background:#F4D9B5;border:none">
+            <div class="num-cap" style="color:#7A4520">LUMI'S ADJUSTMENT</div>
+            <div style="font-size:12px;color:#3A2410;line-height:1.5;margin-top:6px"><b>5 days ahead</b> — bumping +80 kcal/day so we don't burn out the gas tank.</div>
+          </div>
+          <div class="cta" style="width:100%;margin-top:auto;margin-bottom:36px">Apply adjustment</div>
+        </div>
+        <div class="home"></div>
+      </div>
+
+      <!-- Forecast -->
+      <div class="phone"><div class="di"></div>
+        <div class="sb"><span>9:41</span><span>● ● ●</span></div>
+        <div class="scrn" style="padding-bottom:80px">
+          <div class="pcap">FORECAST · 26 WEEKS</div>
+          <h3 style="font-family:'Fraunces',serif;font-variation-settings:'SOFT' 100;font-size:22px;font-weight:500;letter-spacing:-.4px;margin:4px 0 4px"><span style="color:#E8784E;font-style:italic">68 kg</span> by Oct 14</h3>
+          <div style="font-size:11px;color:#3D5A4A;font-weight:600;margin-bottom:12px">14 days ahead of plan</div>
+          <div class="crd" style="padding:14px 8px">
+            <svg viewBox="0 0 240 130" width="100%">
+              <line x1="20" x2="230" y1="20" y2="20" stroke="#EBE3D6"/><line x1="20" x2="230" y1="60" y2="60" stroke="#EBE3D6"/><line x1="20" x2="230" y1="100" y2="100" stroke="#EBE3D6"/>
+              <path d="M22,28 Q80,40 130,60 T228,100" stroke="#8C7B6A" stroke-width="1.4" fill="none" stroke-dasharray="3 4"/>
+              <path d="M22,28 L42,38 L62,48 L82,52 L102,58" stroke="#E8784E" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+              <circle cx="102" cy="58" r="4" fill="#E8784E" stroke="#FAF6F0" stroke-width="2"/>
+            </svg>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px">
+            <div class="crd" style="padding:8px;text-align:center"><div class="num-cap" style="font-size:8px">LOST</div><div style="font-family:'Fraunces',serif;font-variation-settings:'SOFT' 100;font-size:18px;font-weight:500">2.6</div></div>
+            <div class="crd" style="padding:8px;text-align:center"><div class="num-cap" style="font-size:8px">AVG/WK</div><div style="font-family:'Fraunces',serif;font-variation-settings:'SOFT' 100;font-size:18px;font-weight:500">0.65</div></div>
+            <div class="crd" style="padding:8px;text-align:center"><div class="num-cap" style="font-size:8px">TO GO</div><div style="font-family:'Fraunces',serif;font-variation-settings:'SOFT' 100;font-size:18px;font-weight:500">14.4</div></div>
+          </div>
+        </div>
+        <div class="home"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =========== B2 · Bakery Modern · Fraunces (high opsz, weight 600) × Nunito =========== -->
+  <section class="variant" style="font-family:'Nunito',sans-serif">
+    <div class="vhead">
+      <div class="tag" style="font-family:'Fraunces',serif;font-weight:700;font-variation-settings:'SOFT' 30">B2</div>
+      <h2 style="font-family:'Nunito',sans-serif;font-weight:700">Bakery Modern</h2>
+      <div class="pair">Fraunces (700, opsz 144) · Nunito</div>
+    </div>
+    <div class="row">
+
+      <div class="phone"><div class="di"></div>
+        <div class="sb"><span>9:41</span><span>● ● ●</span></div>
+        <div class="scrn" style="display:flex;flex-direction:column;height:100%;padding-bottom:80px">
+          <div class="pcap">TUESDAY · APR 28</div>
+          <h3 style="font-family:'Fraunces',serif;font-weight:700;font-variation-settings:'SOFT' 30,'opsz' 144;font-size:30px;letter-spacing:-.8px;margin:4px 0 14px">Morning, <span style="color:#E8784E">Marco</span></h3>
+          <div class="crd" style="display:flex;gap:14px;align-items:center;margin-bottom:10px">
+            <svg viewBox="0 0 88 88" class="ring"><circle cx="44" cy="44" r="38" stroke="#F4D9B5" stroke-width="6" fill="none"/><circle cx="44" cy="44" r="38" stroke="#E8784E" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="238" stroke-dashoffset="90" transform="rotate(-90 44 44)"/></svg>
+            <div>
+              <div class="num-cap">EATEN</div>
+              <div style="font-family:'Fraunces',serif;font-weight:700;font-variation-settings:'SOFT' 30,'opsz' 144;font-size:28px;line-height:1">1,108</div>
+              <div style="font-size:10px;color:#8C7B6A;margin-top:2px">of 1,780 kcal</div>
+            </div>
+          </div>
+          <div class="crd" style="margin-bottom:10px">
+            <div class="num-cap" style="margin-bottom:8px">JOURNEY</div>
+            <div style="display:flex;align-items:baseline;gap:6px">
+              <div style="font-family:'Fraunces',serif;font-weight:700;font-variation-settings:'SOFT' 30,'opsz' 144;font-size:28px;color:#E8784E;letter-spacing:-1px">−2.6</div>
+              <div style="font-size:11px;color:#8C7B6A">kg of 17</div>
+            </div>
+            <div style="height:3px;border-radius:2px;background:#F4D9B5;margin-top:6px;position:relative"><div style="position:absolute;left:0;top:0;height:100%;width:15%;background:#E8784E;border-radius:2px"></div></div>
+          </div>
+          <div class="meal"><div class="icon">🍗</div><div><div class="t">Chicken & quinoa bowl</div><div class="s">LUNCH · 13:00 · 520 kcal</div></div></div>
+          <div class="nav">
+            <div class="ni on"><span class="dot"></span>Today</div>
+            <div class="ni"><span class="dot"></span>Plan</div>
+            <div class="ni"><span class="dot"></span>Coach</div>
+            <div class="ni"><span class="dot"></span>Stats</div>
+            <div class="ni"><span class="dot"></span>Me</div>
+          </div>
+        </div>
+        <div class="home"></div>
+      </div>
+
+      <div class="phone"><div class="di"></div>
+        <div class="sb"><span>9:41</span><span>● ● ●</span></div>
+        <div class="scrn" style="padding-bottom:80px">
+          <div class="pcap">TODAY'S PLAN</div>
+          <h3 style="font-family:'Fraunces',serif;font-weight:700;font-variation-settings:'SOFT' 30,'opsz' 144;font-size:24px;letter-spacing:-.5px;margin:4px 0 14px">5 meals <span style="color:#E8784E">· 1,780 kcal</span></h3>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="meal" style="opacity:.55"><div class="icon">🥣</div><div><div class="t" style="text-decoration:line-through">Yogurt parfait</div><div class="s">07:30 · 340 kcal · DONE</div></div></div>
+            <div class="meal" style="opacity:.55"><div class="icon">🍎</div><div><div class="t" style="text-decoration:line-through">Apple + almond</div><div class="s">10:30 · 180 kcal · DONE</div></div></div>
+            <div class="meal" style="border:1.5px solid #E8784E"><div class="icon">🍗</div><div><div class="t">Chicken & quinoa bowl</div><div class="s">13:00 · 520 kcal · NEXT</div></div></div>
+            <div class="meal"><div class="icon">🥤</div><div><div class="t">Protein shake</div><div class="s">16:00 · 160 kcal</div></div></div>
+            <div class="meal"><div class="icon">🐟</div><div><div class="t">Salmon & sweet potato</div><div class="s">19:30 · 580 kcal</div></div></div>
+          </div>
+        </div>
+        <div class="home"></div>
+      </div>
+
+      <div class="phone"><div class="di"></div>
+        <div class="sb"><span>9:41</span><span>● ● ●</span></div>
+        <div class="scrn" style="display:flex;flex-direction:column;align-items:center;padding-top:64px">
+          <div class="pcap">SUNDAY · WEEK 4</div>
+          <h3 style="font-family:'Fraunces',serif;font-weight:700;font-variation-settings:'SOFT' 30,'opsz' 144;font-size:24px;letter-spacing:-.5px;margin:6px 0 18px;text-align:center">Sunday <span style="color:#E8784E">weigh-in</span></h3>
+          <div class="crd" style="width:100%;text-align:center;padding:22px 14px">
+            <div class="num-cap">YOUR WEIGHT</div>
+            <div style="font-family:'Fraunces',serif;font-weight:700;font-variation-settings:'SOFT' 30,'opsz' 144;font-size:64px;color:#E8784E;letter-spacing:-2.6px;line-height:1;margin:8px 0 4px">82.4</div>
+            <div style="font-size:11px;color:#8C7B6A">kg · <span class="delta">−0.7 vs last week</span></div>
+          </div>
+          <div class="crd" style="width:100%;margin-top:10px;background:#F4D9B5;border:none">
+            <div class="num-cap" style="color:#7A4520">LUMI'S ADJUSTMENT</div>
+            <div style="font-size:12px;color:#3A2410;line-height:1.5;margin-top:6px"><b>5 days ahead</b> — bumping +80 kcal/day so we don't burn out the gas tank.</div>
+          </div>
+          <div class="cta" style="width:100%;margin-top:auto;margin-bottom:36px">Apply adjustment</div>
+        </div>
+        <div class="home"></div>
+      </div>
+
+      <div class="phone"><div class="di"></div>
+        <div class="sb"><span>9:41</span><span>● ● ●</span></div>
+        <div class="scrn" style="padding-bottom:80px">
+          <div class="pcap">FORECAST · 26 WEEKS</div>
+          <h3 style="font-family:'Fraunces',serif;font-weight:700;font-variation-settings:'SOFT' 30,'opsz' 144;font-size:22px;letter-spacing:-.5px;margin:4px 0 4px"><span style="color:#E8784E">68 kg</span> by Oct 14</h3>
+          <div style="font-size:11px;color:#3D5A4A;font-weight:700;margin-bottom:12px">14 days ahead of plan</div>
+          <div class="crd" style="padding:14px 8px">
+            <svg viewBox="0 0 240 130" width="100%">
+              <line x1="20" x2="230" y1="20" y2="20" stroke="#EBE3D6"/><line x1="20" x2="230" y1="60" y2="60" stroke="#EBE3D6"/><line x1="20" x2="230" y1="100" y2="100" stroke="#EBE3D6"/>
+              <path d="M22,28 Q80,40 130,60 T228,100" stroke="#8C7B6A" stroke-width="1.4" fill="none" stroke-dasharray="3 4"/>
+              <path d="M22,28 L42,38 L62,48 L82,52 L102,58" stroke="#E8784E" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+              <circle cx="102" cy="58" r="4" fill="#E8784E" stroke="#FAF6F0" stroke-width="2"/>
+            </svg>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px">
+            <div class="crd" style="padding:8px;text-align:center"><div class="num-cap" style="font-size:8px">LOST</div><div style="font-family:'Fraunces',serif;font-weight:700;font-variation-settings:'SOFT' 30,'opsz' 144;font-size:18px">2.6</div></div>
+            <div class="crd" style="padding:8px;text-align:center"><div class="num-cap" style="font-size:8px">AVG/WK</div><div style="font-family:'Fraunces',serif;font-weight:700;font-variation-settings:'SOFT' 30,'opsz' 144;font-size:18px">0.65</div></div>
+            <div class="crd" style="padding:8px;text-align:center"><div class="num-cap" style="font-size:8px">TO GO</div><div style="font-family:'Fraunces',serif;font-weight:700;font-variation-settings:'SOFT' 30,'opsz' 144;font-size:18px">14.4</div></div>
+          </div>
+        </div>
+        <div class="home"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =========== B3 · Crisp Optimist · Fraunces (SOFT 0, italic accent) × Sora =========== -->
+  <section class="variant" style="font-family:'Sora',sans-serif">
+    <div class="vhead">
+      <div class="tag" style="font-family:'Fraunces',serif;font-weight:600;font-variation-settings:'SOFT' 0">B3</div>
+      <h2 style="font-family:'Sora',sans-serif;font-weight:600">Crisp Optimist</h2>
+      <div class="pair">Fraunces (SOFT 0, 600) · Sora</div>
+    </div>
+    <div class="row">
+
+      <div class="phone"><div class="di"></div>
+        <div class="sb"><span>9:41</span><span>● ● ●</span></div>
+        <div class="scrn" style="display:flex;flex-direction:column;height:100%;padding-bottom:80px">
+          <div class="pcap">TUESDAY · APR 28</div>
+          <h3 style="font-family:'Fraunces',serif;font-weight:600;font-variation-settings:'SOFT' 0,'opsz' 144;font-size:28px;letter-spacing:-.7px;margin:4px 0 14px">Morning, <span style="color:#E8784E;font-style:italic">Marco</span></h3>
+          <div class="crd" style="display:flex;gap:14px;align-items:center;margin-bottom:10px">
+            <svg viewBox="0 0 88 88" class="ring"><circle cx="44" cy="44" r="38" stroke="#F4D9B5" stroke-width="6" fill="none"/><circle cx="44" cy="44" r="38" stroke="#E8784E" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="238" stroke-dashoffset="90" transform="rotate(-90 44 44)"/></svg>
+            <div>
+              <div class="num-cap">EATEN</div>
+              <div style="font-family:'Fraunces',serif;font-weight:600;font-variation-settings:'SOFT' 0;font-size:28px;line-height:1">1,108</div>
+              <div style="font-size:10px;color:#8C7B6A;margin-top:2px">of 1,780 kcal</div>
+            </div>
+          </div>
+          <div class="crd" style="margin-bottom:10px">
+            <div class="num-cap" style="margin-bottom:8px">JOURNEY</div>
+            <div style="display:flex;align-items:baseline;gap:6px">
+              <div style="font-family:'Fraunces',serif;font-weight:600;font-variation-settings:'SOFT' 0;font-size:28px;color:#E8784E;letter-spacing:-1px">−2.6</div>
+              <div style="font-size:11px;color:#8C7B6A">kg of 17</div>
+            </div>
+            <div style="height:3px;border-radius:2px;background:#F4D9B5;margin-top:6px;position:relative"><div style="position:absolute;left:0;top:0;height:100%;width:15%;background:#E8784E;border-radius:2px"></div></div>
+          </div>
+          <div class="meal"><div class="icon">🍗</div><div><div class="t">Chicken & quinoa bowl</div><div class="s">LUNCH · 13:00 · 520 kcal</div></div></div>
+          <div class="nav">
+            <div class="ni on"><span class="dot"></span>Today</div>
+            <div class="ni"><span class="dot"></span>Plan</div>
+            <div class="ni"><span class="dot"></span>Coach</div>
+            <div class="ni"><span class="dot"></span>Stats</div>
+            <div class="ni"><span class="dot"></span>Me</div>
+          </div>
+        </div>
+        <div class="home"></div>
+      </div>
+
+      <div class="phone"><div class="di"></div>
+        <div class="sb"><span>9:41</span><span>● ● ●</span></div>
+        <div class="scrn" style="padding-bottom:80px">
+          <div class="pcap">TODAY'S PLAN</div>
+          <h3 style="font-family:'Fraunces',serif;font-weight:600;font-variation-settings:'SOFT' 0,'opsz' 144;font-size:24px;letter-spacing:-.5px;margin:4px 0 14px">5 meals <span style="color:#E8784E;font-style:italic">· 1,780 kcal</span></h3>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="meal" style="opacity:.55"><div class="icon">🥣</div><div><div class="t" style="text-decoration:line-through">Yogurt parfait</div><div class="s">07:30 · 340 kcal · DONE</div></div></div>
+            <div class="meal" style="opacity:.55"><div class="icon">🍎</div><div><div class="t" style="text-decoration:line-through">Apple + almond</div><div class="s">10:30 · 180 kcal · DONE</div></div></div>
+            <div class="meal" style="border:1.5px solid #E8784E"><div class="icon">🍗</div><div><div class="t">Chicken & quinoa bowl</div><div class="s">13:00 · 520 kcal · NEXT</div></div></div>
+            <div class="meal"><div class="icon">🥤</div><div><div class="t">Protein shake</div><div class="s">16:00 · 160 kcal</div></div></div>
+            <div class="meal"><div class="icon">🐟</div><div><div class="t">Salmon & sweet potato</div><div class="s">19:30 · 580 kcal</div></div></div>
+          </div>
+        </div>
+        <div class="home"></div>
+      </div>
+
+      <div class="phone"><div class="di"></div>
+        <div class="sb"><span>9:41</span><span>● ● ●</span></div>
+        <div class="scrn" style="display:flex;flex-direction:column;align-items:center;padding-top:64px">
+          <div class="pcap">SUNDAY · WEEK 4</div>
+          <h3 style="font-family:'Fraunces',serif;font-weight:600;font-variation-settings:'SOFT' 0,'opsz' 144;font-size:24px;letter-spacing:-.5px;margin:6px 0 18px;text-align:center">Sunday <span style="color:#E8784E;font-style:italic">weigh-in</span></h3>
+          <div class="crd" style="width:100%;text-align:center;padding:22px 14px">
+            <div class="num-cap">YOUR WEIGHT</div>
+            <div style="font-family:'Fraunces',serif;font-weight:600;font-variation-settings:'SOFT' 0;font-size:64px;color:#E8784E;letter-spacing:-2.6px;line-height:1;margin:8px 0 4px">82.4</div>
+            <div style="font-size:11px;color:#8C7B6A">kg · <span class="delta">−0.7 vs last week</span></div>
+          </div>
+          <div class="crd" style="width:100%;margin-top:10px;background:#F4D9B5;border:none">
+            <div class="num-cap" style="color:#7A4520">LUMI'S ADJUSTMENT</div>
+            <div style="font-size:12px;color:#3A2410;line-height:1.5;margin-top:6px"><b>5 days ahead</b> — bumping +80 kcal/day so we don't burn out the gas tank.</div>
+          </div>
+          <div class="cta" style="width:100%;margin-top:auto;margin-bottom:36px">Apply adjustment</div>
+        </div>
+        <div class="home"></div>
+      </div>
+
+      <div class="phone"><div class="di"></div>
+        <div class="sb"><span>9:41</span><span>● ● ●</span></div>
+        <div class="scrn" style="padding-bottom:80px">
+          <div class="pcap">FORECAST · 26 WEEKS</div>
+          <h3 style="font-family:'Fraunces',serif;font-weight:600;font-variation-settings:'SOFT' 0,'opsz' 144;font-size:22px;letter-spacing:-.5px;margin:4px 0 4px"><span style="color:#E8784E;font-style:italic">68 kg</span> by Oct 14</h3>
+          <div style="font-size:11px;color:#3D5A4A;font-weight:600;margin-bottom:12px">14 days ahead of plan</div>
+          <div class="crd" style="padding:14px 8px">
+            <svg viewBox="0 0 240 130" width="100%">
+              <line x1="20" x2="230" y1="20" y2="20" stroke="#EBE3D6"/><line x1="20" x2="230" y1="60" y2="60" stroke="#EBE3D6"/><line x1="20" x2="230" y1="100" y2="100" stroke="#EBE3D6"/>
+              <path d="M22,28 Q80,40 130,60 T228,100" stroke="#8C7B6A" stroke-width="1.4" fill="none" stroke-dasharray="3 4"/>
+              <path d="M22,28 L42,38 L62,48 L82,52 L102,58" stroke="#E8784E" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+              <circle cx="102" cy="58" r="4" fill="#E8784E" stroke="#FAF6F0" stroke-width="2"/>
+            </svg>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px">
+            <div class="crd" style="padding:8px;text-align:center"><div class="num-cap" style="font-size:8px">LOST</div><div style="font-family:'Fraunces',serif;font-weight:600;font-variation-settings:'SOFT' 0;font-size:18px">2.6</div></div>
+            <div class="crd" style="padding:8px;text-align:center"><div class="num-cap" style="font-size:8px">AVG/WK</div><div style="font-family:'Fraunces',serif;font-weight:600;font-variation-settings:'SOFT' 0;font-size:18px">0.65</div></div>
+            <div class="crd" style="padding:8px;text-align:center"><div class="num-cap" style="font-size:8px">TO GO</div><div style="font-family:'Fraunces',serif;font-weight:600;font-variation-settings:'SOFT' 0;font-size:18px">14.4</div></div>
+          </div>
+        </div>
+        <div class="home"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="footer">
+    Both fonts now applied across each variant — display serif on headings + numerals, secondary sans on body, captions, labels, pills, navigation. Scroll horizontally inside each row to see all 4 screens. <b>Reply B1, B2, or B3</b> to lock and apply across the full 10-screen Lumi prototype.
+  </div>
+
+</div>
+</body></html>
