@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: #2a2018;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: "DM Sans", system-ui, sans-serif;
+  color: #1F1B17;
+}
+
+button { font-family: inherit; }
+
+/* ── Mascot animations ─────────────────────────────────────────── */
+@keyframes pip-breathe {
+  0%, 100% { transform: scaleY(1) scaleX(1); }
+  50%       { transform: scaleY(1.03) scaleX(.985); }
+}
+@keyframes pip-breatheSlow {
+  0%, 100% { transform: scaleY(1) scaleX(1); }
+  50%       { transform: scaleY(1.02) scaleX(.99); }
+}
+@keyframes pip-bob {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+@keyframes pip-jump {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  20%       { transform: translateY(0) scaleY(.88) scaleX(1.08); }
+  50%       { transform: translateY(-22px) scaleY(1); }
+  80%       { transform: translateY(0) scaleY(.9) scaleX(1.06); }
+}
+@keyframes pip-lean {
+  0%, 100% { transform: rotate(0deg); }
+  50%       { transform: rotate(6deg); }
+}
+@keyframes pip-wave {
+  0%, 100% { transform: rotate(0deg); }
+  25%       { transform: rotate(22deg); }
+  75%       { transform: rotate(-8deg); }
+}
+@keyframes pip-shine-rot {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes pip-blink {
+  0%, 90%, 100% { scaleY: 1; }
+  95%            { scaleY: 0.05; }
+}
+
+/* ── Log screen animations ─────────────────────────────────────── */
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: .6; transform: scale(1.08); }
+}
+@keyframes pulse-ring {
+  0%   { transform: scale(.9); opacity: .8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+@keyframes scan {
+  0%   { top: 16px; }
+  100% { top: calc(100% - 20px); }
+}
+@keyframes bar {
+  0%, 100% { scaleY: 1; }
+  50%       { scaleY: 2.2; }
+}
+
+/* ── Compute screen ────────────────────────────────────────────── */
+@keyframes compute-fill {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+/* ── Shine/shimmer ─────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+/* ── Scrollbar hide ────────────────────────────────────────────── */
+.hide-scroll { scrollbar-width: none; }
+.hide-scroll::-webkit-scrollbar { display: none; }
