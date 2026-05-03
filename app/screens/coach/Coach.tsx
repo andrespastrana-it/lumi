@@ -4,9 +4,8 @@ import { useState } from 'react';
 import Mascot from '@/app/components/Mascot';
 import { Header, IconChip, TabBar, S } from '@/app/components/ui';
 import { Icon } from '@/app/lib/icons';
-import { C, BTN_SHADOW, PILLOW_SHADOW_SM } from '@/app/lib/tokens';
-
-interface Msg { from: 'lumi' | 'me'; text: string; action?: { label: string; go: string } }
+import { C, BTN_SHADOW } from '@/app/lib/tokens';
+import MessageBubble, { type Msg } from './MessageBubble';
 
 const PROMPTS = [
   { q: 'Can I drink wine tonight?',           icon: 'heart',   a: () => ({ text: "A glass (150ml) is fine — that's ~120 kcal. I'll trim 100 kcal off dinner. Stick to one and water in between." }) },
@@ -44,18 +43,7 @@ export default function Coach({ go }: { go: (r: string) => void }) {
 
       <div style={{ padding: '4px 22px 8px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {msgs.map((m, i) => (
-          <div key={i} style={{ alignSelf: m.from === 'me' ? 'flex-end' : 'flex-start', display: 'flex', alignItems: 'flex-end', gap: 8, maxWidth: '85%' }}>
-            {m.from === 'lumi' && i === msgs.length - 1 && <div style={{ marginBottom: -2 }}><Mascot mood="happy" size={32} animate={false} /></div>}
-            <div style={{ padding: '12px 16px', background: m.from === 'me' ? C.ink : C.apricotLt, color: m.from === 'me' ? C.paper : C.ink, fontSize: 14, lineHeight: 1.5, borderRadius: m.from === 'me' ? '18px 18px 4px 18px' : '18px 18px 18px 4px', boxShadow: PILLOW_SHADOW_SM }}>
-              {m.text}
-              {m.action && (
-                <button onClick={() => go(m.action!.go)} style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 12, background: C.apricot, color: C.paper, border: 0, padding: '8px 14px', borderRadius: 999, fontFamily: 'inherit', fontSize: 12, fontWeight: 600, cursor: 'pointer', boxShadow: BTN_SHADOW }}>
-                  <Icon name="check" color="#fff" size={12} />
-                  {m.action.label}
-                </button>
-              )}
-            </div>
-          </div>
+          <MessageBubble key={i} m={m} showMascot={i === msgs.length - 1} go={go} />
         ))}
       </div>
 

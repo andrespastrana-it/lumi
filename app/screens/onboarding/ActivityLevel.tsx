@@ -4,8 +4,7 @@ import { Header, IconChip, S, Em } from '@/app/components/ui';
 import { Icon } from '@/app/lib/icons';
 import { C } from '@/app/lib/tokens';
 import { AppState } from '@/app/context/AppContext';
-
-const PILLOW_SHADOW = '0 2px 8px -4px rgba(122,69,32,.10), 0 1px 2px rgba(122,69,32,.05)';
+import { SelectCard, CheckBadge } from './_shared';
 
 export default function ActivityLevel({ go, state, set }: { go: (r: string) => void; state: AppState; set: (k: keyof AppState, v: AppState[keyof AppState]) => void }) {
   const opts = [
@@ -23,14 +22,14 @@ export default function ActivityLevel({ go, state, set }: { go: (r: string) => v
           {opts.map(o => {
             const on = state.activity === o.k;
             return (
-              <div key={o.k} onClick={() => set('activity', o.k)} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: 14, background: on ? C.pillow : 'rgba(255,251,241,.5)', borderRadius: 18, boxShadow: on ? PILLOW_SHADOW : 'none', border: on ? `1.5px solid ${C.apricot}` : '1.5px solid transparent', cursor: 'pointer' }}>
+              <SelectCard key={o.k} selected={on} onClick={() => set('activity', o.k)}>
                 <IconChip tone={o.tone} size={44}>{o.icon}</IconChip>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 16, fontWeight: on ? 600 : 500, color: on ? C.apricot : C.ink, fontFamily: '"Fraunces", serif' }}>{o.l}</div>
                   <div style={{ fontSize: 12, color: C.dim, marginTop: 2 }}>{o.d}</div>
                 </div>
-                {on && <div style={{ width: 24, height: 24, borderRadius: 999, background: C.apricot, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="check" color="#fff" size={14} /></div>}
-              </div>
+                {on && <CheckBadge />}
+              </SelectCard>
             );
           })}
         </div>
