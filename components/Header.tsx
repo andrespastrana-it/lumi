@@ -23,6 +23,7 @@ export function Header({ children, showBack, mode = 'cream' }: HeaderProps) {
           onPress={() => router.back()}
           accessibilityRole="button"
           accessibilityLabel="Go back"
+          hitSlop={8}
           style={{ backgroundColor: 'rgba(0,0,0,.04)', width: 34, height: 34, borderRadius: 999, alignItems: 'center', justifyContent: 'center' }}
         >
           <SymbolView name="chevron.left" size={18} tintColor={fg} />
