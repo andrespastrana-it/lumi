@@ -1,0 +1,54 @@
+{
+  "expo": {
+    "name": "Lumi",
+    "slug": "lumi",
+    "scheme": "lumi",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.axora.lumi",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Lumi uses the camera so you can log meals by photo or barcode.",
+        "NSMicrophoneUsageDescription": "Lumi uses the microphone so you can log meals by voice.",
+        "NSPhotoLibraryUsageDescription": "Lumi reads photos when you pick a meal image from your library.",
+        "NSHealthShareUsageDescription": "Lumi reads weight and activity data to personalize your plan.",
+        "NSHealthUpdateUsageDescription": "Lumi writes weigh-ins back to Apple Health if you enable that integration."
+      }
+    },
+    "android": {
+      "package": "com.axora.lumi",
+      "adaptiveIcon": {
+        "backgroundColor": "#F2EAD8"
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Lumi uses the camera so you can log meals by photo or barcode."
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Lumi uses the microphone so you can log meals by voice."
+        }
+      ],
+      "expo-image",
+      "expo-secure-store",
+      "expo-asset"
+    ]
+  }
+}
