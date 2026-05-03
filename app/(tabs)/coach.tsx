@@ -33,7 +33,7 @@ function MessageBubble({ m, showMascot, onAction }: { m: Msg; showMascot: boolea
     >
       {!isMe && showMascot && (
         <View style={{ marginBottom: -2 }}>
-          <Mascot mood="happy" size={32} />
+          <Mascot mood="happy" size={32} animate={false} />
         </View>
       )}
       <View

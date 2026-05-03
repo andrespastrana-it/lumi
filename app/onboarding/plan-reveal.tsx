@@ -14,7 +14,7 @@ export default function PlanReveal() {
       <Blob color={C.greenWash} size={240} bottom={140} left={-60} opacity={0.22} />
 
       <View style={{ paddingTop: 44, alignItems: 'center' }}>
-        <Mascot mood="happy" size={140} />
+        <Mascot mood="proud" size={140} />
       </View>
 
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 }}>

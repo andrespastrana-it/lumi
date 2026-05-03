@@ -27,7 +27,7 @@ export default function Compute() {
       <Blob color={C.butterLt} size={220} bottom={80} right={-60} opacity={0.08} />
 
       <View style={{ alignItems: 'center' }}>
-        <Mascot mood="curious" size={170} />
+        <Mascot mood="thinking" size={170} />
         <Text style={[S.h2, { fontSize: 30, marginTop: 14 }]}>
           Pip is <Em>thinking</Em>
         </Text>
