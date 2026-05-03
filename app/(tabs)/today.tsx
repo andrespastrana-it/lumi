@@ -29,7 +29,18 @@ const MEALS: {
   { l: 'Salmon, greens, rice',   t: '19:30', kcal: 580, done: false, next: false, tone: 'sky',     icon: 'lunch' },
 ];
 
+function greetingFor(d: Date): string {
+  const h = d.getHours();
+  if (h < 12) return 'Morning';
+  if (h < 18) return 'Afternoon';
+  return 'Evening';
+}
+
 function HeaderGreeting() {
+  const now = new Date();
+  const eyebrow = now.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+  const greeting = greetingFor(now);
+
   return (
     <View style={{ paddingHorizontal: 22, paddingTop: 22, paddingBottom: 14 }}>
       <Blob color={C.apricotMd} size={180} top={-30} right={-30} opacity={0.12} />
@@ -38,9 +49,9 @@ function HeaderGreeting() {
           <Mascot mood="happy" size={92} />
         </View>
         <View style={{ flex: 1, paddingTop: 4 }}>
-          <Text style={S.eyebrow}>Tuesday · Apr 28</Text>
+          <Text style={S.eyebrow}>{eyebrow}</Text>
           <Text style={[S.h1, { fontSize: 30, marginTop: 6, lineHeight: 32 }]}>
-            Morning, <Em>Marco</Em>
+            {greeting}, <Em>Marco</Em>
           </Text>
           <Text style={{ fontSize: 13, color: C.muted, fontStyle: 'italic', fontFamily: 'Fraunces_300Light_Italic', marginTop: 8, lineHeight: 18 }}>
             “Today is a chicken-and-{'\n'}quinoa kind of day.”
