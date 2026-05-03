@@ -40,6 +40,8 @@ yarn-error.log*
 .DS_Store
 *.tsbuildinfo
 legacy-web/next-env.d.ts
+*_backup.*
+*.bak
 
 # AI tooling caches
 .agents/

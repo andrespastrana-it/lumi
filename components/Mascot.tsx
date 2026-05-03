@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { View } from 'react-native';
 import Svg, {
   Defs,
@@ -15,19 +15,16 @@ import Svg, {
 } from 'react-native-svg';
 import Animated, {
   useSharedValue,
-  useAnimatedStyle,
   useAnimatedProps,
   withRepeat,
   withSequence,
   withTiming,
-  withDelay,
+  withSpring,
   Easing,
+  SharedValue,
 } from 'react-native-reanimated';
 
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
-const AnimatedG      = Animated.createAnimatedComponent(G);
-const AnimatedPath   = Animated.createAnimatedComponent(Path);
-const AnimatedSvgText = Animated.createAnimatedComponent(SvgText);
+const AnimatedG = Animated.createAnimatedComponent(G);
 
 const SKIN = {
   s1: '#FFD8BB', s2: '#FFB088', s3: '#E8784E', s4: '#A04A1E',
@@ -92,50 +89,63 @@ function lookOffset(look?: LookDir): { lx: number; ly: number } {
   }
 }
 
-function Eye({ cx, cy, kind, look, blink }: { cx: number; cy: number; kind: EyeKind; look?: LookDir; blink?: boolean }) {
+function Eye({ cx, cy, kind, look, blinkScale }: { cx: number; cy: number; kind: EyeKind; look?: LookDir; blinkScale?: SharedValue<number> }) {
+  const style = useAnimatedProps(() => {
+    if (!blinkScale) return {};
+    return {
+      transform: [
+        { translateX: cx },
+        { translateY: cy },
+        { scaleY: blinkScale.value },
+        { translateX: -cx },
+        { translateY: -cy }
+      ] as any
+    };
+  });
+
   const id = `ig-${cx}-${cy}`;
-  if (kind === 'closed' || (blink && kind === 'open')) {
-    return <Path d={`M ${cx - 10} ${cy} Q ${cx} ${cy + 5} ${cx + 10} ${cy}`} stroke={SKIN.ink} strokeWidth={2.6} fill="none" strokeLinecap="round" />;
-  }
-  if (kind === 'happy') {
-    return <Path d={`M ${cx - 10} ${cy + 3} Q ${cx} ${cy - 7} ${cx + 10} ${cy + 3}`} stroke={SKIN.ink} strokeWidth={2.8} fill="none" strokeLinecap="round" />;
-  }
-  if (kind === 'star') {
-    return (
+  let content = null;
+  if (kind === 'closed') {
+    content = <Path d={`M ${cx - 10} ${cy} Q ${cx} ${cy + 5} ${cx + 10} ${cy}`} stroke={SKIN.ink} strokeWidth={2.6} fill="none" strokeLinecap="round" />;
+  } else if (kind === 'happy') {
+    content = <Path d={`M ${cx - 10} ${cy + 3} Q ${cx} ${cy - 7} ${cx + 10} ${cy + 3}`} stroke={SKIN.ink} strokeWidth={2.8} fill="none" strokeLinecap="round" />;
+  } else if (kind === 'star') {
+    content = (
       <G translateX={cx} translateY={cy}>
         <Ellipse rx={11} ry={12} fill="#fff" stroke={SKIN.ink} strokeWidth={1.5} />
         <Path d="M 0 -8 L 2 -2.5 L 8 -2.5 L 3.2 1.5 L 5 8 L 0 4 L -5 8 L -3.2 1.5 L -8 -2.5 L -2 -2.5 Z" fill={SKIN.ink} />
         <Ellipse cx={-3} cy={-4} rx={2} ry={2.5} fill="#fff" />
       </G>
     );
-  }
-  if (kind === 'heart') {
-    return (
+  } else if (kind === 'heart') {
+    content = (
       <G translateX={cx} translateY={cy}>
         <Ellipse rx={11} ry={12} fill="#fff" stroke={SKIN.ink} strokeWidth={1.5} />
         <Path d="M -5.5 -2 a 2.8 2.8 0 0 1 5.5 0 a 2.8 2.8 0 0 1 5.5 0 q 0 4.5 -5.5 8 q -5.5 -3.5 -5.5 -8 z" fill={SKIN.s3} />
       </G>
     );
+  } else {
+    // open
+    const { lx, ly } = lookOffset(look);
+    content = (
+      <G translateX={cx} translateY={cy}>
+        <Defs>
+          <RadialGradient id={id} cx="50%" cy="50%" r="50%">
+            <Stop offset="0%" stopColor={SKIN.irisLt} />
+            <Stop offset="70%" stopColor={SKIN.iris} />
+            <Stop offset="100%" stopColor={SKIN.ink} />
+          </RadialGradient>
+        </Defs>
+        <Ellipse rx={11} ry={11} fill="#FFFAF3" stroke={SKIN.inkSoft} strokeWidth={0.6} opacity={0.95} />
+        <Ellipse cx={lx} cy={ly} rx={8} ry={8.5} fill={`url(#${id})`} />
+        <Ellipse cx={lx} cy={ly} rx={4.5} ry={5} fill={SKIN.ink} />
+        <Ellipse cx={lx - 2.5} cy={ly - 3.5} rx={2.6} ry={3.2} fill="#fff" />
+        <Circle cx={lx + 2.5} cy={ly + 2.5} r={1.3} fill="#fff" opacity={0.9} />
+        <Path d="M -10 1 Q 0 5 10 1" stroke={SKIN.inkSoft} strokeWidth={0.8} fill="none" opacity={0.4} />
+      </G>
+    );
   }
-  // open
-  const { lx, ly } = lookOffset(look);
-  return (
-    <G translateX={cx} translateY={cy}>
-      <Defs>
-        <RadialGradient id={id} cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor={SKIN.irisLt} />
-          <Stop offset="70%" stopColor={SKIN.iris} />
-          <Stop offset="100%" stopColor={SKIN.ink} />
-        </RadialGradient>
-      </Defs>
-      <Ellipse rx={11} ry={11} fill="#FFFAF3" stroke={SKIN.inkSoft} strokeWidth={0.6} opacity={0.95} />
-      <Ellipse cx={lx} cy={ly} rx={8} ry={8.5} fill={`url(#${id})`} />
-      <Ellipse cx={lx} cy={ly} rx={4.5} ry={5} fill={SKIN.ink} />
-      <Ellipse cx={lx - 2.5} cy={ly - 3.5} rx={2.6} ry={3.2} fill="#fff" />
-      <Circle cx={lx + 2.5} cy={ly + 2.5} r={1.3} fill="#fff" opacity={0.9} />
-      <Path d="M -10 1 Q 0 5 10 1" stroke={SKIN.inkSoft} strokeWidth={0.8} fill="none" opacity={0.4} />
-    </G>
-  );
+  return <AnimatedG animatedProps={style}>{content}</AnimatedG>;
 }
 
 function Mouth({ cx, cy, kind }: { cx: number; cy: number; kind: MouthKind }) {
@@ -259,257 +269,373 @@ function Legs({ pose }: { pose: LegsPose }) {
   );
 }
 
-// ── Animated accents ─────────────────────────────────────────────
-
-function ConfettiParticle({ cx, startY, r, color, dur, delay }: { cx: number; startY: number; r: number; color: string; dur: number; delay: number }) {
-  const t = useSharedValue(0);
+function Accent({ kind }: { kind: AccentKind }) {
+  const floatY = useSharedValue(0);
   useEffect(() => {
-    t.value = withDelay(delay, withRepeat(withTiming(1, { duration: dur, easing: Easing.in(Easing.quad) }), -1, false));
-  }, [t, dur, delay]);
-  const animatedProps = useAnimatedProps(() => ({
-    cy: startY + (180 - startY) * t.value,
-    opacity: t.value < 0.7 ? 1 : 1 - (t.value - 0.7) / 0.3,
+    floatY.value = withRepeat(
+      withSequence(
+        withTiming(-3, { duration: 1800, easing: Easing.inOut(Easing.sin) }),
+        withTiming(0, { duration: 1800, easing: Easing.inOut(Easing.sin) })
+      ), -1, true
+    );
+  }, []);
+  
+  const style = useAnimatedProps(() => ({
+    transform: [{ translateY: floatY.value }] as any
   }));
-  return <AnimatedCircle animatedProps={animatedProps} cx={cx} r={r} fill={color} />;
-}
 
-function ConfettiAccent() {
-  const ps = [
-    { cx: 18,  cy: 18, r: 3,   color: SKIN.s3,     dur: 2500, delay: 0 },
-    { cx: 104, cy: 14, r: 2.5, color: SKIN.leafDk, dur: 2800, delay: 500 },
-    { cx: 112, cy: 42, r: 2.2, color: '#5A3A55',   dur: 2300, delay: 1000 },
-    { cx: 14,  cy: 54, r: 2.5, color: SKIN.s3,     dur: 2600, delay: 300 },
-    { cx: 108, cy: 78, r: 2,   color: SKIN.leafDk, dur: 2400, delay: 700 },
-    { cx: 16,  cy: 90, r: 2.2, color: '#5A3A55',   dur: 2700, delay: 1200 },
-  ];
-  return <G>{ps.map((p, i) => <ConfettiParticle key={i} {...p} startY={p.cy} />)}</G>;
-}
-
-function HeartFloat({ d, fill, opacity, dur, delay }: { d: string; fill: string; opacity?: number; dur: number; delay: number }) {
-  const t = useSharedValue(0);
-  useEffect(() => {
-    t.value = withDelay(delay, withRepeat(withSequence(withTiming(1, { duration: dur / 2 }), withTiming(0, { duration: dur / 2 })), -1, false));
-  }, [t, dur, delay]);
-  const animatedProps = useAnimatedProps(() => ({
-    translateY: -10 * t.value,
-    opacity: (opacity ?? 1) * (1 - t.value * 0.3),
-  }));
-  return (
-    <AnimatedG animatedProps={animatedProps}>
-      <Path d={d} fill={fill} />
-    </AnimatedG>
-  );
-}
-
-function HeartsAccent() {
-  return (
-    <G>
-      <HeartFloat d="M 16 22 a 3 3 0 0 1 6 0 a 3 3 0 0 1 6 0 q 0 4 -6 8 q -6 -4 -6 -8 z"      fill={SKIN.s3} dur={2000} delay={0} />
-      <HeartFloat d="M 92 12 a 2.5 2.5 0 0 1 5 0 a 2.5 2.5 0 0 1 5 0 q 0 3.5 -5 7 q -5 -3.5 -5 -7 z" fill={SKIN.s3} opacity={0.7} dur={2200} delay={500} />
-    </G>
-  );
-}
-
-function TypingDot({ cx, delay }: { cx: number; delay: number }) {
-  const t = useSharedValue(0.3);
-  useEffect(() => {
-    t.value = withDelay(delay, withRepeat(withSequence(withTiming(1, { duration: 500 }), withTiming(0.3, { duration: 500 })), -1, false));
-  }, [t, delay]);
-  const animatedProps = useAnimatedProps(() => ({ opacity: t.value }));
-  return <AnimatedCircle animatedProps={animatedProps} cx={cx} cy={6} r={1.8} fill={SKIN.ink} />;
-}
-
-function DotsAccent() {
-  return (
-    <G translateX={92} translateY={-2}>
-      <Ellipse cx={14} cy={6} rx={14} ry={9} fill="#fff" stroke={SKIN.ink} strokeWidth={1.5} />
-      <TypingDot cx={8}  delay={0} />
-      <TypingDot cx={14} delay={200} />
-      <TypingDot cx={20} delay={400} />
-    </G>
-  );
-}
-
-function SleepZLetter({ x, y, fontSize, baseOpacity, delay }: { x: number; y: number; fontSize: number; baseOpacity: number; delay: number }) {
-  const t = useSharedValue(baseOpacity);
-  useEffect(() => {
-    t.value = withDelay(delay, withRepeat(withSequence(withTiming(baseOpacity * 0.3, { duration: 800 }), withTiming(baseOpacity, { duration: 800 })), -1, false));
-  }, [t, baseOpacity, delay]);
-  const animatedProps = useAnimatedProps(() => ({ opacity: t.value }));
-  return (
-    <AnimatedSvgText animatedProps={animatedProps} x={x} y={y} fontSize={fontSize} fill={SKIN.ink} fontFamily="Fraunces_400Regular">
-      z
-    </AnimatedSvgText>
-  );
-}
-
-function SleepZAccent() {
-  return (
-    <G translateX={95} translateY={16}>
-      <SleepZLetter x={0} y={14} fontSize={14} baseOpacity={1}   delay={0} />
-      <SleepZLetter x={9} y={4}  fontSize={10} baseOpacity={0.7} delay={500} />
-    </G>
-  );
-}
-
-function SweatAccent() {
-  const t = useSharedValue(0.4);
-  useEffect(() => {
-    t.value = withRepeat(withSequence(withTiming(1, { duration: 1000 }), withTiming(0.4, { duration: 1000 })), -1, false);
-  }, [t]);
-  const animatedProps = useAnimatedProps(() => ({ opacity: t.value }));
-  return (
-    <G translateX={86} translateY={38}>
-      <AnimatedPath
-        animatedProps={animatedProps}
-        d="M 5 0 Q 0 8 0 12 a 5 5 0 0 0 10 0 Q 10 8 5 0 Z"
-        fill="#7BB7E8"
-        stroke={SKIN.ink}
-        strokeWidth={1.2}
-      />
-    </G>
-  );
-}
-
-function Accent({ kind, animate }: { kind: AccentKind; animate: boolean }) {
-  // Static fallback for animate=false (used by MascotGallery thumbnails to
-  // keep the grid quiet).
-  if (!animate) {
-    if (kind === 'confetti') {
-      return (
-        <G>
-          {[
-            [18, 18, 3, SKIN.s3],
-            [104, 14, 2.5, SKIN.leafDk],
-            [112, 42, 2.2, '#5A3A55'],
-            [14, 54, 2.5, SKIN.s3],
-            [108, 78, 2, SKIN.leafDk],
-            [16, 90, 2.2, '#5A3A55'],
-          ].map(([cx, cy, r, color], i) => (
-            <Circle key={i} cx={cx as number} cy={cy as number} r={r as number} fill={color as string} />
-          ))}
-        </G>
-      );
-    }
-    if (kind === 'hearts') {
-      return (
-        <G>
-          <Path d="M 16 22 a 3 3 0 0 1 6 0 a 3 3 0 0 1 6 0 q 0 4 -6 8 q -6 -4 -6 -8 z" fill={SKIN.s3} />
-          <Path d="M 92 12 a 2.5 2.5 0 0 1 5 0 a 2.5 2.5 0 0 1 5 0 q 0 3.5 -5 7 q -5 -3.5 -5 -7 z" fill={SKIN.s3} opacity={0.7} />
-        </G>
-      );
-    }
-    if (kind === 'dots') {
-      return (
-        <G translateX={92} translateY={-2}>
-          <Ellipse cx={14} cy={6} rx={14} ry={9} fill="#fff" stroke={SKIN.ink} strokeWidth={1.5} />
-          <Circle cx={8}  cy={6} r={1.8} fill={SKIN.ink} />
-          <Circle cx={14} cy={6} r={1.8} fill={SKIN.ink} />
-          <Circle cx={20} cy={6} r={1.8} fill={SKIN.ink} />
-        </G>
-      );
-    }
-    if (kind === 'sleepZ') {
-      return (
-        <G translateX={95} translateY={16}>
-          <SvgText x={0} y={14} fontSize={14} fill={SKIN.ink} fontFamily="Fraunces_400Regular">z</SvgText>
-          <SvgText x={9} y={4} fontSize={10} fill={SKIN.ink} opacity={0.7} fontFamily="Fraunces_400Regular">z</SvgText>
-        </G>
-      );
-    }
-    if (kind === 'sweat') {
-      return (
-        <G translateX={86} translateY={38}>
-          <Path d="M 5 0 Q 0 8 0 12 a 5 5 0 0 0 10 0 Q 10 8 5 0 Z" fill="#7BB7E8" stroke={SKIN.ink} strokeWidth={1.2} />
-        </G>
-      );
-    }
+  let content = null;
+  if (kind === 'confetti') {
+    const ps = [
+      { cx: 18,  cy: 18, r: 3,   color: SKIN.s3 },
+      { cx: 104, cy: 14, r: 2.5, color: SKIN.leafDk },
+      { cx: 112, cy: 42, r: 2.2, color: '#5A3A55' },
+      { cx: 14,  cy: 54, r: 2.5, color: SKIN.s3 },
+      { cx: 108, cy: 78, r: 2,   color: SKIN.leafDk },
+      { cx: 16,  cy: 90, r: 2.2, color: '#5A3A55' },
+    ];
+    content = <G>{ps.map((p, i) => <Circle key={i} cx={p.cx} cy={p.cy} r={p.r} fill={p.color} />)}</G>;
+  } else if (kind === 'thinkBubble') {
+    content = (
+      <G translateX={92} translateY={6}>
+        <Circle cx={2} cy={22} r={3} fill="#fff" stroke={SKIN.ink} strokeWidth={1.5} />
+        <Circle cx={9} cy={14} r={4.5} fill="#fff" stroke={SKIN.ink} strokeWidth={1.5} />
+        <Ellipse cx={22} cy={6} rx={14} ry={9} fill="#fff" stroke={SKIN.ink} strokeWidth={1.5} />
+        <SvgText x={22} y={11} fontSize={13} fill={SKIN.ink} textAnchor="middle" fontFamily="Fraunces_300Light_Italic">?</SvgText>
+      </G>
+    );
+  } else if (kind === 'sleepZ') {
+    content = (
+      <G translateX={95} translateY={16}>
+        <SvgText x={0} y={14} fontSize={14} fill={SKIN.ink} fontFamily="Fraunces_400Regular">z</SvgText>
+        <SvgText x={9} y={4}  fontSize={10} fill={SKIN.ink} opacity={0.7} fontFamily="Fraunces_400Regular">z</SvgText>
+      </G>
+    );
+  } else if (kind === 'hearts') {
+    content = (
+      <G>
+        <Path d="M 16 22 a 3 3 0 0 1 6 0 a 3 3 0 0 1 6 0 q 0 4 -6 8 q -6 -4 -6 -8 z" fill={SKIN.s3} />
+        <Path d="M 92 12 a 2.5 2.5 0 0 1 5 0 a 2.5 2.5 0 0 1 5 0 q 0 3.5 -5 7 q -5 -3.5 -5 -7 z" fill={SKIN.s3} opacity={0.7} />
+      </G>
+    );
+  } else if (kind === 'sweat') {
+    content = (
+      <G translateX={86} translateY={38}>
+        <Path d="M 5 0 Q 0 8 0 12 a 5 5 0 0 0 10 0 Q 10 8 5 0 Z" fill="#7BB7E8" stroke={SKIN.ink} strokeWidth={1.2} />
+      </G>
+    );
+  } else if (kind === 'tear') {
+    content = <Path d="M 38 78 Q 35 92 38 100 a 3.5 3.5 0 0 0 7 0 Q 48 92 45 78 Z" fill={SKIN.tear} opacity={0.85} stroke={SKIN.iris} strokeWidth={0.8} />;
+  } else if (kind === 'dots') {
+    content = (
+      <G translateX={92} translateY={-2}>
+        <Ellipse cx={14} cy={6} rx={14} ry={9} fill="#fff" stroke={SKIN.ink} strokeWidth={1.5} />
+        <Circle cx={8}  cy={6} r={1.8} fill={SKIN.ink} />
+        <Circle cx={14} cy={6} r={1.8} fill={SKIN.ink} />
+        <Circle cx={20} cy={6} r={1.8} fill={SKIN.ink} />
+      </G>
+    );
   }
 
-  if (kind === 'confetti')    return <ConfettiAccent />;
-  if (kind === 'hearts')      return <HeartsAccent />;
-  if (kind === 'dots')        return <DotsAccent />;
-  if (kind === 'sleepZ')      return <SleepZAccent />;
-  if (kind === 'sweat')       return <SweatAccent />;
-  if (kind === 'thinkBubble') return (
-    <G translateX={92} translateY={6}>
-      <Circle cx={2} cy={22} r={3} fill="#fff" stroke={SKIN.ink} strokeWidth={1.5} />
-      <Circle cx={9} cy={14} r={4.5} fill="#fff" stroke={SKIN.ink} strokeWidth={1.5} />
-      <Ellipse cx={22} cy={6} rx={14} ry={9} fill="#fff" stroke={SKIN.ink} strokeWidth={1.5} />
-      <SvgText x={22} y={11} fontSize={13} fill={SKIN.ink} textAnchor="middle" fontFamily="Fraunces_300Light_Italic">?</SvgText>
-    </G>
-  );
-  if (kind === 'tear') {
-    return <Path d="M 38 78 Q 35 92 38 100 a 3.5 3.5 0 0 0 7 0 Q 48 92 45 78 Z" fill={SKIN.tear} opacity={0.85} stroke={SKIN.iris} strokeWidth={0.8} />;
+  if (!content) return null;
+  const needsFloat = ['thinkBubble', 'sleepZ', 'hearts', 'dots'].includes(kind);
+  if (needsFloat) {
+    return <AnimatedG animatedProps={style}>{content}</AnimatedG>;
   }
-  return null;
+  return <G>{content}</G>;
 }
 
-function useMascotAnimation(anim: AnimKind, animate: boolean) {
-  const translateY = useSharedValue(0);
-  const scaleX = useSharedValue(1);
-  const scaleY = useSharedValue(1);
-  const rotate = useSharedValue(0);
+function useDeepLiveness(anim: AnimKind, animate: boolean, mood: MascotMood) {
+  const rootY = useSharedValue(0);
+  const rootRotate = useSharedValue(0);
+  const bodyScaleX = useSharedValue(1);
+  const bodyScaleY = useSharedValue(1);
+  const bodyY = useSharedValue(0);
+  const faceX = useSharedValue(0);
+  const faceY = useSharedValue(0);
+  const armLagY = useSharedValue(0);
+  const leafRotate = useSharedValue(0);
+  const blinkScale = useSharedValue(1);
+  const shadowScale = useSharedValue(1);
 
+  // Blinking loop
   useEffect(() => {
     if (!animate) return;
-    translateY.value = 0;
-    scaleX.value = 1;
-    scaleY.value = 1;
-    rotate.value = 0;
+    let isActive = true;
+    const blinkLoop = () => {
+      if (!isActive) return;
+      const delay = 2000 + Math.random() * 4000;
+      const isDouble = Math.random() > 0.6;
+      setTimeout(() => {
+        if (!isActive) return;
+        if (mood === 'sleepy') return; // Don't blink if sleepy
+        
+        if (isDouble) {
+          blinkScale.value = withSequence(
+            withTiming(0.1, { duration: 60 }),
+            withTiming(1, { duration: 60 }),
+            withTiming(0.1, { duration: 60 }),
+            withTiming(1, { duration: 80 })
+          );
+        } else {
+          blinkScale.value = withSequence(
+            withTiming(0.1, { duration: 60 }),
+            withTiming(1, { duration: 80 })
+          );
+        }
+        blinkLoop();
+      }, delay);
+    };
+    blinkLoop();
+    return () => { isActive = false; };
+  }, [animate, mood]);
 
-    if (anim === 'bob') {
-      translateY.value = withRepeat(
-        withSequence(withTiming(-6, { duration: 1200 }), withTiming(0, { duration: 1200 })),
-        -1,
-        false,
-      );
-    } else if (anim === 'breathe') {
-      scaleY.value = withRepeat(withTiming(1.03, { duration: 1800 }), -1, true);
-      scaleX.value = withRepeat(withTiming(0.985, { duration: 1800 }), -1, true);
-    } else if (anim === 'breatheSlow') {
-      scaleY.value = withRepeat(withTiming(1.02, { duration: 2800 }), -1, true);
-      scaleX.value = withRepeat(withTiming(0.99,  { duration: 2800 }), -1, true);
-    } else if (anim === 'jump') {
-      translateY.value = withRepeat(
+  // Main physics loop
+  useEffect(() => {
+    if (!animate) return;
+    let intervalHandle: any = null;
+
+    rootY.value = 0; rootRotate.value = 0;
+    bodyScaleX.value = 1; bodyScaleY.value = 1; bodyY.value = 0;
+    faceX.value = 0; faceY.value = 0;
+    armLagY.value = 0; leafRotate.value = 0;
+    shadowScale.value = 1;
+
+    const backEasing = Easing.out(Easing.back(1.5));
+
+    if (anim === 'breathe' || anim === 'breatheSlow') {
+      const dur = anim === 'breatheSlow' ? 3200 : 2000;
+      bodyScaleY.value = withRepeat(
         withSequence(
-          withTiming(0, { duration: 280 }),
-          withTiming(-22, { duration: 420, easing: Easing.out(Easing.quad) }),
-          withTiming(0, { duration: 280, easing: Easing.in(Easing.quad) }),
-          withTiming(0, { duration: 420 }),
-        ),
-        -1,
-        false,
+          withTiming(1.03, { duration: dur * 0.35, easing: Easing.out(Easing.sin) }),
+          withTiming(1.03, { duration: dur * 0.1 }),
+          withTiming(0.98, { duration: dur * 0.55, easing: Easing.inOut(Easing.quad) })
+        ), -1, true
       );
-    } else if (anim === 'lean') {
-      rotate.value = withRepeat(
-        withSequence(withTiming(6, { duration: 1100 }), withTiming(0, { duration: 1100 })),
-        -1,
-        false,
-      );
-    } else if (anim === 'wave') {
-      rotate.value = withRepeat(
+      bodyScaleX.value = withRepeat(
         withSequence(
-          withTiming(0,   { duration: 200 }),
-          withTiming(22,  { duration: 350 }),
-          withTiming(-8,  { duration: 350 }),
-          withTiming(0,   { duration: 350 }),
-          withTiming(0,   { duration: 750 }),
-        ),
-        -1,
-        false,
+          withTiming(0.98, { duration: dur * 0.35, easing: Easing.out(Easing.sin) }),
+          withTiming(0.98, { duration: dur * 0.1 }),
+          withTiming(1.01, { duration: dur * 0.55, easing: Easing.inOut(Easing.quad) })
+        ), -1, true
+      );
+      bodyY.value = withRepeat(
+        withSequence(
+          withTiming(-1.5, { duration: dur * 0.35, easing: Easing.out(Easing.sin) }),
+          withTiming(-1.5, { duration: dur * 0.1 }),
+          withTiming(0.5, { duration: dur * 0.55, easing: Easing.inOut(Easing.quad) })
+        ), -1, true
+      );
+      shadowScale.value = withRepeat(
+        withSequence(
+          withTiming(0.97, { duration: dur * 0.35, easing: Easing.out(Easing.sin) }),
+          withTiming(0.97, { duration: dur * 0.1 }),
+          withTiming(1, { duration: dur * 0.55, easing: Easing.inOut(Easing.quad) })
+        ), -1, true
+      );
+      
+      faceY.value = withRepeat(
+        withSequence(
+          withTiming(1.5, { duration: dur * 0.4, easing: Easing.inOut(Easing.quad) }),
+          withTiming(-0.5, { duration: dur * 0.6, easing: Easing.inOut(Easing.quad) })
+        ), -1, true
+      );
+      faceX.value = withRepeat(
+        withSequence(
+          withTiming(1, { duration: dur * 0.8, easing: Easing.inOut(Easing.sin) }),
+          withTiming(-1, { duration: dur * 0.8, easing: Easing.inOut(Easing.sin) })
+        ), -1, true
+      );
+
+      armLagY.value = withRepeat(
+        withSequence(
+          withTiming(1.5, { duration: dur * 0.45, easing: Easing.inOut(Easing.sin) }),
+          withTiming(-1, { duration: dur * 0.55, easing: Easing.inOut(Easing.sin) })
+        ), -1, true
+      );
+      leafRotate.value = withRepeat(
+        withSequence(
+          withTiming(3, { duration: dur * 0.45, easing: Easing.inOut(Easing.sin) }),
+          withTiming(-2, { duration: dur * 0.55, easing: Easing.inOut(Easing.sin) })
+        ), -1, true
+      );
+    } 
+    else if (anim === 'jump') {
+      const jumpSeq = () => {
+        bodyScaleY.value = withSequence(
+          withTiming(0.85, { duration: 150, easing: Easing.out(Easing.quad) }),
+          withTiming(1.15, { duration: 250, easing: Easing.out(Easing.quad) }),
+          withTiming(1, { duration: 200, easing: Easing.in(Easing.quad) }),
+          withTiming(0.9, { duration: 100, easing: Easing.out(Easing.quad) }),
+          withTiming(1, { duration: 200, easing: backEasing })
+        );
+        bodyScaleX.value = withSequence(
+          withTiming(1.15, { duration: 150, easing: Easing.out(Easing.quad) }),
+          withTiming(0.85, { duration: 250, easing: Easing.out(Easing.quad) }),
+          withTiming(1, { duration: 200, easing: Easing.in(Easing.quad) }),
+          withTiming(1.1, { duration: 100, easing: Easing.out(Easing.quad) }),
+          withTiming(1, { duration: 200, easing: backEasing })
+        );
+        bodyY.value = withSequence(
+          withTiming(4, { duration: 150 }), 
+          withTiming(-32, { duration: 250, easing: Easing.out(Easing.quad) }), 
+          withTiming(0, { duration: 200, easing: Easing.in(Easing.quad) }), 
+          withTiming(2, { duration: 100 }), 
+          withTiming(0, { duration: 200, easing: backEasing })
+        );
+        shadowScale.value = withSequence(
+          withTiming(1, { duration: 150 }), 
+          withTiming(0.6, { duration: 250, easing: Easing.out(Easing.quad) }), 
+          withTiming(1, { duration: 200, easing: Easing.in(Easing.quad) }), 
+          withTiming(1.1, { duration: 100 }), 
+          withTiming(1, { duration: 200, easing: backEasing })
+        );
+        faceY.value = withSequence(
+          withTiming(3, { duration: 150 }), 
+          withTiming(-5, { duration: 250 }), 
+          withTiming(4, { duration: 200 }), 
+          withTiming(0, { duration: 300, easing: backEasing })
+        );
+        armLagY.value = withSequence(
+          withTiming(8, { duration: 150 }),
+          withTiming(14, { duration: 250 }),
+          withTiming(-12, { duration: 200 }),
+          withTiming(0, { duration: 300, easing: backEasing })
+        );
+        leafRotate.value = withSequence(
+          withTiming(-20, { duration: 150 }),
+          withTiming(25, { duration: 250 }),
+          withTiming(-15, { duration: 200 }),
+          withTiming(0, { duration: 300, easing: backEasing })
+        );
+      };
+      jumpSeq();
+      intervalHandle = setInterval(jumpSeq, 1600);
+    }
+    else if (anim === 'bob') {
+      const dur = 800;
+      bodyY.value = withRepeat(
+        withSequence(
+          withTiming(-10, { duration: dur * 0.5, easing: Easing.out(Easing.quad) }),
+          withTiming(0, { duration: dur * 0.5, easing: Easing.in(Easing.quad) })
+        ), -1, false
+      );
+      bodyScaleY.value = withRepeat(
+        withSequence(
+          withTiming(1.08, { duration: dur * 0.5, easing: Easing.out(Easing.quad) }),
+          withTiming(0.92, { duration: dur * 0.5, easing: Easing.in(Easing.quad) })
+        ), -1, false
+      );
+      bodyScaleX.value = withRepeat(
+        withSequence(
+          withTiming(0.92, { duration: dur * 0.5, easing: Easing.out(Easing.quad) }),
+          withTiming(1.08, { duration: dur * 0.5, easing: Easing.in(Easing.quad) })
+        ), -1, false
+      );
+      shadowScale.value = withRepeat(
+        withSequence(
+          withTiming(0.85, { duration: dur * 0.5, easing: Easing.out(Easing.quad) }),
+          withTiming(1, { duration: dur * 0.5, easing: Easing.in(Easing.quad) })
+        ), -1, false
+      );
+      armLagY.value = withRepeat(
+        withSequence(
+          withTiming(5, { duration: dur * 0.5, easing: Easing.out(Easing.quad) }),
+          withTiming(-3, { duration: dur * 0.5, easing: Easing.in(Easing.quad) })
+        ), -1, false
+      );
+      faceY.value = withRepeat(
+        withSequence(
+          withTiming(-2, { duration: dur * 0.5, easing: Easing.out(Easing.quad) }),
+          withTiming(2, { duration: dur * 0.5, easing: Easing.in(Easing.quad) })
+        ), -1, false
       );
     }
-  }, [anim, animate, translateY, scaleX, scaleY, rotate]);
+    else if (anim === 'lean') {
+      rootRotate.value = withRepeat(
+        withSequence(
+          withTiming(6, { duration: 1100, easing: Easing.inOut(Easing.quad) }),
+          withTiming(0, { duration: 1100, easing: Easing.inOut(Easing.quad) })
+        ), -1, false
+      );
+      bodyScaleY.value = withRepeat(withTiming(1.02, { duration: 1100 }), -1, true);
+    }
+    else if (anim === 'wave') {
+      rootRotate.value = withRepeat(
+        withSequence(
+          withTiming(0, { duration: 200 }),
+          withTiming(22, { duration: 350, easing: Easing.out(Easing.quad) }),
+          withTiming(-8, { duration: 350, easing: Easing.inOut(Easing.quad) }),
+          withTiming(0, { duration: 350, easing: backEasing }),
+          withTiming(0, { duration: 750 })
+        ), -1, false
+      );
+      bodyScaleY.value = withRepeat(withTiming(1.02, { duration: 1000 }), -1, true);
+    }
 
-  return useAnimatedStyle(() => ({
+    return () => {
+      if (intervalHandle) clearInterval(intervalHandle);
+    };
+  }, [anim, animate]);
+
+  const rootStyle = useAnimatedProps(() => ({
     transform: [
-      { translateY: translateY.value },
-      { scaleX: scaleX.value },
-      { scaleY: scaleY.value },
-      { rotate: `${rotate.value}deg` },
-    ],
+      { translateY: rootY.value },
+      { translateX: 60 },
+      { translateY: 144 },
+      { rotate: `${rootRotate.value}deg` },
+      { translateX: -60 },
+      { translateY: -144 }
+    ] as any
   }));
+
+  const bodyStyle = useAnimatedProps(() => ({
+    transform: [
+      { translateX: 60 },
+      { translateY: 144 },
+      { scaleX: bodyScaleX.value },
+      { scaleY: bodyScaleY.value },
+      { translateX: -60 },
+      { translateY: -144 },
+      { translateY: bodyY.value }
+    ] as any
+  }));
+
+  const faceStyle = useAnimatedProps(() => ({
+    transform: [
+      { translateX: faceX.value },
+      { translateY: faceY.value }
+    ] as any
+  }));
+
+  const armStyle = useAnimatedProps(() => ({
+    transform: [
+      { translateY: armLagY.value }
+    ] as any
+  }));
+
+  const leafStyle = useAnimatedProps(() => ({
+    transform: [
+      { translateX: 60 },
+      { translateY: 30 },
+      { rotate: `${leafRotate.value}deg` },
+      { translateX: -60 },
+      { translateY: -30 }
+    ] as any
+  }));
+
+  const shadowStyle = useAnimatedProps(() => ({
+    transform: [
+      { translateX: 60 },
+      { translateY: 160 },
+      { scaleX: shadowScale.value },
+      { scaleY: shadowScale.value },
+      { translateX: -60 },
+      { translateY: -160 }
+    ] as any
+  }));
+
+  return { rootStyle, bodyStyle, faceStyle, armStyle, leafStyle, blinkScale, shadowStyle };
 }
 
 interface MascotProps {
@@ -520,95 +646,82 @@ interface MascotProps {
   trackCursor?: boolean;
 }
 
-function useEyeBlink(animate: boolean) {
-  const [blink, setBlink] = useState(false);
-  useEffect(() => {
-    if (!animate) return;
-    let t1: ReturnType<typeof setTimeout> | undefined;
-    let t2: ReturnType<typeof setTimeout> | undefined;
-    const loop = () => {
-      const wait = 2400 + Math.random() * 3000;
-      t1 = setTimeout(() => {
-        setBlink(true);
-        t2 = setTimeout(() => {
-          setBlink(false);
-          loop();
-        }, 130);
-      }, wait);
-    };
-    loop();
-    return () => {
-      if (t1) clearTimeout(t1);
-      if (t2) clearTimeout(t2);
-    };
-  }, [animate]);
-  return blink;
-}
-
 export function Mascot({ mood = 'happy', size = 140, animate = true }: MascotProps) {
   const m = MOODS[mood] || MOODS.happy;
   const h = size * (170 / 120);
-  const animStyle = useMascotAnimation(m.anim, animate);
-  const blink = useEyeBlink(animate);
+  const { rootStyle, bodyStyle, faceStyle, armStyle, leafStyle, blinkScale, shadowStyle } = useDeepLiveness(m.anim, animate, mood);
 
   return (
     <View style={{ width: size, height: h }}>
-      <Animated.View style={[{ width: size, height: h }, animStyle]}>
-        <Svg width={size} height={h} viewBox="0 0 120 170">
-          <Defs>
-            <RadialGradient id="pipBody" cx="38%" cy="28%" r="72%">
-              <Stop offset="0%" stopColor={SKIN.s1} />
-              <Stop offset="30%" stopColor={SKIN.s2} />
-              <Stop offset="78%" stopColor={SKIN.s3} />
-              <Stop offset="100%" stopColor={SKIN.s4} />
-            </RadialGradient>
-            <RadialGradient id="pipBelly" cx="50%" cy="80%" r="50%">
-              <Stop offset="0%"   stopColor={SKIN.s4} stopOpacity={0.45} />
-              <Stop offset="100%" stopColor={SKIN.s4} stopOpacity={0} />
-            </RadialGradient>
-            <RadialGradient id="pipGloss" cx="32%" cy="18%" r="42%">
-              <Stop offset="0%"   stopColor="#fff" stopOpacity={0.9} />
-              <Stop offset="55%"  stopColor="#fff" stopOpacity={0.18} />
-              <Stop offset="100%" stopColor="#fff" stopOpacity={0} />
-            </RadialGradient>
-            <LinearGradient id="pipLeaf" x1="0%" y1="0%" x2="100%" y2="100%">
-              <Stop offset="0%"   stopColor="#9CC49C" />
-              <Stop offset="100%" stopColor={SKIN.leafDk} />
-            </LinearGradient>
-          </Defs>
+      <Svg width={size} height={h} viewBox="0 0 120 170">
+        <Defs>
+          <RadialGradient id="pipBody" cx="38%" cy="28%" r="72%">
+            <Stop offset="0%" stopColor={SKIN.s1} />
+            <Stop offset="30%" stopColor={SKIN.s2} />
+            <Stop offset="78%" stopColor={SKIN.s3} />
+            <Stop offset="100%" stopColor={SKIN.s4} />
+          </RadialGradient>
+          <RadialGradient id="pipBelly" cx="50%" cy="80%" r="50%">
+            <Stop offset="0%"   stopColor={SKIN.s4} stopOpacity={0.45} />
+            <Stop offset="100%" stopColor={SKIN.s4} stopOpacity={0} />
+          </RadialGradient>
+          <RadialGradient id="pipGloss" cx="32%" cy="18%" r="42%">
+            <Stop offset="0%"   stopColor="#fff" stopOpacity={0.9} />
+            <Stop offset="55%"  stopColor="#fff" stopOpacity={0.18} />
+            <Stop offset="100%" stopColor="#fff" stopOpacity={0} />
+          </RadialGradient>
+          <LinearGradient id="pipLeaf" x1="0%" y1="0%" x2="100%" y2="100%">
+            <Stop offset="0%"   stopColor="#9CC49C" />
+            <Stop offset="100%" stopColor={SKIN.leafDk} />
+          </LinearGradient>
+        </Defs>
 
+        <AnimatedG animatedProps={shadowStyle}>
           <Ellipse cx={60} cy={160} rx={40} ry={6} fill={SKIN.ink} opacity={0.18} />
+        </AnimatedG>
 
+        <AnimatedG animatedProps={rootStyle}>
           <Legs pose={m.legs} />
 
-          {(m.arms === 'cheer' || m.arms === 'up' || m.arms === 'wave') && <Arms pose={m.arms} />}
+          <AnimatedG animatedProps={bodyStyle}>
+            {(m.arms === 'cheer' || m.arms === 'up' || m.arms === 'wave') && (
+              <AnimatedG animatedProps={armStyle}>
+                <Arms pose={m.arms} />
+              </AnimatedG>
+            )}
 
-          <Path d="M 60 32 C 89 32, 102 58, 102 92 C 102 124, 86 144, 60 144 C 34 144, 18 124, 18 92 C 18 58, 31 32, 60 32 Z" fill="url(#pipBody)" />
-          <Path d="M 60 34 Q 56 64 58 104 Q 56 134 60 142" stroke={SKIN.s4} strokeWidth={1.6} fill="none" opacity={0.32} strokeLinecap="round" />
-          <Ellipse cx={60} cy={120} rx={38} ry={24} fill="url(#pipBelly)" />
-          <Ellipse cx={42} cy={62}  rx={22} ry={28} fill="url(#pipGloss)" />
-          <Ellipse cx={80} cy={50}  rx={6}  ry={9}  fill="#fff" opacity={0.18} />
+            <Path d="M 60 32 C 89 32, 102 58, 102 92 C 102 124, 86 144, 60 144 C 34 144, 18 124, 18 92 C 18 58, 31 32, 60 32 Z" fill="url(#pipBody)" />
+            <Path d="M 60 34 Q 56 64 58 104 Q 56 134 60 142" stroke={SKIN.s4} strokeWidth={1.6} fill="none" opacity={0.32} strokeLinecap="round" />
+            <Ellipse cx={60} cy={120} rx={38} ry={24} fill="url(#pipBelly)" />
+            <Ellipse cx={42} cy={62}  rx={22} ry={28} fill="url(#pipGloss)" />
+            <Ellipse cx={80} cy={50}  rx={6}  ry={9}  fill="#fff" opacity={0.18} />
 
-          {/* Leaves */}
-          <G>
-            <Path d="M 60 30 Q 72 18 82 22 Q 78 33 66 33 Z" fill="url(#pipLeaf)" />
-            <Path d="M 60 30 Q 70 22 80 24" stroke={SKIN.leafDk} strokeWidth={1.2} fill="none" opacity={0.5} />
-            <Path d="M 60 32 Q 50 22 42 26 Q 46 35 58 33 Z" fill={SKIN.leafDk} opacity={0.85} />
-            <Path d="M 60 33 L 60 24" stroke={SKIN.leafDk} strokeWidth={2.2} strokeLinecap="round" />
-          </G>
+            <AnimatedG animatedProps={leafStyle}>
+              <Path d="M 60 30 Q 72 18 82 22 Q 78 33 66 33 Z" fill="url(#pipLeaf)" />
+              <Path d="M 60 30 Q 70 22 80 24" stroke={SKIN.leafDk} strokeWidth={1.2} fill="none" opacity={0.5} />
+              <Path d="M 60 32 Q 50 22 42 26 Q 46 35 58 33 Z" fill={SKIN.leafDk} opacity={0.85} />
+              <Path d="M 60 33 L 60 24" stroke={SKIN.leafDk} strokeWidth={2.2} strokeLinecap="round" />
+            </AnimatedG>
 
-          <Brows kind={m.brows} />
-          <Cheeks visible={m.cheeks} />
-          <Eye cx={45} cy={70} kind={m.eye} look={m.look} blink={blink} />
-          <Eye cx={75} cy={70} kind={m.eye} look={m.look} blink={blink} />
-          <Mouth cx={60} cy={92} kind={m.mouth} />
-          <Ellipse cx={60} cy={80} rx={1.5} ry={1} fill={SKIN.s4} opacity={0.4} />
+            <AnimatedG animatedProps={faceStyle}>
+              <Brows kind={m.brows} />
+              <Cheeks visible={m.cheeks} />
+              <Eye cx={45} cy={70} kind={m.eye} look={m.look} blinkScale={blinkScale} />
+              <Eye cx={75} cy={70} kind={m.eye} look={m.look} blinkScale={blinkScale} />
+              <Mouth cx={60} cy={92} kind={m.mouth} />
+              <Ellipse cx={60} cy={80} rx={1.5} ry={1} fill={SKIN.s4} opacity={0.4} />
+            </AnimatedG>
 
-          {(m.arms !== 'cheer' && m.arms !== 'up' && m.arms !== 'wave') && <Arms pose={m.arms} />}
+            {(m.arms !== 'cheer' && m.arms !== 'up' && m.arms !== 'wave') && (
+              <AnimatedG animatedProps={armStyle}>
+                <Arms pose={m.arms} />
+              </AnimatedG>
+            )}
 
-          {m.accent && <Accent kind={m.accent} animate={animate} />}
-        </Svg>
-      </Animated.View>
+            {m.accent && <Accent kind={m.accent} />}
+          </AnimatedG>
+        </AnimatedG>
+      </Svg>
     </View>
   );
 }
