@@ -44,6 +44,9 @@ export default function Subscription() {
                 <Pressable
                   key={o.k}
                   onPress={() => set('subscription', o.k)}
+                  accessibilityRole="radio"
+                  accessibilityLabel={`${o.l}, ${o.p}. ${o.s}`}
+                  accessibilityState={{ selected: on }}
                   style={[
                     S.pillow,
                     {
@@ -84,10 +87,10 @@ export default function Subscription() {
 
           <View style={{ marginTop: 18, gap: 8 }}>
             <CtaButton label="Upgrade now" onPress={() => router.back()} />
-            <Pressable style={{ paddingVertical: 14, alignItems: 'center' }}>
+            <Pressable accessibilityRole="button" accessibilityLabel="Restore previous purchase" style={{ paddingVertical: 14, alignItems: 'center' }}>
               <Text style={{ color: C.dim, fontSize: 13, fontFamily: 'DMSans_500Medium' }}>Restore purchase</Text>
             </Pressable>
-            <Pressable style={{ paddingVertical: 14, alignItems: 'center' }}>
+            <Pressable accessibilityRole="button" accessibilityLabel="Cancel subscription" style={{ paddingVertical: 14, alignItems: 'center' }}>
               <Text style={{ color: '#B43E2A', fontSize: 13, fontFamily: 'DMSans_500Medium' }}>Cancel subscription</Text>
             </Pressable>
           </View>

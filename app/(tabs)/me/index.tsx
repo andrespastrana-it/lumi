@@ -39,6 +39,8 @@ export default function Profile() {
         <View style={{ paddingHorizontal: 22, paddingTop: 4 }}>
           <Pressable
             onPress={() => router.push('/(tabs)/me/edit')}
+            accessibilityRole="button"
+            accessibilityLabel="Marco. Down 2.6 kilograms, 21-day streak. Tap to edit profile."
             style={[S.pillow, { flexDirection: 'row', alignItems: 'center', gap: 16 }]}
           >
             <View style={{ width: 64, height: 64, borderRadius: 999, backgroundColor: C.apricot, alignItems: 'center', justifyContent: 'center' }}>
@@ -67,6 +69,8 @@ export default function Profile() {
                 <Pressable
                   key={it.l}
                   onPress={onPress}
+                  accessibilityRole="button"
+                  accessibilityLabel={it.v ? `${it.l}, ${it.v}` : it.l}
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',

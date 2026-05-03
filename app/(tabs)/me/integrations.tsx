@@ -63,6 +63,10 @@ export default function Integrations() {
                   </View>
                   <Pressable
                     onPress={() => toggle(it.k)}
+                    accessibilityRole="button"
+                    accessibilityLabel={on ? `Disconnect ${it.l}` : `Connect ${it.l}`}
+                    accessibilityState={{ checked: on }}
+                    hitSlop={6}
                     style={{
                       paddingHorizontal: 14,
                       paddingVertical: 7,

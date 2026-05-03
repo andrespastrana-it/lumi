@@ -106,6 +106,8 @@ function StreakBanner() {
     <View style={{ paddingHorizontal: 22, paddingTop: 14 }}>
       <Pressable
         onPress={() => router.push('/(tabs)/stats')}
+        accessibilityRole="button"
+        accessibilityLabel="Streak: 21 days, down 2.6 kilograms. Tap to see forecast."
         style={[S.pillowSm, { backgroundColor: C.greenLt, flexDirection: 'row', alignItems: 'center', gap: 14 }]}
       >
         <IconChip tone="greenSolid" size={44}>
@@ -136,6 +138,8 @@ function MealsList() {
           <Pressable
             key={i}
             onPress={() => router.push('/(tabs)/plan')}
+            accessibilityRole="button"
+            accessibilityLabel={`${m.l}, ${m.t}, ${m.kcal} kilocalories${m.done ? ', done' : m.next ? ', up next' : ''}`}
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -200,6 +204,8 @@ function WeighInBanner() {
     <View style={{ paddingHorizontal: 22, paddingTop: 16 }}>
       <Pressable
         onPress={() => router.push('/(tabs)/stats/weigh-in')}
+        accessibilityRole="button"
+        accessibilityLabel="Sunday weigh-in. Tap to step on the scale."
         style={[S.pillow, { backgroundColor: C.apricot, flexDirection: 'row', alignItems: 'center', gap: 14 }]}
       >
         <View style={{ width: 44, height: 44, borderRadius: 999, backgroundColor: 'rgba(255,255,255,.2)', alignItems: 'center', justifyContent: 'center' }}>

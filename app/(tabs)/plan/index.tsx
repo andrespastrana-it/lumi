@@ -32,6 +32,8 @@ export default function Plan() {
               <Pressable
                 key={i}
                 onPress={() => router.push('/(tabs)/plan/recipe')}
+                accessibilityRole="button"
+                accessibilityLabel={`${m.l}, ${m.t}, ${m.kcal} kilocalories${m.done ? ', done' : m.next ? ', up next' : ''}`}
                 style={[
                   S.pillowSm,
                   {

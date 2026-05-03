@@ -53,6 +53,8 @@ function MessageBubble({ m, showMascot, onAction }: { m: Msg; showMascot: boolea
         {m.action && (
           <Pressable
             onPress={() => onAction(m.action!.to)}
+            accessibilityRole="button"
+            accessibilityLabel={m.action.label}
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -135,6 +137,8 @@ export default function Coach() {
             <Pressable
               key={p.q}
               onPress={() => send(p.q, p.reply)}
+              accessibilityRole="button"
+              accessibilityLabel={`Ask Pip: ${p.q}`}
               style={[S.pillowSm, { flexDirection: 'row', alignItems: 'center', gap: 12 }]}
             >
               <IconChip tone="apricot" size={32}>
@@ -179,6 +183,9 @@ export default function Coach() {
         </View>
         <Pressable
           onPress={() => router.push('/log/choose')}
+          accessibilityRole="button"
+          accessibilityLabel="Log a meal"
+          hitSlop={4}
           style={{ width: 44, height: 44, borderRadius: 999, backgroundColor: C.apricot, alignItems: 'center', justifyContent: 'center', boxShadow: BTN_SHADOW }}
         >
           <Icon name="add" color="#fff" size={18} />

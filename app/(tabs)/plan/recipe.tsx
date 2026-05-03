@@ -60,6 +60,9 @@ function Hero() {
       <View style={{ position: 'absolute', top: 18, left: 22 }}>
         <Pressable
           onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+          hitSlop={6}
           style={{ width: 38, height: 38, borderRadius: 999, backgroundColor: 'rgba(255,255,255,.25)', alignItems: 'center', justifyContent: 'center' }}
         >
           <Text style={{ color: '#fff', fontSize: 22, fontFamily: 'Fraunces_400Regular' }}>‹</Text>
@@ -67,6 +70,9 @@ function Hero() {
       </View>
       <View style={{ position: 'absolute', top: 18, right: 22 }}>
         <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Save to favorites"
+          hitSlop={6}
           style={{ width: 38, height: 38, borderRadius: 999, backgroundColor: 'rgba(255,255,255,.25)', alignItems: 'center', justifyContent: 'center' }}
         >
           <Icon name="heart" color="#fff" size={18} />

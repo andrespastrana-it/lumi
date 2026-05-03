@@ -40,6 +40,9 @@ export default function CoachTone() {
                 <Pressable
                   key={t.l}
                   onPress={() => set('coachTone', t.l)}
+                  accessibilityRole="radio"
+                  accessibilityLabel={`${t.l}. ${t.d}`}
+                  accessibilityState={{ selected: on }}
                   style={[
                     S.pillow,
                     {

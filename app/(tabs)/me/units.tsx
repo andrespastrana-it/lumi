@@ -39,6 +39,9 @@ export default function Units() {
                     <Pressable
                       key={o}
                       onPress={() => setUnit(g.k, o)}
+                      accessibilityRole="radio"
+                      accessibilityLabel={`${g.label}: ${o}`}
+                      accessibilityState={{ selected: on }}
                       style={{
                         paddingHorizontal: 16,
                         paddingVertical: 10,

@@ -62,13 +62,13 @@ export default function Privacy() {
 
           <Text style={[S.eyebrow, { marginTop: 28 }]}>Your data, your control</Text>
           <View style={{ marginTop: 10, gap: 8 }}>
-            <Pressable style={{ paddingVertical: 14, alignItems: 'center' }}>
+            <Pressable accessibilityRole="button" accessibilityLabel="Export my data as CSV" style={{ paddingVertical: 14, alignItems: 'center' }}>
               <Text style={{ color: C.ink, fontSize: 13, fontFamily: 'DMSans_500Medium' }}>Export my data (.csv)</Text>
             </Pressable>
-            <Pressable style={{ paddingVertical: 14, alignItems: 'center' }}>
+            <Pressable accessibilityRole="link" accessibilityLabel="Open privacy policy" style={{ paddingVertical: 14, alignItems: 'center' }}>
               <Text style={{ color: C.ink, fontSize: 13, fontFamily: 'DMSans_500Medium' }}>Privacy policy</Text>
             </Pressable>
-            <Pressable style={{ paddingVertical: 14, alignItems: 'center' }}>
+            <Pressable accessibilityRole="button" accessibilityLabel="Delete my account" style={{ paddingVertical: 14, alignItems: 'center' }}>
               <Text style={{ color: '#B43E2A', fontSize: 13, fontFamily: 'DMSans_500Medium' }}>Delete my account</Text>
             </Pressable>
           </View>

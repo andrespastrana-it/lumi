@@ -26,6 +26,8 @@ export default function Help() {
         <View style={S.pad}>
           <Pressable
             onPress={() => router.push('/(tabs)/coach')}
+            accessibilityRole="button"
+            accessibilityLabel="Need a hand? Ask Pip directly."
             style={[S.pillow, { backgroundColor: C.apricotWash, marginTop: 14, flexDirection: 'row', alignItems: 'center', gap: 14 }]}
           >
             <Mascot mood="wave" size={56} />
@@ -46,6 +48,9 @@ export default function Help() {
                 <Pressable
                   key={q}
                   onPress={() => setOpen(on ? -1 : i)}
+                  accessibilityRole="button"
+                  accessibilityLabel={q}
+                  accessibilityState={{ expanded: on }}
                   style={{
                     paddingHorizontal: 18,
                     paddingVertical: 16,
@@ -69,10 +74,10 @@ export default function Help() {
 
           <Text style={[S.eyebrow, { marginTop: 28 }]}>Contact us</Text>
           <View style={{ marginTop: 10, gap: 8 }}>
-            <Pressable style={{ paddingVertical: 14, alignItems: 'center' }}>
+            <Pressable accessibilityRole="link" accessibilityLabel="Email support at lumi.app" style={{ paddingVertical: 14, alignItems: 'center' }}>
               <Text style={{ color: C.ink, fontSize: 13, fontFamily: 'DMSans_500Medium' }}>support@lumi.app</Text>
             </Pressable>
-            <Pressable style={{ paddingVertical: 14, alignItems: 'center' }}>
+            <Pressable accessibilityRole="link" accessibilityLabel="Rate Lumi on the App Store" style={{ paddingVertical: 14, alignItems: 'center' }}>
               <Text style={{ color: C.ink, fontSize: 13, fontFamily: 'DMSans_500Medium' }}>Rate Lumi on the App Store</Text>
             </Pressable>
           </View>
