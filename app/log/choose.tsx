@@ -36,6 +36,8 @@ export default function LogChoose() {
               <Pressable
                 key={m.to}
                 onPress={() => router.push(m.to as never)}
+                accessibilityRole="button"
+                accessibilityLabel={`${m.l}. ${m.d}`}
                 style={[
                   S.pillow,
                   {

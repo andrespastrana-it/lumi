@@ -45,6 +45,8 @@ export default function LogSearch() {
             <Pressable
               key={name}
               onPress={() => router.replace({ pathname: '/log/confirm', params: { source: 'search', name } })}
+              accessibilityRole="button"
+              accessibilityLabel={`${name}, ${sub}`}
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',

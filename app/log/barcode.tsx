@@ -105,6 +105,9 @@ export default function LogBarcode() {
       <View style={{ position: 'absolute', top: 18, left: 22 }}>
         <Pressable
           onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="Cancel and go back"
+          hitSlop={6}
           style={{ width: 38, height: 38, borderRadius: 999, backgroundColor: 'rgba(0,0,0,.4)', alignItems: 'center', justifyContent: 'center' }}
         >
           <Text style={{ color: '#fff', fontSize: 22, fontFamily: 'Fraunces_400Regular' }}>‹</Text>

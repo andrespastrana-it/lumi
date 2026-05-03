@@ -108,6 +108,9 @@ export default function LogPhoto() {
       <View style={{ position: 'absolute', top: 18, left: 22 }}>
         <Pressable
           onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="Cancel and go back"
+          hitSlop={6}
           style={{ width: 38, height: 38, borderRadius: 999, backgroundColor: 'rgba(0,0,0,.4)', alignItems: 'center', justifyContent: 'center' }}
         >
           <Text style={{ color: '#fff', fontSize: 22, fontFamily: 'Fraunces_400Regular' }}>‹</Text>
@@ -128,15 +131,28 @@ export default function LogPhoto() {
           gap: 28,
         }}
       >
-        <Pressable style={{ width: 44, height: 44, borderRadius: 999, backgroundColor: 'rgba(0,0,0,.4)', alignItems: 'center', justifyContent: 'center' }}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Open photo library"
+          hitSlop={6}
+          style={{ width: 44, height: 44, borderRadius: 999, backgroundColor: 'rgba(0,0,0,.4)', alignItems: 'center', justifyContent: 'center' }}
+        >
           <Icon name="sparkle" color="#fff" size={18} />
         </Pressable>
         <Pressable
           onPress={capture}
           disabled={capturing}
+          accessibilityRole="button"
+          accessibilityLabel="Capture photo"
+          accessibilityState={{ disabled: capturing }}
           style={{ width: 76, height: 76, borderRadius: 999, backgroundColor: '#fff', borderWidth: 5, borderColor: 'rgba(255,255,255,.3)', opacity: capturing ? 0.6 : 1 }}
         />
-        <Pressable style={{ width: 44, height: 44, borderRadius: 999, backgroundColor: 'rgba(0,0,0,.4)', alignItems: 'center', justifyContent: 'center' }}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Toggle flash"
+          hitSlop={6}
+          style={{ width: 44, height: 44, borderRadius: 999, backgroundColor: 'rgba(0,0,0,.4)', alignItems: 'center', justifyContent: 'center' }}
+        >
           <Icon name="flame" color="#fff" size={18} />
         </Pressable>
       </View>
