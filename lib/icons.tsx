@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { SvgXml } from 'react-native-svg';
 
 const PATHS: Record<string, string> = {
@@ -44,12 +45,18 @@ interface IconProps {
   size?: number;
 }
 
-export function Icon({ name, color = '#1F1B17', size = 24 }: IconProps) {
+function IconImpl({ name, color = '#1F1B17', size = 24 }: IconProps) {
   const inner = PATHS[name];
   if (!inner) return null;
   const colored = inner.replace(/currentColor/g, color);
   const xml = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">${colored}</svg>`;
   return <SvgXml xml={xml} width={size} height={size} />;
 }
+
+// Icon is rendered dozens of times per screen and its props are all
+// primitives. Memo wins big on screens with many icon-bearing rows
+// (Today, Plan, MeIndex, Onboarding/Permissions).
+export const Icon = memo(IconImpl);
+Icon.displayName = 'Icon';
 
 export { PATHS };

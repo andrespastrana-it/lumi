@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, memo } from 'react';
 import { View } from 'react-native';
 import Svg, {
   Defs,
@@ -729,7 +729,7 @@ interface MascotProps {
   trackCursor?: boolean;
 }
 
-export function Mascot({ mood = 'happy', size = 140, animate = true }: MascotProps) {
+function MascotImpl({ mood = 'happy', size = 140, animate = true }: MascotProps) {
   const m = MOODS[mood] || MOODS.happy;
   const h = size * (170 / 120);
   const { rootStyle, bodyStyle, faceStyle, pupilStyle, armStyle, leafStyle, blinkScale, shadowStyle } = useDeepLiveness(m.anim, animate, mood);
@@ -808,3 +808,11 @@ export function Mascot({ mood = 'happy', size = 140, animate = true }: MascotPro
     </View>
   );
 }
+
+// Mascot has 8+ Reanimated shared values + multiple useEffects per
+// instance. It's also rendered inside Coach and HeaderGreeting where
+// the parent re-renders frequently (TextInput keystrokes, etc.).
+// Memo prevents the whole liveness apparatus from rebuilding every
+// keystroke.
+export const Mascot = memo(MascotImpl);
+Mascot.displayName = 'Mascot';
