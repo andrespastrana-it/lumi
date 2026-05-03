@@ -1,0 +1,10 @@
+# Files excluded from the upload to EAS Build.
+# Same syntax as .gitignore. Anything tracked by git that doesn't help build
+# the app should be listed here so cloud builds stay slim.
+
+legacy-web/
+docs/
+chats/
+project/
+*.md
+!README.md
