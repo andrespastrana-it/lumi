@@ -11,6 +11,5 @@ export { Em } from './Em';
 export { CtaButton } from './CtaButton';
 export { SelectCard } from './SelectCard';
 export { CheckBadge } from './CheckBadge';
-export { ScreenStub } from './ScreenStub';
 export { FoodPlate } from './FoodPlate';
 export type { PlateTone } from './FoodPlate';
