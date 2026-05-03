@@ -46,6 +46,13 @@
           "microphonePermission": "Lumi uses the microphone so you can log meals by voice."
         }
       ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FAF6F0",
+          "resizeMode": "contain"
+        }
+      ],
       "expo-image",
       "expo-secure-store",
       "expo-asset"
