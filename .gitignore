@@ -18,3 +18,9 @@ npm-debug.log*
 .DS_Store
 *.tsbuildinfo
 next-env.d.ts
+
+# AI tooling caches
+.agents/
+.claude/
+.trae/
+skills-lock.json
