@@ -85,12 +85,14 @@ export default function LogVoice() {
   }, [permission]);
 
   const stopAndConfirm = async () => {
+    let uri = '';
     try {
       if (recorderState.isRecording) await recorder.stop();
+      uri = recorder.uri ?? '';
     } catch {
-      // ignore
+      // ignore — recorder may already be stopped on hot reload
     }
-    router.replace('/log/confirm');
+    router.replace({ pathname: '/log/confirm', params: { source: 'voice', audioUri: uri } });
   };
 
   if (permission === 'denied') {

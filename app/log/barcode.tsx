@@ -62,11 +62,11 @@ export default function LogBarcode() {
     );
   }
 
-  const onScan = (_r: BarcodeScanningResult) => {
+  const onScan = (r: BarcodeScanningResult) => {
     if (scannedRef.current) return;
     scannedRef.current = true;
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    router.replace('/log/confirm');
+    router.replace({ pathname: '/log/confirm', params: { source: 'barcode', barcode: r.data } });
   };
 
   return (
@@ -116,7 +116,7 @@ export default function LogBarcode() {
           label="Simulate scan"
           onPress={() => {
             scannedRef.current = true;
-            router.replace('/log/confirm');
+            router.replace({ pathname: '/log/confirm', params: { source: 'barcode', barcode: 'simulated' } });
           }}
         />
       </View>

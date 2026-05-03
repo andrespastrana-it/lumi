@@ -71,8 +71,8 @@ export default function LogPhoto() {
     if (!cameraRef.current || capturing) return;
     setCapturing(true);
     try {
-      await cameraRef.current.takePictureAsync({ quality: 0.7, skipProcessing: true });
-      router.replace('/log/confirm');
+      const photo = await cameraRef.current.takePictureAsync({ quality: 0.7, skipProcessing: true });
+      router.replace({ pathname: '/log/confirm', params: { source: 'photo', photoUri: photo?.uri ?? '' } });
     } catch (e) {
       Alert.alert('Capture failed', String(e));
       setCapturing(false);

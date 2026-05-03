@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import Svg, {
   Defs,
@@ -16,11 +16,18 @@ import Svg, {
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
+  useAnimatedProps,
   withRepeat,
   withSequence,
   withTiming,
+  withDelay,
   Easing,
 } from 'react-native-reanimated';
+
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+const AnimatedG      = Animated.createAnimatedComponent(G);
+const AnimatedPath   = Animated.createAnimatedComponent(Path);
+const AnimatedSvgText = Animated.createAnimatedComponent(SvgText);
 
 const SKIN = {
   s1: '#FFD8BB', s2: '#FFB088', s3: '#E8784E', s4: '#A04A1E',
@@ -85,9 +92,9 @@ function lookOffset(look?: LookDir): { lx: number; ly: number } {
   }
 }
 
-function Eye({ cx, cy, kind, look }: { cx: number; cy: number; kind: EyeKind; look?: LookDir }) {
+function Eye({ cx, cy, kind, look, blink }: { cx: number; cy: number; kind: EyeKind; look?: LookDir; blink?: boolean }) {
   const id = `ig-${cx}-${cy}`;
-  if (kind === 'closed') {
+  if (kind === 'closed' || (blink && kind === 'open')) {
     return <Path d={`M ${cx - 10} ${cy} Q ${cx} ${cy + 5} ${cx + 10} ${cy}`} stroke={SKIN.ink} strokeWidth={2.6} fill="none" strokeLinecap="round" />;
   }
   if (kind === 'happy') {
@@ -252,63 +259,188 @@ function Legs({ pose }: { pose: LegsPose }) {
   );
 }
 
-function Accent({ kind }: { kind: AccentKind }) {
-  if (kind === 'confetti') {
-    const ps = [
-      { cx: 18,  cy: 18, r: 3,   color: SKIN.s3 },
-      { cx: 104, cy: 14, r: 2.5, color: SKIN.leafDk },
-      { cx: 112, cy: 42, r: 2.2, color: '#5A3A55' },
-      { cx: 14,  cy: 54, r: 2.5, color: SKIN.s3 },
-      { cx: 108, cy: 78, r: 2,   color: SKIN.leafDk },
-      { cx: 16,  cy: 90, r: 2.2, color: '#5A3A55' },
-    ];
-    return <G>{ps.map((p, i) => <Circle key={i} cx={p.cx} cy={p.cy} r={p.r} fill={p.color} />)}</G>;
+// ── Animated accents ─────────────────────────────────────────────
+
+function ConfettiParticle({ cx, startY, r, color, dur, delay }: { cx: number; startY: number; r: number; color: string; dur: number; delay: number }) {
+  const t = useSharedValue(0);
+  useEffect(() => {
+    t.value = withDelay(delay, withRepeat(withTiming(1, { duration: dur, easing: Easing.in(Easing.quad) }), -1, false));
+  }, [t, dur, delay]);
+  const animatedProps = useAnimatedProps(() => ({
+    cy: startY + (180 - startY) * t.value,
+    opacity: t.value < 0.7 ? 1 : 1 - (t.value - 0.7) / 0.3,
+  }));
+  return <AnimatedCircle animatedProps={animatedProps} cx={cx} r={r} fill={color} />;
+}
+
+function ConfettiAccent() {
+  const ps = [
+    { cx: 18,  cy: 18, r: 3,   color: SKIN.s3,     dur: 2500, delay: 0 },
+    { cx: 104, cy: 14, r: 2.5, color: SKIN.leafDk, dur: 2800, delay: 500 },
+    { cx: 112, cy: 42, r: 2.2, color: '#5A3A55',   dur: 2300, delay: 1000 },
+    { cx: 14,  cy: 54, r: 2.5, color: SKIN.s3,     dur: 2600, delay: 300 },
+    { cx: 108, cy: 78, r: 2,   color: SKIN.leafDk, dur: 2400, delay: 700 },
+    { cx: 16,  cy: 90, r: 2.2, color: '#5A3A55',   dur: 2700, delay: 1200 },
+  ];
+  return <G>{ps.map((p, i) => <ConfettiParticle key={i} {...p} startY={p.cy} />)}</G>;
+}
+
+function HeartFloat({ d, fill, opacity, dur, delay }: { d: string; fill: string; opacity?: number; dur: number; delay: number }) {
+  const t = useSharedValue(0);
+  useEffect(() => {
+    t.value = withDelay(delay, withRepeat(withSequence(withTiming(1, { duration: dur / 2 }), withTiming(0, { duration: dur / 2 })), -1, false));
+  }, [t, dur, delay]);
+  const animatedProps = useAnimatedProps(() => ({
+    translateY: -10 * t.value,
+    opacity: (opacity ?? 1) * (1 - t.value * 0.3),
+  }));
+  return (
+    <AnimatedG animatedProps={animatedProps}>
+      <Path d={d} fill={fill} />
+    </AnimatedG>
+  );
+}
+
+function HeartsAccent() {
+  return (
+    <G>
+      <HeartFloat d="M 16 22 a 3 3 0 0 1 6 0 a 3 3 0 0 1 6 0 q 0 4 -6 8 q -6 -4 -6 -8 z"      fill={SKIN.s3} dur={2000} delay={0} />
+      <HeartFloat d="M 92 12 a 2.5 2.5 0 0 1 5 0 a 2.5 2.5 0 0 1 5 0 q 0 3.5 -5 7 q -5 -3.5 -5 -7 z" fill={SKIN.s3} opacity={0.7} dur={2200} delay={500} />
+    </G>
+  );
+}
+
+function TypingDot({ cx, delay }: { cx: number; delay: number }) {
+  const t = useSharedValue(0.3);
+  useEffect(() => {
+    t.value = withDelay(delay, withRepeat(withSequence(withTiming(1, { duration: 500 }), withTiming(0.3, { duration: 500 })), -1, false));
+  }, [t, delay]);
+  const animatedProps = useAnimatedProps(() => ({ opacity: t.value }));
+  return <AnimatedCircle animatedProps={animatedProps} cx={cx} cy={6} r={1.8} fill={SKIN.ink} />;
+}
+
+function DotsAccent() {
+  return (
+    <G translateX={92} translateY={-2}>
+      <Ellipse cx={14} cy={6} rx={14} ry={9} fill="#fff" stroke={SKIN.ink} strokeWidth={1.5} />
+      <TypingDot cx={8}  delay={0} />
+      <TypingDot cx={14} delay={200} />
+      <TypingDot cx={20} delay={400} />
+    </G>
+  );
+}
+
+function SleepZLetter({ x, y, fontSize, baseOpacity, delay }: { x: number; y: number; fontSize: number; baseOpacity: number; delay: number }) {
+  const t = useSharedValue(baseOpacity);
+  useEffect(() => {
+    t.value = withDelay(delay, withRepeat(withSequence(withTiming(baseOpacity * 0.3, { duration: 800 }), withTiming(baseOpacity, { duration: 800 })), -1, false));
+  }, [t, baseOpacity, delay]);
+  const animatedProps = useAnimatedProps(() => ({ opacity: t.value }));
+  return (
+    <AnimatedSvgText animatedProps={animatedProps} x={x} y={y} fontSize={fontSize} fill={SKIN.ink} fontFamily="Fraunces_400Regular">
+      z
+    </AnimatedSvgText>
+  );
+}
+
+function SleepZAccent() {
+  return (
+    <G translateX={95} translateY={16}>
+      <SleepZLetter x={0} y={14} fontSize={14} baseOpacity={1}   delay={0} />
+      <SleepZLetter x={9} y={4}  fontSize={10} baseOpacity={0.7} delay={500} />
+    </G>
+  );
+}
+
+function SweatAccent() {
+  const t = useSharedValue(0.4);
+  useEffect(() => {
+    t.value = withRepeat(withSequence(withTiming(1, { duration: 1000 }), withTiming(0.4, { duration: 1000 })), -1, false);
+  }, [t]);
+  const animatedProps = useAnimatedProps(() => ({ opacity: t.value }));
+  return (
+    <G translateX={86} translateY={38}>
+      <AnimatedPath
+        animatedProps={animatedProps}
+        d="M 5 0 Q 0 8 0 12 a 5 5 0 0 0 10 0 Q 10 8 5 0 Z"
+        fill="#7BB7E8"
+        stroke={SKIN.ink}
+        strokeWidth={1.2}
+      />
+    </G>
+  );
+}
+
+function Accent({ kind, animate }: { kind: AccentKind; animate: boolean }) {
+  // Static fallback for animate=false (used by MascotGallery thumbnails to
+  // keep the grid quiet).
+  if (!animate) {
+    if (kind === 'confetti') {
+      return (
+        <G>
+          {[
+            [18, 18, 3, SKIN.s3],
+            [104, 14, 2.5, SKIN.leafDk],
+            [112, 42, 2.2, '#5A3A55'],
+            [14, 54, 2.5, SKIN.s3],
+            [108, 78, 2, SKIN.leafDk],
+            [16, 90, 2.2, '#5A3A55'],
+          ].map(([cx, cy, r, color], i) => (
+            <Circle key={i} cx={cx as number} cy={cy as number} r={r as number} fill={color as string} />
+          ))}
+        </G>
+      );
+    }
+    if (kind === 'hearts') {
+      return (
+        <G>
+          <Path d="M 16 22 a 3 3 0 0 1 6 0 a 3 3 0 0 1 6 0 q 0 4 -6 8 q -6 -4 -6 -8 z" fill={SKIN.s3} />
+          <Path d="M 92 12 a 2.5 2.5 0 0 1 5 0 a 2.5 2.5 0 0 1 5 0 q 0 3.5 -5 7 q -5 -3.5 -5 -7 z" fill={SKIN.s3} opacity={0.7} />
+        </G>
+      );
+    }
+    if (kind === 'dots') {
+      return (
+        <G translateX={92} translateY={-2}>
+          <Ellipse cx={14} cy={6} rx={14} ry={9} fill="#fff" stroke={SKIN.ink} strokeWidth={1.5} />
+          <Circle cx={8}  cy={6} r={1.8} fill={SKIN.ink} />
+          <Circle cx={14} cy={6} r={1.8} fill={SKIN.ink} />
+          <Circle cx={20} cy={6} r={1.8} fill={SKIN.ink} />
+        </G>
+      );
+    }
+    if (kind === 'sleepZ') {
+      return (
+        <G translateX={95} translateY={16}>
+          <SvgText x={0} y={14} fontSize={14} fill={SKIN.ink} fontFamily="Fraunces_400Regular">z</SvgText>
+          <SvgText x={9} y={4} fontSize={10} fill={SKIN.ink} opacity={0.7} fontFamily="Fraunces_400Regular">z</SvgText>
+        </G>
+      );
+    }
+    if (kind === 'sweat') {
+      return (
+        <G translateX={86} translateY={38}>
+          <Path d="M 5 0 Q 0 8 0 12 a 5 5 0 0 0 10 0 Q 10 8 5 0 Z" fill="#7BB7E8" stroke={SKIN.ink} strokeWidth={1.2} />
+        </G>
+      );
+    }
   }
-  if (kind === 'thinkBubble') {
-    return (
-      <G translateX={92} translateY={6}>
-        <Circle cx={2} cy={22} r={3} fill="#fff" stroke={SKIN.ink} strokeWidth={1.5} />
-        <Circle cx={9} cy={14} r={4.5} fill="#fff" stroke={SKIN.ink} strokeWidth={1.5} />
-        <Ellipse cx={22} cy={6} rx={14} ry={9} fill="#fff" stroke={SKIN.ink} strokeWidth={1.5} />
-        <SvgText x={22} y={11} fontSize={13} fill={SKIN.ink} textAnchor="middle" fontFamily="Fraunces_300Light_Italic">?</SvgText>
-      </G>
-    );
-  }
-  if (kind === 'sleepZ') {
-    return (
-      <G translateX={95} translateY={16}>
-        <SvgText x={0} y={14} fontSize={14} fill={SKIN.ink} fontFamily="Fraunces_400Regular">z</SvgText>
-        <SvgText x={9} y={4}  fontSize={10} fill={SKIN.ink} opacity={0.7} fontFamily="Fraunces_400Regular">z</SvgText>
-      </G>
-    );
-  }
-  if (kind === 'hearts') {
-    return (
-      <G>
-        <Path d="M 16 22 a 3 3 0 0 1 6 0 a 3 3 0 0 1 6 0 q 0 4 -6 8 q -6 -4 -6 -8 z" fill={SKIN.s3} />
-        <Path d="M 92 12 a 2.5 2.5 0 0 1 5 0 a 2.5 2.5 0 0 1 5 0 q 0 3.5 -5 7 q -5 -3.5 -5 -7 z" fill={SKIN.s3} opacity={0.7} />
-      </G>
-    );
-  }
-  if (kind === 'sweat') {
-    return (
-      <G translateX={86} translateY={38}>
-        <Path d="M 5 0 Q 0 8 0 12 a 5 5 0 0 0 10 0 Q 10 8 5 0 Z" fill="#7BB7E8" stroke={SKIN.ink} strokeWidth={1.2} />
-      </G>
-    );
-  }
+
+  if (kind === 'confetti')    return <ConfettiAccent />;
+  if (kind === 'hearts')      return <HeartsAccent />;
+  if (kind === 'dots')        return <DotsAccent />;
+  if (kind === 'sleepZ')      return <SleepZAccent />;
+  if (kind === 'sweat')       return <SweatAccent />;
+  if (kind === 'thinkBubble') return (
+    <G translateX={92} translateY={6}>
+      <Circle cx={2} cy={22} r={3} fill="#fff" stroke={SKIN.ink} strokeWidth={1.5} />
+      <Circle cx={9} cy={14} r={4.5} fill="#fff" stroke={SKIN.ink} strokeWidth={1.5} />
+      <Ellipse cx={22} cy={6} rx={14} ry={9} fill="#fff" stroke={SKIN.ink} strokeWidth={1.5} />
+      <SvgText x={22} y={11} fontSize={13} fill={SKIN.ink} textAnchor="middle" fontFamily="Fraunces_300Light_Italic">?</SvgText>
+    </G>
+  );
   if (kind === 'tear') {
     return <Path d="M 38 78 Q 35 92 38 100 a 3.5 3.5 0 0 0 7 0 Q 48 92 45 78 Z" fill={SKIN.tear} opacity={0.85} stroke={SKIN.iris} strokeWidth={0.8} />;
-  }
-  if (kind === 'dots') {
-    return (
-      <G translateX={92} translateY={-2}>
-        <Ellipse cx={14} cy={6} rx={14} ry={9} fill="#fff" stroke={SKIN.ink} strokeWidth={1.5} />
-        <Circle cx={8}  cy={6} r={1.8} fill={SKIN.ink} />
-        <Circle cx={14} cy={6} r={1.8} fill={SKIN.ink} />
-        <Circle cx={20} cy={6} r={1.8} fill={SKIN.ink} />
-      </G>
-    );
   }
   return null;
 }
@@ -388,10 +520,36 @@ interface MascotProps {
   trackCursor?: boolean;
 }
 
+function useEyeBlink(animate: boolean) {
+  const [blink, setBlink] = useState(false);
+  useEffect(() => {
+    if (!animate) return;
+    let t1: ReturnType<typeof setTimeout> | undefined;
+    let t2: ReturnType<typeof setTimeout> | undefined;
+    const loop = () => {
+      const wait = 2400 + Math.random() * 3000;
+      t1 = setTimeout(() => {
+        setBlink(true);
+        t2 = setTimeout(() => {
+          setBlink(false);
+          loop();
+        }, 130);
+      }, wait);
+    };
+    loop();
+    return () => {
+      if (t1) clearTimeout(t1);
+      if (t2) clearTimeout(t2);
+    };
+  }, [animate]);
+  return blink;
+}
+
 export function Mascot({ mood = 'happy', size = 140, animate = true }: MascotProps) {
   const m = MOODS[mood] || MOODS.happy;
   const h = size * (170 / 120);
   const animStyle = useMascotAnimation(m.anim, animate);
+  const blink = useEyeBlink(animate);
 
   return (
     <View style={{ width: size, height: h }}>
@@ -441,14 +599,14 @@ export function Mascot({ mood = 'happy', size = 140, animate = true }: MascotPro
 
           <Brows kind={m.brows} />
           <Cheeks visible={m.cheeks} />
-          <Eye cx={45} cy={70} kind={m.eye} look={m.look} />
-          <Eye cx={75} cy={70} kind={m.eye} look={m.look} />
+          <Eye cx={45} cy={70} kind={m.eye} look={m.look} blink={blink} />
+          <Eye cx={75} cy={70} kind={m.eye} look={m.look} blink={blink} />
           <Mouth cx={60} cy={92} kind={m.mouth} />
           <Ellipse cx={60} cy={80} rx={1.5} ry={1} fill={SKIN.s4} opacity={0.4} />
 
           {(m.arms !== 'cheer' && m.arms !== 'up' && m.arms !== 'wave') && <Arms pose={m.arms} />}
 
-          {m.accent && <Accent kind={m.accent} />}
+          {m.accent && <Accent kind={m.accent} animate={animate} />}
         </Svg>
       </Animated.View>
     </View>

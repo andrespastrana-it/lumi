@@ -44,7 +44,7 @@ export default function LogSearch() {
           {FOOD_ITEMS.map(([name, sub, tone, icon], i) => (
             <Pressable
               key={name}
-              onPress={() => router.replace('/log/confirm')}
+              onPress={() => router.replace({ pathname: '/log/confirm', params: { source: 'search', name } })}
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',

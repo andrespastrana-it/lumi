@@ -1,9 +1,19 @@
-import { ScrollView, View, Text } from 'react-native';
-import { useRouter } from 'expo-router';
+import { ScrollView, View, Text, Image } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Header, IconChip, FoodPlate, CtaButton } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
+
+type LogSource = 'photo' | 'voice' | 'barcode' | 'search' | 'manual';
+
+interface LogParams {
+  source?: LogSource;
+  photoUri?: string;
+  audioUri?: string;
+  barcode?: string;
+  name?: string;
+}
 
 const STATS: [string, string][] = [
   ['~180', 'kcal'],
@@ -12,13 +22,33 @@ const STATS: [string, string][] = [
   ['13',   'F'],
 ];
 
+function recognizedFor(p: LogParams): { eyebrow: string; title: string } {
+  if (p.source === 'photo')   return { eyebrow: 'Pip recognized your photo', title: 'Two eggs + espresso' };
+  if (p.source === 'voice')   return { eyebrow: 'Pip heard',                  title: 'Two eggs + espresso' };
+  if (p.source === 'barcode') return { eyebrow: `Scanned · ${p.barcode}`,     title: 'Greek yogurt 100g' };
+  if (p.source === 'search')  return { eyebrow: 'Picked from search',         title: p.name ?? 'Selected food' };
+  return { eyebrow: 'Pip recognized', title: 'Two eggs + espresso' };
+}
+
 export default function LogConfirm() {
   const router = useRouter();
+  const params = useLocalSearchParams() as LogParams;
+  const { eyebrow, title } = recognizedFor(params);
 
   return (
     <View style={S.page}>
       <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ paddingBottom: 40 }}>
         <Header showBack>Confirm</Header>
+
+        {params.source === 'photo' && params.photoUri ? (
+          <View style={{ paddingHorizontal: 22, paddingTop: 8 }}>
+            <Image
+              source={{ uri: params.photoUri }}
+              style={{ width: '100%', height: 220, borderRadius: 22, backgroundColor: C.surface }}
+              resizeMode="cover"
+            />
+          </View>
+        ) : null}
 
         <View style={{ paddingHorizontal: 22, paddingTop: 8 }}>
           <View style={[S.pillow, { backgroundColor: C.greenLt, padding: 20 }]}>
@@ -26,10 +56,10 @@ export default function LogConfirm() {
               <IconChip tone="greenSolid" size={44}>
                 <Icon name="check" color="#fff" size={22} />
               </IconChip>
-              <View>
-                <Text style={[S.eyebrow, { color: C.green }]}>Pip recognized</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={[S.eyebrow, { color: C.green }]}>{eyebrow}</Text>
                 <Text style={[S.h2, { color: C.green, marginTop: 4, fontSize: 22, lineHeight: 24 }]}>
-                  Two eggs + espresso
+                  {title}
                 </Text>
               </View>
             </View>
