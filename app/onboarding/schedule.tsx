@@ -54,6 +54,9 @@ export default function Schedule() {
               <Text style={{ flex: 1, fontSize: 15, color: C.ink, fontFamily: 'DMSans_500Medium' }}>{m.label}</Text>
               <Pressable
                 onPress={() => tap(m.k)}
+                accessibilityRole="button"
+                accessibilityLabel={`${m.label} time, ${state.mealTimes[m.k]}. Tap to nudge fifteen minutes later.`}
+                hitSlop={{ top: 10, bottom: 10, left: 6, right: 6 }}
                 style={{ backgroundColor: C.cream, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 999 }}
               >
                 <Text style={{ fontFamily: 'Fraunces_400Regular', fontSize: 18, color: C.apricot }}>{state.mealTimes[m.k]}</Text>

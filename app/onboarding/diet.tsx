@@ -33,6 +33,9 @@ export default function Diet() {
               <Pressable
                 key={t}
                 onPress={() => toggle(t)}
+                accessibilityRole="checkbox"
+                accessibilityLabel={t}
+                accessibilityState={{ checked: on }}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',

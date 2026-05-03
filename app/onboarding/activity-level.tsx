@@ -36,7 +36,7 @@ export default function ActivityLevel() {
           {OPTS.map(o => {
             const on = state.activity === o.k;
             return (
-              <SelectCard key={o.k} selected={on} onPress={() => set('activity', o.k)}>
+              <SelectCard key={o.k} selected={on} label={`${o.l}, ${o.d}`} onPress={() => set('activity', o.k)}>
                 <IconChip tone={o.tone} size={44}>
                   <Icon name={o.icon} color={o.iconColor} size={22} />
                 </IconChip>

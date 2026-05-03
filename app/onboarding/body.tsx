@@ -27,11 +27,15 @@ const FIELDS: {
 
 const fmt = (v: number) => (Number.isInteger(v) ? v.toString() : v.toFixed(1));
 
-function StepButton({ label, onPress, disabled }: { label: string; onPress: () => void; disabled: boolean }) {
+function StepButton({ label, a11yLabel, onPress, disabled }: { label: string; a11yLabel: string; onPress: () => void; disabled: boolean }) {
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={a11yLabel}
+      accessibilityState={{ disabled }}
+      hitSlop={8}
       style={{
         width: 32,
         height: 32,
@@ -79,8 +83,8 @@ export default function Body() {
                     <Text style={{ fontSize: 12, color: C.dim, fontFamily: 'DMSans_400Regular' }}>{f.suffix}</Text>
                   </Text>
                 </View>
-                <StepButton label="−" onPress={() => bump(f.k, -f.step, f.min, f.max)} disabled={v <= f.min} />
-                <StepButton label="+" onPress={() => bump(f.k,  f.step, f.min, f.max)} disabled={v >= f.max} />
+                <StepButton label="−" a11yLabel={`Decrease ${f.label}`} onPress={() => bump(f.k, -f.step, f.min, f.max)} disabled={v <= f.min} />
+                <StepButton label="+" a11yLabel={`Increase ${f.label}`} onPress={() => bump(f.k,  f.step, f.min, f.max)} disabled={v >= f.max} />
               </View>
             );
           })}

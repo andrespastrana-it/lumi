@@ -30,7 +30,7 @@ export default function Goal() {
           {OPTS.map(o => {
             const on = state.goal === o.label;
             return (
-              <SelectCard key={o.label} selected={on} onPress={() => set('goal', o.label)}>
+              <SelectCard key={o.label} selected={on} label={o.label} onPress={() => set('goal', o.label)}>
                 <IconChip tone={o.chip.tone}>
                   <Icon name={o.chip.icon} color={o.chip.color} size={22} />
                 </IconChip>

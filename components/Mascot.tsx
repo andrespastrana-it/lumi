@@ -89,7 +89,7 @@ function lookOffset(look?: LookDir): { lx: number; ly: number } {
   }
 }
 
-function Eye({ cx, cy, kind, look, blinkScale }: { cx: number; cy: number; kind: EyeKind; look?: LookDir; blinkScale?: SharedValue<number> }) {
+function Eye({ cx, cy, kind, pupilStyle, blinkScale }: { cx: number; cy: number; kind: EyeKind; pupilStyle?: any; blinkScale?: SharedValue<number> }) {
   const style = useAnimatedProps(() => {
     if (!blinkScale) return {};
     return {
@@ -126,7 +126,6 @@ function Eye({ cx, cy, kind, look, blinkScale }: { cx: number; cy: number; kind:
     );
   } else {
     // open
-    const { lx, ly } = lookOffset(look);
     content = (
       <G translateX={cx} translateY={cy}>
         <Defs>
@@ -137,10 +136,12 @@ function Eye({ cx, cy, kind, look, blinkScale }: { cx: number; cy: number; kind:
           </RadialGradient>
         </Defs>
         <Ellipse rx={11} ry={11} fill="#FFFAF3" stroke={SKIN.inkSoft} strokeWidth={0.6} opacity={0.95} />
-        <Ellipse cx={lx} cy={ly} rx={8} ry={8.5} fill={`url(#${id})`} />
-        <Ellipse cx={lx} cy={ly} rx={4.5} ry={5} fill={SKIN.ink} />
-        <Ellipse cx={lx - 2.5} cy={ly - 3.5} rx={2.6} ry={3.2} fill="#fff" />
-        <Circle cx={lx + 2.5} cy={ly + 2.5} r={1.3} fill="#fff" opacity={0.9} />
+        <AnimatedG animatedProps={pupilStyle}>
+          <Ellipse rx={8} ry={8.5} fill={`url(#${id})`} />
+          <Ellipse rx={4.5} ry={5} fill={SKIN.ink} />
+          <Ellipse cx={-2.5} cy={-3.5} rx={2.6} ry={3.2} fill="#fff" />
+          <Circle cx={2.5} cy={2.5} r={1.3} fill="#fff" opacity={0.9} />
+        </AnimatedG>
         <Path d="M -10 1 Q 0 5 10 1" stroke={SKIN.inkSoft} strokeWidth={0.8} fill="none" opacity={0.4} />
       </G>
     );
@@ -353,10 +354,17 @@ function useDeepLiveness(anim: AnimKind, animate: boolean, mood: MascotMood) {
   const bodyY = useSharedValue(0);
   const faceX = useSharedValue(0);
   const faceY = useSharedValue(0);
+  const faceScale = useSharedValue(1);
   const armLagY = useSharedValue(0);
   const leafRotate = useSharedValue(0);
+  const leafTwitchRotate = useSharedValue(0);
   const blinkScale = useSharedValue(1);
   const shadowScale = useSharedValue(1);
+  
+  const mConf = MOODS[mood] || MOODS.happy;
+  const { lx: initLx, ly: initLy } = lookOffset(mConf.look);
+  const pupilX = useSharedValue(initLx);
+  const pupilY = useSharedValue(initLy);
 
   // Blinking loop
   useEffect(() => {
@@ -390,6 +398,60 @@ function useDeepLiveness(anim: AnimKind, animate: boolean, mood: MascotMood) {
     return () => { isActive = false; };
   }, [animate, mood]);
 
+  // Random Glancing & Leaf Twitches
+  useEffect(() => {
+    if (!animate) return;
+    let isActive = true;
+    
+    // Glancing loop
+    const glanceLoop = () => {
+      if (!isActive) return;
+      const delay = 3000 + Math.random() * 5000;
+      setTimeout(() => {
+        if (!isActive) return;
+        // Only glance if we are in a calm mood
+        if (mood === 'idle' || mood === 'neutral') {
+          const dirs: LookDir[] = ['left', 'right', 'up', 'upLeft', 'upRight', 'center'];
+          const randomDir = dirs[Math.floor(Math.random() * dirs.length)];
+          const { lx, ly } = lookOffset(randomDir);
+          
+          pupilX.value = withSpring(lx, { damping: 14, stiffness: 120 });
+          pupilY.value = withSpring(ly, { damping: 14, stiffness: 120 });
+          
+          // Hold the glance, then return to center
+          if (randomDir !== 'center') {
+            setTimeout(() => {
+              if (isActive && (mood === 'idle' || mood === 'neutral')) {
+                pupilX.value = withSpring(0, { damping: 14, stiffness: 120 });
+                pupilY.value = withSpring(0, { damping: 14, stiffness: 120 });
+              }
+            }, 800 + Math.random() * 1000);
+          }
+        }
+        glanceLoop();
+      }, delay);
+    };
+    
+    // Leaf twitch loop
+    const twitchLoop = () => {
+      if (!isActive) return;
+      const delay = 4000 + Math.random() * 6000;
+      setTimeout(() => {
+        if (!isActive) return;
+        const mag = (Math.random() > 0.5 ? 1 : -1) * (15 + Math.random() * 10);
+        leafTwitchRotate.value = withSequence(
+          withTiming(mag, { duration: 80, easing: Easing.out(Easing.quad) }),
+          withSpring(0, { damping: 5, stiffness: 300, mass: 0.5 })
+        );
+        twitchLoop();
+      }, delay);
+    };
+
+    glanceLoop();
+    twitchLoop();
+    return () => { isActive = false; };
+  }, [animate, mood]);
+
   // Main physics loop
   useEffect(() => {
     if (!animate) return;
@@ -397,7 +459,7 @@ function useDeepLiveness(anim: AnimKind, animate: boolean, mood: MascotMood) {
 
     rootY.value = 0; rootRotate.value = 0;
     bodyScaleX.value = 1; bodyScaleY.value = 1; bodyY.value = 0;
-    faceX.value = 0; faceY.value = 0;
+    faceX.value = 0; faceY.value = 0; faceScale.value = 1;
     armLagY.value = 0; leafRotate.value = 0;
     shadowScale.value = 1;
 
@@ -434,6 +496,15 @@ function useDeepLiveness(anim: AnimKind, animate: boolean, mood: MascotMood) {
         ), -1, true
       );
       
+      // Face squishes slightly as it breathes
+      faceScale.value = withRepeat(
+        withSequence(
+          withTiming(1.015, { duration: dur * 0.35, easing: Easing.out(Easing.sin) }),
+          withTiming(1.015, { duration: dur * 0.1 }),
+          withTiming(0.99, { duration: dur * 0.55, easing: Easing.inOut(Easing.quad) })
+        ), -1, true
+      );
+
       faceY.value = withRepeat(
         withSequence(
           withTiming(1.5, { duration: dur * 0.4, easing: Easing.inOut(Easing.quad) }),
@@ -467,46 +538,46 @@ function useDeepLiveness(anim: AnimKind, animate: boolean, mood: MascotMood) {
           withTiming(1.15, { duration: 250, easing: Easing.out(Easing.quad) }),
           withTiming(1, { duration: 200, easing: Easing.in(Easing.quad) }),
           withTiming(0.9, { duration: 100, easing: Easing.out(Easing.quad) }),
-          withTiming(1, { duration: 200, easing: backEasing })
+          withSpring(1, { damping: 6, stiffness: 200 })
         );
         bodyScaleX.value = withSequence(
           withTiming(1.15, { duration: 150, easing: Easing.out(Easing.quad) }),
           withTiming(0.85, { duration: 250, easing: Easing.out(Easing.quad) }),
           withTiming(1, { duration: 200, easing: Easing.in(Easing.quad) }),
           withTiming(1.1, { duration: 100, easing: Easing.out(Easing.quad) }),
-          withTiming(1, { duration: 200, easing: backEasing })
+          withSpring(1, { damping: 6, stiffness: 200 })
         );
         bodyY.value = withSequence(
           withTiming(4, { duration: 150 }), 
           withTiming(-32, { duration: 250, easing: Easing.out(Easing.quad) }), 
           withTiming(0, { duration: 200, easing: Easing.in(Easing.quad) }), 
           withTiming(2, { duration: 100 }), 
-          withTiming(0, { duration: 200, easing: backEasing })
+          withSpring(0, { damping: 8, stiffness: 250 })
         );
         shadowScale.value = withSequence(
           withTiming(1, { duration: 150 }), 
           withTiming(0.6, { duration: 250, easing: Easing.out(Easing.quad) }), 
           withTiming(1, { duration: 200, easing: Easing.in(Easing.quad) }), 
           withTiming(1.1, { duration: 100 }), 
-          withTiming(1, { duration: 200, easing: backEasing })
+          withSpring(1, { damping: 8, stiffness: 250 })
         );
         faceY.value = withSequence(
           withTiming(3, { duration: 150 }), 
           withTiming(-5, { duration: 250 }), 
           withTiming(4, { duration: 200 }), 
-          withTiming(0, { duration: 300, easing: backEasing })
+          withSpring(0, { damping: 10, stiffness: 180 })
         );
         armLagY.value = withSequence(
           withTiming(8, { duration: 150 }),
           withTiming(14, { duration: 250 }),
           withTiming(-12, { duration: 200 }),
-          withTiming(0, { duration: 300, easing: backEasing })
+          withSpring(0, { damping: 8, stiffness: 150 })
         );
         leafRotate.value = withSequence(
           withTiming(-20, { duration: 150 }),
           withTiming(25, { duration: 250 }),
           withTiming(-15, { duration: 200 }),
-          withTiming(0, { duration: 300, easing: backEasing })
+          withSpring(0, { damping: 6, stiffness: 120 })
         );
       };
       jumpSeq();
@@ -566,7 +637,7 @@ function useDeepLiveness(anim: AnimKind, animate: boolean, mood: MascotMood) {
           withTiming(0, { duration: 200 }),
           withTiming(22, { duration: 350, easing: Easing.out(Easing.quad) }),
           withTiming(-8, { duration: 350, easing: Easing.inOut(Easing.quad) }),
-          withTiming(0, { duration: 350, easing: backEasing }),
+          withSpring(0, { damping: 12, stiffness: 150 }),
           withTiming(0, { duration: 750 })
         ), -1, false
       );
@@ -603,8 +674,21 @@ function useDeepLiveness(anim: AnimKind, animate: boolean, mood: MascotMood) {
 
   const faceStyle = useAnimatedProps(() => ({
     transform: [
+      { translateX: 60 },
+      { translateY: 80 },
+      { scaleX: faceScale.value },
+      { scaleY: faceScale.value },
+      { translateX: -60 },
+      { translateY: -80 },
       { translateX: faceX.value },
       { translateY: faceY.value }
+    ] as any
+  }));
+
+  const pupilStyle = useAnimatedProps(() => ({
+    transform: [
+      { translateX: pupilX.value },
+      { translateY: pupilY.value }
     ] as any
   }));
 
@@ -618,7 +702,7 @@ function useDeepLiveness(anim: AnimKind, animate: boolean, mood: MascotMood) {
     transform: [
       { translateX: 60 },
       { translateY: 30 },
-      { rotate: `${leafRotate.value}deg` },
+      { rotate: `${leafRotate.value + leafTwitchRotate.value}deg` },
       { translateX: -60 },
       { translateY: -30 }
     ] as any
@@ -629,13 +713,12 @@ function useDeepLiveness(anim: AnimKind, animate: boolean, mood: MascotMood) {
       { translateX: 60 },
       { translateY: 160 },
       { scaleX: shadowScale.value },
-      { scaleY: shadowScale.value },
       { translateX: -60 },
-      { translateY: -160 }
-    ] as any
+      { translateY: -160 },
+    ] as any,
   }));
 
-  return { rootStyle, bodyStyle, faceStyle, armStyle, leafStyle, blinkScale, shadowStyle };
+  return { rootStyle, bodyStyle, faceStyle, pupilStyle, armStyle, leafStyle, blinkScale, shadowStyle };
 }
 
 interface MascotProps {
@@ -649,7 +732,7 @@ interface MascotProps {
 export function Mascot({ mood = 'happy', size = 140, animate = true }: MascotProps) {
   const m = MOODS[mood] || MOODS.happy;
   const h = size * (170 / 120);
-  const { rootStyle, bodyStyle, faceStyle, armStyle, leafStyle, blinkScale, shadowStyle } = useDeepLiveness(m.anim, animate, mood);
+  const { rootStyle, bodyStyle, faceStyle, pupilStyle, armStyle, leafStyle, blinkScale, shadowStyle } = useDeepLiveness(m.anim, animate, mood);
 
   return (
     <View style={{ width: size, height: h }}>
@@ -706,8 +789,8 @@ export function Mascot({ mood = 'happy', size = 140, animate = true }: MascotPro
             <AnimatedG animatedProps={faceStyle}>
               <Brows kind={m.brows} />
               <Cheeks visible={m.cheeks} />
-              <Eye cx={45} cy={70} kind={m.eye} look={m.look} blinkScale={blinkScale} />
-              <Eye cx={75} cy={70} kind={m.eye} look={m.look} blinkScale={blinkScale} />
+              <Eye cx={45} cy={70} kind={m.eye} pupilStyle={pupilStyle} blinkScale={blinkScale} />
+              <Eye cx={75} cy={70} kind={m.eye} pupilStyle={pupilStyle} blinkScale={blinkScale} />
               <Mouth cx={60} cy={92} kind={m.mouth} />
               <Ellipse cx={60} cy={80} rx={1.5} ry={1} fill={SKIN.s4} opacity={0.4} />
             </AnimatedG>

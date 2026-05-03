@@ -59,6 +59,9 @@ export default function Permissions() {
               <Pressable
                 key={item.k}
                 onPress={() => onToggle(item.k)}
+                accessibilityRole="switch"
+                accessibilityLabel={`${item.l}. ${item.d}`}
+                accessibilityState={{ checked: on }}
                 style={[
                   S.pillowSm,
                   {
