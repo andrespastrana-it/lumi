@@ -79,13 +79,16 @@ export default function Coach() {
   const router = useRouter();
   const [msgs, setMsgs] = useState<Msg[]>([{ from: 'lumi', text: "Hey Marco — what's on your mind?" }]);
   const [draft, setDraft] = useState('');
+  const [pipTyping, setPipTyping] = useState(false);
 
   const send = (text: string, replyFn: () => { text: string; action?: Msg['action'] }) => {
     setMsgs(m => [...m, { from: 'me', text }]);
+    setPipTyping(true);
     setTimeout(() => {
       const r = replyFn();
       setMsgs(m => [...m, { from: 'lumi', text: r.text, action: r.action }]);
-    }, 500);
+      setPipTyping(false);
+    }, 800);
   };
 
   const submitDraft = () => {
@@ -102,13 +105,13 @@ export default function Coach() {
 
         <View style={{ paddingHorizontal: 22, paddingTop: 4, paddingBottom: 14 }}>
           <View style={[S.pillow, { flexDirection: 'row', alignItems: 'center', gap: 14 }]}>
-            <Mascot mood={msgs.length > 1 ? 'happy' : 'wave'} size={64} />
+            <Mascot mood={pipTyping ? 'typing' : msgs.length > 1 ? 'happy' : 'wave'} size={64} />
             <View style={{ flex: 1 }}>
               <Text style={{ fontFamily: 'Fraunces_400Regular', fontSize: 22, color: C.ink }}>Pip</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 2 }}>
                 <View style={{ width: 7, height: 7, borderRadius: 999, backgroundColor: C.green }} />
                 <Text style={{ fontSize: 11, color: C.green, fontFamily: 'DMSans_600SemiBold', letterSpacing: 0.6, textTransform: 'uppercase' }}>
-                  Listening
+                  {pipTyping ? 'Typing…' : 'Listening'}
                 </Text>
               </View>
             </View>

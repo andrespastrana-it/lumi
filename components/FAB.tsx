@@ -14,6 +14,8 @@ export function FAB() {
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel="Log a meal"
       style={{
         position: 'absolute',
         right: 22,

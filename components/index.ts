@@ -13,3 +13,4 @@ export { SelectCard } from './SelectCard';
 export { CheckBadge } from './CheckBadge';
 export { FoodPlate } from './FoodPlate';
 export type { PlateTone } from './FoodPlate';
+export { ErrorBoundary } from './ErrorBoundary';

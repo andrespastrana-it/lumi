@@ -29,6 +29,9 @@ export function CtaButton({ label, onPress, disabled, variant = 'apricot', style
     <Pressable
       onPress={handle}
       disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled: !!disabled }}
       style={{
         width: '100%',
         alignItems: 'center',
