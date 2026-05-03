@@ -13,10 +13,20 @@ interface RowProps {
 }
 
 export function Row({ label, value, onPress, selected, dense, icon, sub }: RowProps) {
-  const Container: any = onPress ? Pressable : View;
+  const interactive = !!onPress;
+  const Container: any = interactive ? Pressable : View;
+  const a11y = interactive
+    ? {
+        accessibilityRole: 'button' as const,
+        accessibilityLabel: label,
+        accessibilityState: { selected: !!selected },
+      }
+    : {};
+
   return (
     <Container
       onPress={onPress}
+      {...a11y}
       style={{
         flexDirection: 'row',
         alignItems: 'center',

@@ -6,12 +6,17 @@ interface SelectCardProps {
   selected: boolean;
   onPress: () => void;
   children: ReactNode;
+  /** Screen-reader label. Mirror the visible option name. */
+  label?: string;
 }
 
-export function SelectCard({ selected, onPress, children }: SelectCardProps) {
+export function SelectCard({ selected, onPress, children, label }: SelectCardProps) {
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole="radio"
+      accessibilityLabel={label}
+      accessibilityState={{ selected }}
       style={{
         flexDirection: 'row',
         alignItems: 'center',
