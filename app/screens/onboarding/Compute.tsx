@@ -15,7 +15,7 @@ export default function Compute({ go }: { go: (r: string) => void }) {
       const t = setTimeout(() => setStep(s => s + 1), 750);
       return () => clearTimeout(t);
     } else {
-      const t = setTimeout(() => go('plan_reveal'), 1000);
+      const t = setTimeout(() => go('planReveal'), 1000);
       return () => clearTimeout(t);
     }
   }, [step, go]);

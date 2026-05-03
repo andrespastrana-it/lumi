@@ -129,13 +129,13 @@ function Screen({ route, go, state, set }: {
     // Onboarding
     case 'welcome':       return <Welcome go={go} />;
     case 'goal':          return <Goal go={go} state={state} set={set} />;
-    case 'body':          return <Body go={go} state={state} />;
+    case 'body':          return <Body go={go} state={state} set={set} />;
     case 'activityLevel': return <ActivityLevel go={go} state={state} set={set} />;
     case 'diet':          return <Diet go={go} state={state} set={set} />;
-    case 'schedule':      return <Schedule go={go} />;
+    case 'schedule':      return <Schedule go={go} state={state} set={set} />;
     case 'compute':       return <Compute go={go} />;
     case 'planReveal':    return <PlanReveal go={go} />;
-    case 'permissions':   return <Permissions go={go} />;
+    case 'permissions':   return <Permissions go={go} state={state} set={set} />;
     case 'paywall':       return <Paywall go={go} />;
     // Main
     case 'today':         return <Today go={go} state={state} />;
@@ -160,14 +160,14 @@ function Screen({ route, go, state, set }: {
     case 'plateau':       return <Plateau go={go} />;
     case 'badDay':        return <BadDay go={go} />;
     // Profile
-    case 'profile':         return <Profile go={go} />;
+    case 'profile':         return <Profile go={go} state={state} />;
     case 'profileEdit':     return <ProfileEdit go={go} state={state} />;
-    case 'coachTone':       return <CoachTone go={go} />;
-    case 'units':           return <Units go={go} />;
-    case 'integrations':    return <Integrations go={go} />;
-    case 'privacy':         return <Privacy go={go} />;
-    case 'subscription':    return <Subscription go={go} />;
-    case 'notifications':   return <Notifications go={go} />;
+    case 'coachTone':       return <CoachTone go={go} state={state} set={set} />;
+    case 'units':           return <Units go={go} state={state} set={set} />;
+    case 'integrations':    return <Integrations go={go} state={state} set={set} />;
+    case 'privacy':         return <Privacy go={go} state={state} set={set} />;
+    case 'subscription':    return <Subscription go={go} state={state} set={set} />;
+    case 'notifications':   return <Notifications go={go} state={state} set={set} />;
     case 'help':            return <Help go={go} />;
     case 'profileSettings': return <ProfileSettings go={go} />;
     default:              return <Today go={go} state={state} />;

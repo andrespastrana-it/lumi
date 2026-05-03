@@ -7,20 +7,26 @@ import { Header, IconChip, TabBar, S, Em } from '@/app/components/ui';
 import { Icon } from '@/app/lib/icons';
 import { C } from '@/app/lib/tokens';
 import { AppState } from '@/app/context/AppContext';
+import type { CoachToneType, SubscriptionTier } from '@/app/context/AppContext';
 
 // ── Profile ──────────────────────────────────────────────────────
-export function Profile({ go }: { go: (r: string) => void }) {
+export function Profile({ go, state }: { go: (r: string) => void; state: AppState }) {
+  const subLabel = state.subscription === 'annual' ? 'Annual · €59.99/yr'
+                 : state.subscription === 'monthly' ? 'Monthly · €9.99/mo'
+                 : 'Lifetime · €199';
+  const intCount = Object.values(state.integrations).filter(Boolean).length;
+  const notifCount = Object.values(state.notifPrefs).filter(Boolean).length;
   const items = [
-    { l: 'Activity log',     v: 'This week · 4 workouts', r: 'activity2', icon: 'workout', tone: 'green' as const },
-    { l: 'Notifications',   v: '3 active reminders',     r: 'notifications', icon: 'bell', tone: 'butter' as const },
-    { l: 'Coach tone',      v: 'Warm',                   r: 'coachTone', icon: 'coach', tone: 'apricot' as const },
-    { l: 'Units & locale',  v: 'kg · cm · kcal',         r: 'units', icon: 'scale', tone: 'green' as const },
-    { l: 'Integrations',    v: 'Apple Health · Glovo',   r: 'integrations', icon: 'heart', tone: 'butter' as const },
-    { l: 'Privacy',         v: 'Standard',               r: 'privacy', icon: 'veg', tone: 'green' as const },
-    { l: 'Subscription',    v: 'Trial · 5 days left',    r: 'subscription', icon: 'sparkle', tone: 'apricotSolid' as const },
-    { l: 'Meet Pip',        v: 'Coach moods',            r: 'mascotGallery', icon: 'coach', tone: 'apricot' as const },
-    { l: 'Help & FAQ',      v: 'Get in touch',           r: 'help', icon: 'sparkle', tone: 'cream' as const },
-    { l: 'Sign out',        v: '',                       r: 'welcome', icon: 'add', tone: 'cream' as const },
+    { l: 'Activity log',     v: 'This week · 4 workouts',          r: 'activity',      icon: 'workout', tone: 'green' as const },
+    { l: 'Notifications',    v: `${notifCount} active reminders`,  r: 'notifications', icon: 'bell',    tone: 'butter' as const },
+    { l: 'Coach tone',       v: state.coachTone,                   r: 'coachTone',     icon: 'coach',   tone: 'apricot' as const },
+    { l: 'Units & locale',   v: `${state.units.mass} · ${state.units.height} · ${state.units.energy}`, r: 'units', icon: 'scale', tone: 'green' as const },
+    { l: 'Integrations',     v: `${intCount} connected`,           r: 'integrations',  icon: 'heart',   tone: 'butter' as const },
+    { l: 'Privacy',          v: state.privacy.share ? 'Sharing on' : 'Standard', r: 'privacy', icon: 'veg', tone: 'green' as const },
+    { l: 'Subscription',     v: subLabel,                          r: 'subscription',  icon: 'sparkle', tone: 'apricotSolid' as const },
+    { l: 'Meet Pip',         v: 'Coach moods',                     r: 'mascotGallery', icon: 'coach',   tone: 'apricot' as const },
+    { l: 'Help & FAQ',       v: 'Get in touch',                    r: 'help',          icon: 'sparkle', tone: 'cream' as const },
+    { l: 'Sign out',         v: '',                                r: 'welcome',       icon: 'add',     tone: 'cream' as const },
   ];
   return (
     <div style={{ ...S.page, paddingBottom: 110 }}>
@@ -97,15 +103,20 @@ export function ProfileEdit({ go, state }: { go: (r: string) => void; state: App
 }
 
 // ── CoachTone ────────────────────────────────────────────────────
-const TONES: { l: string; d: string; m: MoodType }[] = [
+const TONES: { l: CoachToneType; d: string; m: MoodType }[] = [
   { l: 'Warm',        d: 'Like a thoughtful friend. Default.',   m: 'happy' },
   { l: 'Direct',      d: 'No fluff. Says it straight.',          m: 'thinking' },
   { l: 'Cheerleader', d: 'Hype every win, no matter how small.', m: 'cheering' },
   { l: 'Stoic',       d: 'Calm, sparing, philosophical.',        m: 'curious' },
 ];
 
-export function CoachTone({ go }: { go: (r: string) => void }) {
-  const [pick, setPick] = useState('Warm');
+export function CoachTone({ go, state, set }: {
+  go: (r: string) => void;
+  state: AppState;
+  set: (k: keyof AppState, v: AppState[keyof AppState]) => void;
+}) {
+  const pick = state.coachTone;
+  const setPick = (t: CoachToneType) => set('coachTone', t);
   return (
     <div style={S.page}>
       <Header back="profile" go={go}>Coach tone</Header>
@@ -138,16 +149,21 @@ export function CoachTone({ go }: { go: (r: string) => void }) {
 }
 
 // ── Units ────────────────────────────────────────────────────────
-export function Units({ go }: { go: (r: string) => void }) {
-  const [units, setUnits] = useState({ mass: 'kg', height: 'cm', energy: 'kcal', volume: 'L', firstDay: 'Monday', lang: 'English' });
-  const Group = ({ k, label, opts }: { k: keyof typeof units; label: string; opts: string[] }) => (
+export function Units({ go, state, set }: {
+  go: (r: string) => void;
+  state: AppState;
+  set: (k: keyof AppState, v: AppState[keyof AppState]) => void;
+}) {
+  const units = state.units;
+  const setUnit = (k: keyof AppState['units'], v: string) => set('units', { ...units, [k]: v });
+  const Group = ({ k, label, opts }: { k: keyof AppState['units']; label: string; opts: string[] }) => (
     <div>
       <div style={{ ...S.eyebrow, marginTop: 24 }}>{label}</div>
       <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {opts.map(o => {
           const on = units[k] === o;
           return (
-            <button key={o} onClick={() => setUnits(u => ({ ...u, [k]: o }))} style={{ padding: '10px 16px', borderRadius: 999, fontSize: 13, fontWeight: on ? 600 : 500, background: on ? C.apricot : C.surface, color: on ? '#fff' : C.ink, border: on ? 0 : `1px solid ${C.hair}`, cursor: 'pointer', fontFamily: 'inherit' }}>{o}</button>
+            <button key={o} onClick={() => setUnit(k, o)} style={{ padding: '10px 16px', borderRadius: 999, fontSize: 13, fontWeight: on ? 600 : 500, background: on ? C.apricot : C.surface, color: on ? '#fff' : C.ink, border: on ? 0 : `1px solid ${C.hair}`, cursor: 'pointer', fontFamily: 'inherit' }}>{o}</button>
           );
         })}
       </div>
@@ -181,14 +197,19 @@ const INT_ITEMS = [
   { k: 'glovo',    l: 'Glovo',        d: 'Order recipe ingredients',          icon: 'cart',    tone: 'cream' as const },
 ];
 
-export function Integrations({ go }: { go: (r: string) => void }) {
-  const [conn, setConn] = useState<Record<string, boolean>>({ apple: true, glovo: true, strava: false, google: false, fitbit: false, withings: true });
+export function Integrations({ go, state, set }: {
+  go: (r: string) => void;
+  state: AppState;
+  set: (k: keyof AppState, v: AppState[keyof AppState]) => void;
+}) {
+  const conn = state.integrations;
+  const setConn = (updater: (c: Record<string, boolean>) => Record<string, boolean>) => set('integrations', updater(conn));
   return (
     <div style={S.page}>
       <Header back="profile" go={go}>Integrations</Header>
       <div style={S.pad}>
         <div style={{ ...S.pillowSm, background: C.pillow, marginTop: 14, fontSize: 13, color: C.dim, lineHeight: 1.5 }}>
-          <span style={{ color: C.green, fontWeight: 600 }}>3 connected.</span> Lumi reads what you allow. Disconnect anytime.
+          <span style={{ color: C.green, fontWeight: 600 }}>{Object.values(conn).filter(Boolean).length} connected.</span> Lumi reads what you allow. Disconnect anytime.
         </div>
         <div style={{ marginTop: 14, ...S.pillow, padding: 0 }}>
           {INT_ITEMS.map(({ k, l, d, icon, tone }, i) => {
@@ -212,8 +233,13 @@ export function Integrations({ go }: { go: (r: string) => void }) {
 }
 
 // ── Privacy ──────────────────────────────────────────────────────
-export function Privacy({ go }: { go: (r: string) => void }) {
-  const [perm, setPerm] = useState({ analytics: true, share: false, research: true });
+export function Privacy({ go, state, set }: {
+  go: (r: string) => void;
+  state: AppState;
+  set: (k: keyof AppState, v: AppState[keyof AppState]) => void;
+}) {
+  const perm = state.privacy;
+  const setPerm = (updater: (p: AppState['privacy']) => AppState['privacy']) => set('privacy', updater(perm));
   return (
     <div style={S.page}>
       <Header back="profile" go={go}>Privacy</Header>
@@ -258,9 +284,14 @@ export function Privacy({ go }: { go: (r: string) => void }) {
 }
 
 // ── Subscription ─────────────────────────────────────────────────
-export function Subscription({ go }: { go: (r: string) => void }) {
-  const [plan, setPlan] = useState('annual');
-  const PLANS = [
+export function Subscription({ go, state, set }: {
+  go: (r: string) => void;
+  state: AppState;
+  set: (k: keyof AppState, v: AppState[keyof AppState]) => void;
+}) {
+  const plan = state.subscription;
+  const setPlan = (p: SubscriptionTier) => set('subscription', p);
+  const PLANS: { k: SubscriptionTier; l: string; p: string; s: string; best?: boolean }[] = [
     { k: 'annual',   l: 'Annual',   p: '€59.99/yr', s: '€5/mo billed yearly · save 50%', best: true },
     { k: 'monthly',  l: 'Monthly',  p: '€9.99/mo',  s: 'Cancel anytime' },
     { k: 'lifetime', l: 'Lifetime', p: '€199 once', s: 'Pay once. Yours forever.' },
@@ -318,8 +349,13 @@ const NOTIF_ITEMS = [
   { k: 'quiet',       l: 'Quiet hours',      d: '22:00 — 07:00' },
 ];
 
-export function Notifications({ go }: { go: (r: string) => void }) {
-  const [pref, setPref] = useState<Record<string, boolean>>({ summary: true, mealNudge: true, weighIn: true, wins: true, plateauAlert: false, weekly: true, quiet: true });
+export function Notifications({ go, state, set }: {
+  go: (r: string) => void;
+  state: AppState;
+  set: (k: keyof AppState, v: AppState[keyof AppState]) => void;
+}) {
+  const pref = state.notifPrefs;
+  const setPref = (updater: (p: Record<string, boolean>) => Record<string, boolean>) => set('notifPrefs', updater(pref));
   return (
     <div style={S.page}>
       <Header back="profile" go={go}>Notifications</Header>

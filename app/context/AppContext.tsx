@@ -2,16 +2,31 @@
 
 import { createContext, useContext, useState, ReactNode } from 'react';
 
+export type CoachToneType = 'Warm' | 'Direct' | 'Cheerleader' | 'Stoic';
+export type SubscriptionTier = 'annual' | 'monthly' | 'lifetime';
+
 export interface AppState {
+  // Body
   weight: number;
   height: number;
   age: number;
   target: number;
+  // Onboarding selections
   goal: string | null;
   activity: string | null;
   diet: string[];
+  mealTimes: { wake: string; breakfast: string; lunch: string; dinner: string; sleep: string };
+  permissions: Record<'notif' | 'health' | 'cam' | 'mic', boolean>;
+  // Weigh-in
   weighInDue: boolean;
   lastWeight: number | null;
+  // Profile / settings
+  coachTone: CoachToneType;
+  units: { mass: string; height: string; energy: string; volume: string; firstDay: string; lang: string };
+  integrations: Record<string, boolean>;
+  privacy: { analytics: boolean; share: boolean; research: boolean };
+  subscription: SubscriptionTier;
+  notifPrefs: Record<string, boolean>;
 }
 
 interface AppContextType {
@@ -34,8 +49,16 @@ const initialState: AppState = {
   goal: null,
   activity: null,
   diet: [],
+  mealTimes: { wake: '07:00', breakfast: '07:30', lunch: '13:00', dinner: '20:00', sleep: '23:30' },
+  permissions: { notif: false, health: false, cam: false, mic: false },
   weighInDue: true,
   lastWeight: null,
+  coachTone: 'Warm',
+  units: { mass: 'kg', height: 'cm', energy: 'kcal', volume: 'L', firstDay: 'Monday', lang: 'English' },
+  integrations: { apple: true, glovo: true, strava: false, google: false, fitbit: false, withings: true },
+  privacy: { analytics: true, share: false, research: true },
+  subscription: 'annual',
+  notifPrefs: { summary: true, mealNudge: true, weighIn: true, wins: true, plateauAlert: false, weekly: true, quiet: true },
 };
 
 export function AppProvider({ children }: { children: ReactNode }) {
@@ -68,7 +91,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const restart = () => {
     setRoute('welcome');
     setHistory(['welcome']);
-    setState(s => ({ ...s, weighInDue: true }));
+    setState(initialState);
   };
 
   return (
