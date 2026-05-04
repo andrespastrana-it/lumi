@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Lumi app icon · 1024x1024 placeholder · check-in only.
+  This is a single Pip on a cream square. Designed to read at small sizes
+  (iOS Settings list, notification icon) — silhouette-first, no fine
+  detail. Apple HIG: keep the safe area inside ~80% (rounded mask) for
+  iOS, ~66% for Android adaptive (foreground layer drawn within a 66%
+  diameter inner circle).
+
+  Conversion to PNG (required by app.json `icon` field):
+    Inkscape:   inkscape -w 1024 -h 1024 assets/icon.svg -o assets/icon.png
+    Figma:      open the file, frame at 1024x1024, export 1x as PNG
+    rsvg:       rsvg-convert -w 1024 -h 1024 assets/icon.svg -o assets/icon.png
+
+  After converting, set in app.json:
+    "icon": "./assets/icon.png",
+    "ios.icon": "./assets/icon-ios.png",         (optional, square)
+    "android.adaptiveIcon.foregroundImage": "./assets/icon-fg.png"
+
+  For the splash screen image: same SVG, scaled to 1284x1284 inside a
+  1284x2778 cream canvas (iPhone 14 Pro Max).
+-->
+<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="1024" height="1024">
+  <defs>
+    <!-- Pip body radial: matches Mascot.tsx SKIN ramp (s1 → s2 → s3 → s4) -->
+    <radialGradient id="body" cx="38%" cy="28%" r="72%">
+      <stop offset="0%" stop-color="#FFD8BB"/>
+      <stop offset="30%" stop-color="#FFB088"/>
+      <stop offset="78%" stop-color="#E8784E"/>
+      <stop offset="100%" stop-color="#A04A1E"/>
+    </radialGradient>
+
+    <!-- Belly shadow -->
+    <radialGradient id="belly" cx="50%" cy="80%" r="50%">
+      <stop offset="0%" stop-color="#A04A1E" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#A04A1E" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Cheek gloss -->
+    <radialGradient id="gloss" cx="32%" cy="18%" r="42%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="55%" stop-color="#ffffff" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Leaves -->
+    <linearGradient id="leaf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9CC49C"/>
+      <stop offset="100%" stop-color="#3D5A4A"/>
+    </linearGradient>
+
+    <!-- Background — match S.page (creamHi) -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FAF6F0"/>
+      <stop offset="100%" stop-color="#F2EAD8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Cream canvas (will be masked to a rounded square by iOS, full bleed by Android adaptive bg) -->
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+
+  <!-- Whole-Pip group: scaled and centered. Mascot viewBox is 120x170, center
+       at (60, 85). To fit in a 1024 icon with a generous safe area (~660 inner),
+       scale ×6.0 → 720 wide, then translate to center (152, 92). -->
+  <g transform="translate(152 100) scale(6)">
+    <!-- Ground shadow -->
+    <ellipse cx="60" cy="160" rx="40" ry="6" fill="#2A1F18" opacity="0.18"/>
+
+    <!-- Feet -->
+    <g>
+      <ellipse cx="48" cy="153" rx="10" ry="2.5" fill="#2A1F18" opacity="0.18"/>
+      <ellipse cx="48" cy="149" rx="11" ry="7" fill="#A04A1E"/>
+      <ellipse cx="48" cy="148" rx="11" ry="7" fill="#E8784E"/>
+      <ellipse cx="46" cy="145.5" rx="5" ry="2.3" fill="#FFD8BB" opacity="0.6"/>
+    </g>
+    <g>
+      <ellipse cx="72" cy="153" rx="10" ry="2.5" fill="#2A1F18" opacity="0.18"/>
+      <ellipse cx="72" cy="149" rx="11" ry="7" fill="#A04A1E"/>
+      <ellipse cx="72" cy="148" rx="11" ry="7" fill="#E8784E"/>
+      <ellipse cx="70" cy="145.5" rx="5" ry="2.3" fill="#FFD8BB" opacity="0.6"/>
+    </g>
+
+    <!-- Resting arms (drawn before body so hands sit at the sides) -->
+    <path d="M 26 100 Q 16 108 14 122" stroke="#A04A1E" stroke-width="13" fill="none" stroke-linecap="round"/>
+    <path d="M 26 100 Q 16 108 14 122" stroke="#E8784E" stroke-width="11" fill="none" stroke-linecap="round"/>
+    <path d="M 26 100 Q 16 108 14 122" stroke="#FFB088" stroke-width="9" fill="none" stroke-linecap="round"/>
+    <path d="M 94 100 Q 104 108 106 122" stroke="#A04A1E" stroke-width="13" fill="none" stroke-linecap="round"/>
+    <path d="M 94 100 Q 104 108 106 122" stroke="#E8784E" stroke-width="11" fill="none" stroke-linecap="round"/>
+    <path d="M 94 100 Q 104 108 106 122" stroke="#FFB088" stroke-width="9" fill="none" stroke-linecap="round"/>
+
+    <!-- Body -->
+    <path d="M 60 32 C 89 32, 102 58, 102 92 C 102 124, 86 144, 60 144 C 34 144, 18 124, 18 92 C 18 58, 31 32, 60 32 Z" fill="url(#body)"/>
+    <path d="M 60 34 Q 56 64 58 104 Q 56 134 60 142" stroke="#A04A1E" stroke-width="1.6" fill="none" opacity="0.32" stroke-linecap="round"/>
+    <ellipse cx="60" cy="120" rx="38" ry="24" fill="url(#belly)"/>
+    <ellipse cx="42" cy="62" rx="22" ry="28" fill="url(#gloss)"/>
+    <ellipse cx="80" cy="50" rx="6" ry="9" fill="#ffffff" opacity="0.18"/>
+
+    <!-- Leaves -->
+    <path d="M 60 30 Q 72 18 82 22 Q 78 33 66 33 Z" fill="url(#leaf)"/>
+    <path d="M 60 30 Q 70 22 80 24" stroke="#3D5A4A" stroke-width="1.2" fill="none" opacity="0.5"/>
+    <path d="M 60 32 Q 50 22 42 26 Q 46 35 58 33 Z" fill="#3D5A4A" opacity="0.85"/>
+    <path d="M 60 33 L 60 24" stroke="#3D5A4A" stroke-width="2.2" stroke-linecap="round"/>
+
+    <!-- Brows (arched) -->
+    <path d="M 33 50 Q 42 44 52 50" stroke="#5A3A20" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <path d="M 68 50 Q 78 44 87 50" stroke="#5A3A20" stroke-width="3" stroke-linecap="round" fill="none"/>
+
+    <!-- Cheeks -->
+    <ellipse cx="32" cy="80" rx="7.5" ry="4.5" fill="#F5826A" opacity="0.55"/>
+    <ellipse cx="88" cy="80" rx="7.5" ry="4.5" fill="#F5826A" opacity="0.55"/>
+
+    <!-- Eyes (open, looking center) -->
+    <g transform="translate(45 70)">
+      <ellipse rx="11" ry="11" fill="#FFFAF3" stroke="#5A3A20" stroke-width="0.6" opacity="0.95"/>
+      <ellipse cx="0" cy="0" rx="8" ry="8.5" fill="#6B3A1E"/>
+      <ellipse cx="0" cy="0" rx="4.5" ry="5" fill="#2A1F18"/>
+      <ellipse cx="-2.5" cy="-3.5" rx="2.6" ry="3.2" fill="#ffffff"/>
+      <circle cx="2.5" cy="2.5" r="1.3" fill="#ffffff" opacity="0.9"/>
+    </g>
+    <g transform="translate(75 70)">
+      <ellipse rx="11" ry="11" fill="#FFFAF3" stroke="#5A3A20" stroke-width="0.6" opacity="0.95"/>
+      <ellipse cx="0" cy="0" rx="8" ry="8.5" fill="#6B3A1E"/>
+      <ellipse cx="0" cy="0" rx="4.5" ry="5" fill="#2A1F18"/>
+      <ellipse cx="-2.5" cy="-3.5" rx="2.6" ry="3.2" fill="#ffffff"/>
+      <circle cx="2.5" cy="2.5" r="1.3" fill="#ffffff" opacity="0.9"/>
+    </g>
+
+    <!-- Nose dot -->
+    <ellipse cx="60" cy="80" rx="1.5" ry="1" fill="#A04A1E" opacity="0.4"/>
+
+    <!-- Smile -->
+    <path d="M 50 91 Q 60 98 70 91" stroke="#2A1F18" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+    <circle cx="48" cy="92" r="1" fill="#F5826A" opacity="0.6"/>
+    <circle cx="72" cy="92" r="1" fill="#F5826A" opacity="0.6"/>
+
+    <!-- Hands -->
+    <g>
+      <circle cx="14" cy="124" r="8" fill="#A04A1E"/>
+      <circle cx="14" cy="123.5" r="7" fill="#E8784E"/>
+      <circle cx="14" cy="123" r="6" fill="#FFB088"/>
+      <ellipse cx="12.5" cy="121" rx="2.4" ry="1.6" fill="#FFD8BB" opacity="0.7"/>
+    </g>
+    <g>
+      <circle cx="106" cy="124" r="8" fill="#A04A1E"/>
+      <circle cx="106" cy="123.5" r="7" fill="#E8784E"/>
+      <circle cx="106" cy="123" r="6" fill="#FFB088"/>
+      <ellipse cx="104.5" cy="121" rx="2.4" ry="1.6" fill="#FFD8BB" opacity="0.7"/>
+    </g>
+  </g>
+</svg>
