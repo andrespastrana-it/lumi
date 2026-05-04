@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { Mascot, Blob, CtaButton } from '@/components';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
+import { t } from '@/lib/strings';
 
 export default function Welcome() {
   const router = useRouter();
@@ -14,7 +15,7 @@ export default function Welcome() {
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 }}>
         <Mascot mood="wave" size={170} />
         <Text style={[S.h1, { fontSize: 56, marginTop: 20, lineHeight: 58, textAlign: 'center' }]}>
-          Hi, I&apos;m
+          {t.onboarding.welcomeHi}
         </Text>
         <Text
           style={{
@@ -26,16 +27,16 @@ export default function Welcome() {
             textAlign: 'center',
           }}
         >
-          Pip
+          {t.onboarding.welcomeName}
         </Text>
         <Text style={[S.body, { fontSize: 15, marginTop: 18, maxWidth: 280, textAlign: 'center' }]}>
-          Your weight-loss partner.{'\n'}Warm. Specific. On your side.
+          {t.onboarding.welcomeTagline}
         </Text>
       </View>
 
       <View style={{ paddingHorizontal: 22, paddingBottom: 28, gap: 4 }}>
-        <CtaButton label="Let's begin" onPress={() => router.push('/onboarding/goal')} />
-        <CtaButton label="I have an account" variant="line" onPress={() => router.replace('/(tabs)/today')} />
+        <CtaButton label={t.cta.letsBegin} onPress={() => router.push('/onboarding/goal')} />
+        <CtaButton label={t.cta.haveAccount} variant="line" onPress={() => router.replace('/(tabs)/today')} />
       </View>
     </View>
   );
