@@ -7,6 +7,7 @@ import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
 import { requestNotificationPermission } from '@/lib/permissions';
+import { requestHealthPermission } from '@/lib/health';
 import { useApp, AppState } from '@/context/AppContext';
 
 type PermKey = keyof AppState['permissions'];
@@ -22,9 +23,14 @@ async function requestNative(k: PermKey): Promise<boolean> {
   if (k === 'cam')   return (await Camera.requestCameraPermissionsAsync()).granted;
   if (k === 'mic')   return (await requestRecordingPermissionsAsync()).granted;
   if (k === 'notif') return requestNotificationPermission();
-  // health: real Apple Health hookup is out of scope for this migration. The
-  // toggle stays wireframe-only state until expo-health (or react-native-health)
-  // is wired up post-migration.
+  if (k === 'health') {
+    // HealthKit / Health Connect via lib/health.ts. The stub returns
+    // unsupported in Expo Go and on Android (no Health Connect module
+    // wired yet). When unsupported we still flip the wireframe toggle
+    // so the onboarding flow doesn't get stuck.
+    const r = await requestHealthPermission();
+    return r.granted || r.unsupported;
+  }
   return true;
 }
 
