@@ -1,28 +1,48 @@
-import { ScrollView, View, Text, Pressable } from 'react-native';
+import { ScrollView, View, Text, Pressable, ActivityIndicator, Alert } from 'react-native';
+import { useQuery, useMutation } from 'convex/react';
 import { Header, IconChip } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
-import { useApp } from '@/context/AppContext';
+import { api } from '@/convex/_generated/api';
+import { describeConvexError } from '@/lib/clientError';
+
+type Provider = 'appleHealth' | 'googleFit' | 'fitbit' | 'withings' | 'strava' | 'glovo';
 
 const INT_ITEMS: {
-  k: string; l: string; d: string; icon: string;
+  k: Provider; l: string; d: string; icon: string;
   tone: 'apricotSolid' | 'green' | 'apricot' | 'butter' | 'greenSolid' | 'cream';
 }[] = [
-  { k: 'apple',    l: 'Apple Health',    d: 'Steps · workouts · sleep · weight', icon: 'heart', tone: 'apricotSolid' },
-  { k: 'google',   l: 'Google Fit',      d: 'Activity & body metrics',           icon: 'heart', tone: 'green' },
-  { k: 'strava',   l: 'Strava',          d: 'Auto-import runs & rides',          icon: 'flame', tone: 'apricot' },
-  { k: 'fitbit',   l: 'Fitbit',          d: 'Wearable + scale',                  icon: 'heart', tone: 'butter' },
-  { k: 'withings', l: 'Withings scale',  d: 'Auto-log weigh-ins',                icon: 'scale', tone: 'greenSolid' },
-  { k: 'glovo',    l: 'Glovo',           d: 'Order recipe ingredients',          icon: 'cart',  tone: 'cream' },
+  { k: 'appleHealth', l: 'Apple Health',   d: 'Steps · workouts · sleep · weight', icon: 'heart', tone: 'apricotSolid' },
+  { k: 'googleFit',   l: 'Google Fit',     d: 'Activity & body metrics',           icon: 'heart', tone: 'green' },
+  { k: 'strava',      l: 'Strava',         d: 'Auto-import runs & rides',          icon: 'flame', tone: 'apricot' },
+  { k: 'fitbit',      l: 'Fitbit',         d: 'Wearable + scale',                  icon: 'heart', tone: 'butter' },
+  { k: 'withings',    l: 'Withings scale', d: 'Auto-log weigh-ins',                icon: 'scale', tone: 'greenSolid' },
+  { k: 'glovo',       l: 'Glovo',          d: 'Order recipe ingredients',          icon: 'cart',  tone: 'cream' },
 ];
 
 export default function Integrations() {
-  const { state, set } = useApp();
-  const conn = state.integrations;
-  const count = Object.values(conn).filter(Boolean).length;
+  const me = useQuery(api.me.get);
+  const toggleMutation = useMutation(api.integrations.toggle);
 
-  const toggle = (k: string) => set('integrations', { ...conn, [k]: !conn[k] });
+  if (me === undefined) {
+    return (
+      <View style={[S.page, { alignItems: 'center', justifyContent: 'center' }]}>
+        <ActivityIndicator color={C.apricot} />
+      </View>
+    );
+  }
+
+  const conn = me?.integrations;
+  const count = conn ? Object.values(conn).filter((v) => v === true).length : 0;
+
+  const toggle = async (provider: Provider, current: boolean) => {
+    try {
+      await toggleMutation({ provider, enabled: !current });
+    } catch (e) {
+      Alert.alert('Could not update', describeConvexError(e));
+    }
+  };
 
   return (
     <View style={S.page}>
@@ -39,7 +59,7 @@ export default function Integrations() {
 
           <View style={[S.pillow, { padding: 0, marginTop: 14 }]}>
             {INT_ITEMS.map((it, i) => {
-              const on = conn[it.k];
+              const on = !!conn?.[it.k];
               const solid = it.tone === 'apricotSolid' || it.tone === 'greenSolid';
               return (
                 <View
@@ -62,7 +82,7 @@ export default function Integrations() {
                     <Text style={{ fontSize: 11.5, color: C.dim, marginTop: 2, lineHeight: 15, fontFamily: 'DMSans_400Regular' }}>{it.d}</Text>
                   </View>
                   <Pressable
-                    onPress={() => toggle(it.k)}
+                    onPress={() => toggle(it.k, on)}
                     accessibilityRole="button"
                     accessibilityLabel={on ? `Disconnect ${it.l}` : `Connect ${it.l}`}
                     accessibilityState={{ checked: on }}

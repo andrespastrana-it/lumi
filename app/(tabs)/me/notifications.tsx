@@ -1,10 +1,14 @@
-import { ScrollView, View, Text, Switch } from 'react-native';
+import { ScrollView, View, Text, Switch, ActivityIndicator, Alert } from 'react-native';
+import { useQuery, useMutation } from 'convex/react';
 import { Header } from '@/components';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
-import { useApp } from '@/context/AppContext';
+import { api } from '@/convex/_generated/api';
+import { describeConvexError } from '@/lib/clientError';
 
-const ITEMS: { k: string; l: string; d: string }[] = [
+type PrefKey = 'summary' | 'mealNudge' | 'weighIn' | 'wins' | 'plateauAlert' | 'weekly' | 'quiet';
+
+const ITEMS: { k: PrefKey; l: string; d: string }[] = [
   { k: 'summary',      l: 'Daily summary',   d: "9:00 AM · today's plan & yesterday's recap" },
   { k: 'mealNudge',    l: 'Meal nudges',     d: '12:30 PM · 7:00 PM · soft reminders' },
   { k: 'weighIn',      l: 'Weekly weigh-in', d: 'Sun 9:00 AM' },
@@ -15,8 +19,26 @@ const ITEMS: { k: string; l: string; d: string }[] = [
 ];
 
 export default function Notifications() {
-  const { state, set } = useApp();
-  const pref = state.notifPrefs;
+  const me = useQuery(api.me.get);
+  const set = useMutation(api.notifPrefs.set);
+
+  if (me === undefined) {
+    return (
+      <View style={[S.page, { alignItems: 'center', justifyContent: 'center' }]}>
+        <ActivityIndicator color={C.apricot} />
+      </View>
+    );
+  }
+
+  const prefs = me?.notifPrefs;
+
+  const toggle = async (k: PrefKey, current: boolean) => {
+    try {
+      await set({ partial: { [k]: !current } });
+    } catch (e) {
+      Alert.alert('Could not update', describeConvexError(e));
+    }
+  };
 
   return (
     <View style={S.page}>
@@ -32,7 +54,7 @@ export default function Notifications() {
 
           <View style={[S.pillow, { padding: 0, marginTop: 14 }]}>
             {ITEMS.map((it, i) => {
-              const on = !!pref[it.k];
+              const on = !!prefs?.[it.k];
               return (
                 <View
                   key={it.k}
@@ -52,7 +74,7 @@ export default function Notifications() {
                   </View>
                   <Switch
                     value={on}
-                    onValueChange={() => set('notifPrefs', { ...pref, [it.k]: !on })}
+                    onValueChange={() => toggle(it.k, on)}
                     trackColor={{ true: C.apricot, false: C.hair }}
                   />
                 </View>

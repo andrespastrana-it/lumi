@@ -1,14 +1,18 @@
-import { ScrollView, View, Text, Pressable } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ScrollView, View, Text, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useQuery, useMutation } from 'convex/react';
 import { Header, Mascot, Em, CtaButton } from '@/components';
 import type { MascotMood } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
-import { useApp } from '@/context/AppContext';
-import type { CoachToneType } from '@/context/AppContext';
+import { api } from '@/convex/_generated/api';
+import { describeConvexError } from '@/lib/clientError';
 
-const TONES: { l: CoachToneType; d: string; m: MascotMood }[] = [
+type Tone = 'Warm' | 'Direct' | 'Cheerleader' | 'Stoic';
+
+const TONES: { l: Tone; d: string; m: MascotMood }[] = [
   { l: 'Warm',        d: 'Like a thoughtful friend. Default.',   m: 'happy' },
   { l: 'Direct',      d: 'No fluff. Says it straight.',          m: 'thinking' },
   { l: 'Cheerleader', d: 'Hype every win, no matter how small.', m: 'cheering' },
@@ -17,8 +21,36 @@ const TONES: { l: CoachToneType; d: string; m: MascotMood }[] = [
 
 export default function CoachTone() {
   const router = useRouter();
-  const { state, set } = useApp();
-  const pick = state.coachTone;
+  const me = useQuery(api.me.get);
+  const patch = useMutation(api.profile.patch);
+  const [pick, setPick] = useState<Tone | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (pick === null && me?.profile?.coachTone) {
+      setPick(me.profile.coachTone as Tone);
+    }
+  }, [me, pick]);
+
+  if (me === undefined || pick === null) {
+    return (
+      <View style={[S.page, { alignItems: 'center', justifyContent: 'center' }]}>
+        <ActivityIndicator color={C.apricot} />
+      </View>
+    );
+  }
+
+  const onSave = async () => {
+    if (busy) return;
+    try {
+      setBusy(true);
+      await patch({ partial: { coachTone: pick } });
+      router.back();
+    } catch (e) {
+      setBusy(false);
+      Alert.alert('Could not save', describeConvexError(e));
+    }
+  };
 
   return (
     <View style={S.page}>
@@ -39,7 +71,7 @@ export default function CoachTone() {
               return (
                 <Pressable
                   key={t.l}
-                  onPress={() => set('coachTone', t.l)}
+                  onPress={() => setPick(t.l)}
                   accessibilityRole="radio"
                   accessibilityLabel={`${t.l}. ${t.d}`}
                   accessibilityState={{ selected: on }}
@@ -75,7 +107,7 @@ export default function CoachTone() {
         </View>
 
         <View style={{ paddingHorizontal: 22, paddingTop: 24, paddingBottom: 22 }}>
-          <CtaButton label="Save" onPress={() => router.back()} />
+          <CtaButton label={busy ? 'Saving…' : 'Save'} disabled={busy} onPress={onSave} />
         </View>
       </ScrollView>
     </View>

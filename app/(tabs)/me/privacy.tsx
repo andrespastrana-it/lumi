@@ -1,11 +1,14 @@
-import { ScrollView, View, Text, Switch, Pressable } from 'react-native';
+import { ScrollView, View, Text, Switch, Pressable, ActivityIndicator, Alert } from 'react-native';
+import { useQuery, useMutation } from 'convex/react';
 import { Header, IconChip } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
-import { useApp, AppState } from '@/context/AppContext';
+import { api } from '@/convex/_generated/api';
+import { describeConvexError } from '@/lib/clientError';
 
-type PrivKey = keyof AppState['privacy'];
+type PrivacyState = { analytics: boolean; share: boolean; research: boolean };
+type PrivKey = keyof PrivacyState;
 
 const ROWS: { k: PrivKey; l: string; d: string }[] = [
   { k: 'analytics', l: 'Anonymous analytics',              d: 'Helps us improve Pip' },
@@ -13,10 +16,30 @@ const ROWS: { k: PrivKey; l: string; d: string }[] = [
   { k: 'research',  l: 'Contribute to nutrition research', d: 'De-identified, opt-out anytime' },
 ];
 
+const DEFAULT_PRIVACY: PrivacyState = { analytics: true, share: false, research: false };
+
 export default function Privacy() {
-  const { state, set } = useApp();
-  const perm = state.privacy;
-  const toggle = (k: PrivKey) => set('privacy', { ...perm, [k]: !perm[k] });
+  const me = useQuery(api.me.get);
+  const patch = useMutation(api.profile.patch);
+
+  if (me === undefined) {
+    return (
+      <View style={[S.page, { alignItems: 'center', justifyContent: 'center' }]}>
+        <ActivityIndicator color={C.apricot} />
+      </View>
+    );
+  }
+
+  const current: PrivacyState = me?.profile?.privacy ?? DEFAULT_PRIVACY;
+
+  const toggle = async (k: PrivKey) => {
+    const next: PrivacyState = { ...current, [k]: !current[k] };
+    try {
+      await patch({ partial: { privacy: next } });
+    } catch (e) {
+      Alert.alert('Could not update', describeConvexError(e));
+    }
+  };
 
   return (
     <View style={S.page}>
@@ -55,7 +78,7 @@ export default function Privacy() {
                   <Text style={{ fontSize: 14, color: C.ink, fontFamily: 'DMSans_500Medium' }}>{r.l}</Text>
                   <Text style={{ fontSize: 11.5, color: C.dim, marginTop: 2, lineHeight: 15, fontFamily: 'DMSans_400Regular' }}>{r.d}</Text>
                 </View>
-                <Switch value={perm[r.k]} onValueChange={() => toggle(r.k)} trackColor={{ true: C.apricot, false: C.hair }} />
+                <Switch value={current[r.k]} onValueChange={() => toggle(r.k)} trackColor={{ true: C.apricot, false: C.hair }} />
               </View>
             ))}
           </View>
