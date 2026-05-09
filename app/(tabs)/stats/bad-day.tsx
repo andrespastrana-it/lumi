@@ -1,13 +1,82 @@
-import { View, Text } from 'react-native';
+import { View, Text, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useQuery } from 'convex/react';
 import { Header, IconChip, Mascot, Em, CtaButton } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
+import { api } from '@/convex/_generated/api';
+
+const RECOVER_DAYS = 5;
+
+function yesterdayLocalDate(): string {
+  const d = new Date(Date.now() - 86400_000);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
 
 export default function BadDay() {
   const router = useRouter();
   const dismiss = () => router.replace('/(tabs)/today');
+  const me = useQuery(api.me.get);
+  const yesterday = useQuery(api.logs.byDate, { date: yesterdayLocalDate() });
+
+  if (me === undefined || yesterday === undefined) {
+    return (
+      <View style={[S.page, { alignItems: 'center', justifyContent: 'center' }]}>
+        <ActivityIndicator color={C.apricot} />
+      </View>
+    );
+  }
+
+  const target = me?.activePlan?.dailyKcal ?? 0;
+  const eaten = yesterday.reduce((sum, l) => sum + (l.kcal ?? 0), 0);
+  const over = target > 0 ? Math.max(0, eaten - target) : 0;
+  const onPlan = over === 0 && target > 0;
+
+  if (target === 0) {
+    return (
+      <View style={S.page}>
+        <Header showBack>Yesterday</Header>
+        <View style={[S.pad, { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14 }]}>
+          <Mascot mood="thinking" size={120} />
+          <Text style={[S.h2, { textAlign: 'center' }]}>No plan yet</Text>
+          <Text style={{ fontSize: 14, color: C.muted, textAlign: 'center', maxWidth: 280, fontFamily: 'Fraunces_300Light_Italic' }}>
+            Finish onboarding so Pip can compare yesterday to a target.
+          </Text>
+          <CtaButton label="Finish onboarding" onPress={() => router.replace('/onboarding/welcome')} />
+        </View>
+      </View>
+    );
+  }
+
+  if (onPlan) {
+    return (
+      <View style={S.page}>
+        <Header showBack>Yesterday</Header>
+        <View style={{ paddingHorizontal: 22, paddingTop: 8 }}>
+          <View style={[S.pillow, { flexDirection: 'row', alignItems: 'center', gap: 14 }]}>
+            <Mascot mood="proud" size={80} />
+            <Text style={[S.h1, { fontSize: 28, lineHeight: 30 }]}>
+              You stayed{'\n'}<Em>on plan</Em>
+            </Text>
+          </View>
+        </View>
+        <View style={S.pad}>
+          <Text style={[S.body, { marginTop: 18 }]}>
+            Yesterday: {Math.round(eaten).toLocaleString()} of {target.toLocaleString()} kcal. Nothing to recover. Pip&apos;s proud of you.
+          </Text>
+        </View>
+        <View style={{ paddingHorizontal: 22, paddingTop: 28, paddingBottom: 22 }}>
+          <CtaButton label="Back to today" onPress={dismiss} />
+        </View>
+      </View>
+    );
+  }
+
+  const perDay = Math.ceil(over / RECOVER_DAYS);
 
   return (
     <View style={S.page}>
@@ -36,7 +105,7 @@ export default function BadDay() {
           <View style={{ flex: 1 }}>
             <Text style={S.eyebrow}>Yesterday</Text>
             <Text style={{ fontFamily: 'Fraunces_300Light_Italic', fontSize: 22, color: C.apricot, marginTop: 2 }}>
-              + 520 kcal over
+              + {Math.round(over).toLocaleString()} kcal over
             </Text>
           </View>
         </View>
@@ -51,7 +120,7 @@ export default function BadDay() {
             <View>
               <Text style={[S.eyebrow, { color: C.green }]}>Pip&apos;s plan</Text>
               <Text style={{ fontFamily: 'Fraunces_300Light_Italic', fontSize: 22, color: C.green, marginTop: 2, letterSpacing: -0.4 }}>
-                −104 kcal/day × 5 days
+                −{perDay.toLocaleString()} kcal/day × {RECOVER_DAYS} days
               </Text>
             </View>
           </View>

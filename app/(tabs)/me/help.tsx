@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ScrollView, View, Text, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
+import Constants from 'expo-constants';
 import { Mascot, Header } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
@@ -83,7 +84,13 @@ export default function Help() {
           </View>
 
           <Text style={{ textAlign: 'center', marginTop: 28, fontSize: 11, color: C.dim, letterSpacing: 0.6, fontFamily: 'DMSans_400Regular' }}>
-            Lumi · v1.4.2 · Build 824
+            Lumi · v{Constants.expoConfig?.version ?? '0.0.0'}
+            {(() => {
+              const ios = (Constants.expoConfig?.ios as { buildNumber?: string } | undefined)?.buildNumber;
+              const android = (Constants.expoConfig?.android as { versionCode?: number } | undefined)?.versionCode;
+              const build = ios ?? (android !== undefined ? String(android) : null);
+              return build ? ` · Build ${build}` : '';
+            })()}
           </Text>
         </View>
       </ScrollView>
