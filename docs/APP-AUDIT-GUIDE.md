@@ -21,8 +21,11 @@ Rule: finish lower layers before polishing higher layers.
 - **Test barcode button** — gated behind `__DEV__` in `app/log/barcode.tsx`.
 - **Today meal-row dead end** — removed press handler that routed to `/(tabs)/plan`. Meal rows are read-only until a detail screen exists.
 - **Onboarding step order**, **today/log/onboarding flows** — wired end-to-end through Convex.
+- **Me tab** — `app/(tabs)/me/index.tsx` reads `api.me.get` (notifPrefs/integrations counts, coachTone, units, privacy). Avatar + first name come from Clerk's `useUser()`. Sign-out wired to Clerk's `useAuth().signOut()` + redirect to `/auth/sign-in`. Subscription label still in `AppContext` (no billing backend yet — kept).
+- **Plan tab** — `plan/index.tsx`, `recipe.tsx`, `shopping.tsx` all wired to `api.plan.active`. Today's meals filtered by `(Date.now() - plan.activeFrom) / DAY % 7`. `markRecipeDone` (long-press), `addToShopping`, `toggleRecipeFavorite`, `logRecipe`, `toggleShoppingItem` all wired with `describeConvexError` on failure.
 - Out of scope, deferred:
-  - **Sub-tab indexes still on mock data** — `app/(tabs)/plan/index.tsx`, `stats/index.tsx`, and most `me/*.tsx` sub-screens read hardcoded arrays / `AppContext` instead of `api.{plan.active, weighIns.recent, forecast.get, me.get}`. Each is a focused refactor; spawn a follow-up commit per tab.
+  - **Stats tab** — `stats/index.tsx` chart needs forecast snapshot producer in backend; sub-screens (`weigh-in`, `weigh-in-result`, `plateau`, `milestone`, `bad-day`, `mascot-gallery`, `activity`) still mocked.
+  - **Settings batch** — `me/edit.tsx`, `me/coach-tone.tsx`, `me/units.tsx`, `me/privacy.tsx`, `me/notifications.tsx`, `me/integrations.tsx`, `me/subscription.tsx`, `me/settings.tsx`, `me/help.tsx`.
   - **Audio playback in confirm screen for voice drafts** — Layer 6 (UX polish).
   - **Meal detail screen + edit-existing-log flow** — out of scope.
   - **Push notifications actually firing** — Layer 7 (release).

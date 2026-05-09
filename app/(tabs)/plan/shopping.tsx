@@ -1,19 +1,52 @@
-import { ScrollView, View, Text } from 'react-native';
+import { ScrollView, View, Text, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useQuery, useMutation } from 'convex/react';
 import { Header, IconChip, Em, CtaButton } from '@/components';
-import type { ToneName } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
-
-const GROUPS: { g: string; tone: ToneName; icon: string; items: [string, string][] }[] = [
-  { g: 'Produce', tone: 'green',   icon: 'veg',       items: [['Cucumber', '× 2'], ['Red onion', '× 1'], ['Lemons', '× 4'], ['Berries', '· 250g'], ['Spinach', '· 200g']] },
-  { g: 'Protein', tone: 'apricot', icon: 'lunch',     items: [['Chicken breast', '· 600g'], ['Salmon fillet', '· 400g'], ['Greek yogurt', '· 1kg']] },
-  { g: 'Pantry',  tone: 'butter',  icon: 'breakfast', items: [['Quinoa', '· 500g'], ['Olive oil', '· 500ml'], ['Almonds', '· 200g']] },
-];
+import { api } from '@/convex/_generated/api';
+import { describeConvexError } from '@/lib/clientError';
 
 export default function Shopping() {
   const router = useRouter();
+  const plan = useQuery(api.plan.active);
+  const toggleItem = useMutation(api.plan.toggleShoppingItem);
+
+  if (plan === undefined) {
+    return (
+      <View style={[S.page, { alignItems: 'center', justifyContent: 'center' }]}>
+        <ActivityIndicator color={C.apricot} />
+      </View>
+    );
+  }
+
+  if (plan === null || plan.shopping.length === 0) {
+    return (
+      <View style={S.page}>
+        <Header showBack>This week</Header>
+        <View style={[S.pad, { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14 }]}>
+          <Text style={[S.h2, { textAlign: 'center' }]}>Shopping list is empty</Text>
+          <Text style={{ fontSize: 14, color: C.muted, textAlign: 'center', maxWidth: 280, fontFamily: 'Fraunces_300Light_Italic' }}>
+            Open a recipe and tap &ldquo;Add to shopping list&rdquo; to start.
+          </Text>
+          <CtaButton label="Browse plan" onPress={() => router.replace('/(tabs)/plan')} />
+        </View>
+      </View>
+    );
+  }
+
+  const items = [...plan.shopping].sort((a, b) =>
+    a.checked === b.checked ? a.name.localeCompare(b.name) : a.checked ? 1 : -1,
+  );
+
+  const onToggle = async (itemId: string) => {
+    try {
+      await toggleItem({ itemId });
+    } catch (e) {
+      Alert.alert('Could not update', describeConvexError(e));
+    }
+  };
 
   return (
     <View style={S.page}>
@@ -29,48 +62,66 @@ export default function Shopping() {
               <Icon name="cart" color="#fff" size={24} />
             </IconChip>
             <View style={{ flex: 1 }}>
-              <Text style={[S.eyebrow, { color: C.green }]}>Estimated total</Text>
-              <Text style={{ fontFamily: 'Fraunces_300Light_Italic', fontSize: 28, color: C.green, marginTop: 2 }}>~€42</Text>
+              <Text style={[S.eyebrow, { color: C.green }]}>Items to grab</Text>
+              <Text style={{ fontFamily: 'Fraunces_300Light_Italic', fontSize: 28, color: C.green, marginTop: 2 }}>
+                {items.filter((i) => !i.checked).length}
+              </Text>
             </View>
-            <Text style={{ fontSize: 11, color: C.green, opacity: 0.7, fontStyle: 'italic', fontFamily: 'Fraunces_300Light_Italic' }}>15 items</Text>
+            <Text style={{ fontSize: 11, color: C.green, opacity: 0.7, fontStyle: 'italic', fontFamily: 'Fraunces_300Light_Italic' }}>
+              of {items.length}
+            </Text>
           </View>
         </View>
 
         <View style={S.pad}>
-          {GROUPS.map(({ g, tone, icon, items }) => (
-            <View key={g} style={{ marginTop: 22 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                <IconChip tone={tone} size={28}>
-                  <Icon name={icon} color={tone === 'green' ? C.green : C.apricotDk} size={14} />
-                </IconChip>
-                <Text style={S.eyebrow}>{g}</Text>
-              </View>
-              <View style={[S.pillow, { padding: 0 }]}>
-                {items.map(([name, qty], i) => (
-                  <View
-                    key={name}
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: 14,
-                      paddingHorizontal: 18,
-                      paddingVertical: 14,
-                      borderBottomWidth: i < items.length - 1 ? 1 : 0,
-                      borderBottomColor: C.hair,
-                    }}
-                  >
-                    <View style={{ width: 22, height: 22, borderRadius: 6, borderWidth: 1.5, borderColor: C.hair, backgroundColor: C.creamHi }} />
-                    <Text style={{ flex: 1, color: C.ink, fontSize: 14, fontFamily: 'DMSans_400Regular' }}>{name}</Text>
-                    <Text style={{ color: C.dim, fontSize: 12, fontFamily: 'DMSans_400Regular' }}>{qty}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          ))}
-        </View>
-
-        <View style={{ paddingHorizontal: 22, paddingTop: 28, paddingBottom: 22 }}>
-          <CtaButton label="Order via Glovo" onPress={() => router.replace('/(tabs)/today')} />
+          <View style={[S.pillow, { padding: 0, marginTop: 12 }]}>
+            {items.map((it, i) => (
+              <Pressable
+                key={it.id}
+                onPress={() => onToggle(it.id)}
+                accessibilityRole="checkbox"
+                accessibilityLabel={`${it.name}, ${it.qty}`}
+                accessibilityState={{ checked: it.checked }}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 14,
+                  paddingHorizontal: 18,
+                  paddingVertical: 14,
+                  borderBottomWidth: i < items.length - 1 ? 1 : 0,
+                  borderBottomColor: C.hair,
+                  opacity: it.checked ? 0.5 : 1,
+                }}
+              >
+                <View
+                  style={{
+                    width: 22,
+                    height: 22,
+                    borderRadius: 6,
+                    borderWidth: 1.5,
+                    borderColor: it.checked ? C.green : C.hair,
+                    backgroundColor: it.checked ? C.green : C.creamHi,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {it.checked ? <Icon name="check" color="#fff" size={14} /> : null}
+                </View>
+                <Text
+                  style={{
+                    flex: 1,
+                    color: C.ink,
+                    fontSize: 14,
+                    fontFamily: 'DMSans_400Regular',
+                    textDecorationLine: it.checked ? 'line-through' : 'none',
+                  }}
+                >
+                  {it.name}
+                </Text>
+                <Text style={{ color: C.dim, fontSize: 12, fontFamily: 'DMSans_400Regular' }}>{it.qty}</Text>
+              </Pressable>
+            ))}
+          </View>
         </View>
       </ScrollView>
     </View>
