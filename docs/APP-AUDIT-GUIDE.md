@@ -24,9 +24,13 @@ Rule: finish lower layers before polishing higher layers.
 - **Me tab** — `app/(tabs)/me/index.tsx` reads `api.me.get` (notifPrefs/integrations counts, coachTone, units, privacy). Avatar + first name come from Clerk's `useUser()`. Sign-out wired to Clerk's `useAuth().signOut()` + redirect to `/auth/sign-in`. Subscription label still in `AppContext` (no billing backend yet — kept).
 - **Me settings batch** — `me/edit.tsx` (read-only display from `api.me.get` + Clerk), `me/coach-tone.tsx` (`profile.patch({ coachTone })`), `me/units.tsx` (`profile.patch({ units })`), `me/privacy.tsx` (toggle → `profile.patch({ privacy })`), `me/notifications.tsx` (toggle → `notifPrefs.set({ partial })`), `me/integrations.tsx` (toggle → `integrations.toggle({ provider, enabled })`). All persist server-side; errors via `describeConvexError`. UI provider keys mapped to backend literals (`appleHealth`, `googleFit`, etc.).
 - **Plan tab** — `plan/index.tsx`, `recipe.tsx`, `shopping.tsx` all wired to `api.plan.active`. Today's meals filtered by `(Date.now() - plan.activeFrom) / DAY % 7`. `markRecipeDone` (long-press), `addToShopping`, `toggleRecipeFavorite`, `logRecipe`, `toggleShoppingItem` all wired with `describeConvexError` on failure.
+- **Stats core** — `stats/weigh-in.tsx` calls `api.weighIns.create({ weightKg, source: 'manual' })` (bounds enforced backend-side). `stats/index.tsx` chart now renders real `api.weighIns.recent` points; "Lost" / "To go" / "Weigh-ins" stats computed from `api.me.get` profile + recent weigh-ins. Empty state when no weigh-ins logged. Forecast curve still placeholder until backend snapshot producer ships (Layer 4).
 - Out of scope, deferred:
-  - **Stats tab** — `stats/index.tsx` chart needs forecast snapshot producer in backend; sub-screens (`weigh-in`, `weigh-in-result`, `plateau`, `milestone`, `bad-day`, `mascot-gallery`, `activity`) still mocked.
-  - **Settings batch** — `me/edit.tsx`, `me/coach-tone.tsx`, `me/units.tsx`, `me/privacy.tsx`, `me/notifications.tsx`, `me/integrations.tsx`, `me/subscription.tsx`, `me/settings.tsx`, `me/help.tsx`.
+  - **Stats sub-screens** — `weigh-in-result.tsx`, `plateau.tsx`, `milestone.tsx`, `bad-day.tsx`, `mascot-gallery.tsx`, `activity.tsx` are informational and remain mocked.
+  - **Forecast snapshot producer** — Layer 4 (AI/cron) work; once shipped, `stats/index.tsx` can replace the linear-projection chart with actual model output.
+  - **Account deletion / data export** — backend has `users.softDelete` (internal) but no public client mutation; `me/privacy.tsx` UI shows the buttons as placeholders.
+  - **`me/{subscription,settings,help}.tsx`** — informational, no Convex hookup needed.
+  - **Inline editing** of profile fields on `me/edit.tsx` — read-only display for now; per-field sub-screens or modal forms deferred.
   - **Audio playback in confirm screen for voice drafts** — Layer 6 (UX polish).
   - **Meal detail screen + edit-existing-log flow** — out of scope.
   - **Push notifications actually firing** — Layer 7 (release).

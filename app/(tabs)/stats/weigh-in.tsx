@@ -1,19 +1,22 @@
 import { useState } from 'react';
-import { View, Text, Pressable, TextInput } from 'react-native';
+import { View, Text, Pressable, TextInput, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useMutation } from 'convex/react';
 import { Header, Blob, Em, CtaButton } from '@/components';
 import { S } from '@/lib/styles';
 import { C, PILLOW_SHADOW_SM } from '@/lib/tokens';
-import { useApp } from '@/context/AppContext';
+import { api } from '@/convex/_generated/api';
+import { describeConvexError } from '@/lib/clientError';
 
 const MIN = 35;
 const MAX = 250;
 
 export default function WeighIn() {
   const router = useRouter();
-  const { set } = useApp();
+  const create = useMutation(api.weighIns.create);
   const [w, setW] = useState(82.4);
   const [draft, setDraft] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   const commit = () => {
     if (draft === null) return;
@@ -25,17 +28,23 @@ export default function WeighIn() {
     setDraft(null);
   };
 
-  const submit = () => {
-    set('lastWeight', w);
-    set('weighInDue', false);
-    router.replace('/(tabs)/stats/weigh-in-result');
+  const submit = async () => {
+    if (busy) return;
+    try {
+      setBusy(true);
+      await create({ weightKg: w, source: 'manual' });
+      router.replace('/(tabs)/stats/weigh-in-result');
+    } catch (e) {
+      setBusy(false);
+      Alert.alert('Could not save', describeConvexError(e));
+    }
   };
 
   const editing = draft !== null;
 
   return (
     <View style={S.page}>
-      <Header showBack>Sunday weigh-in · Week 4</Header>
+      <Header showBack>Weigh-in</Header>
 
       <View style={S.pad}>
         <Text style={[S.h1, { marginTop: 14 }]}>
@@ -87,7 +96,7 @@ export default function WeighIn() {
       </View>
 
       <View style={{ paddingHorizontal: 22, paddingTop: 24, paddingBottom: 22 }}>
-        <CtaButton label="Confirm" onPress={submit} disabled={editing} />
+        <CtaButton label={busy ? 'Saving…' : 'Confirm'} onPress={submit} disabled={editing || busy} />
       </View>
     </View>
   );
