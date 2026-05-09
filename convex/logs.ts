@@ -255,6 +255,35 @@ export const confirmManual = mutation({
   },
 });
 
+export const draftSearchPick = mutation({
+  args: {
+    name: v.string(),
+    kcal: v.number(),
+    proteinG: v.number(),
+    carbG: v.number(),
+    fatG: v.number(),
+    servingSizeG: v.optional(v.number()),
+    confidence: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    assertFoodBounds(args);
+    return await ctx.db.insert('foodLogs', {
+      userId: user._id,
+      consumedAt: Date.now(),
+      source: 'search',
+      name: args.name,
+      kcal: args.kcal,
+      proteinG: args.proteinG,
+      carbG: args.carbG,
+      fatG: args.fatG,
+      servingSizeG: args.servingSizeG,
+      confidence: args.confidence,
+      status: 'draft',
+    });
+  },
+});
+
 export const logRecipe = mutation({
   args: {
     planRecipeId: v.id('planRecipes'),

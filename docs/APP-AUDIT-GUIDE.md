@@ -12,6 +12,21 @@ Use this order when polishing Lumi from backend to frontend:
 
 Rule: finish lower layers before polishing higher layers.
 
+## Layer 3 verdict (2026-05-09)
+
+- **Voice logging E2E** — `app/log/voice.tsx` now uploads via `api.upload.{generate,claim}` and calls `api.logsActions.draftFromVoice`, then routes to `confirm.tsx` with `logId`. Idempotent on `assetId` per Layer 2.
+- **Permissions persistence** — `app/onboarding/permissions.tsx` calls `api.permissionGrants.set({ key, value })` on every toggle. Backend now reflects user intent.
+- **Search → confirm** — `app/log/search.tsx` calls new `api.logs.draftSearchPick` mutation (food bounds enforced) and routes to `confirm.tsx` with `logId`. Same UX as photo/voice/barcode now.
+- **Confirm error surface** — `app/log/confirm.tsx` (and photo/voice/barcode/search) catch errors and render code-aware messages via `lib/clientError.ts:describeConvexError`. First client consumer of the Layer 2 `error.data.code` contract.
+- **Test barcode button** — gated behind `__DEV__` in `app/log/barcode.tsx`.
+- **Today meal-row dead end** — removed press handler that routed to `/(tabs)/plan`. Meal rows are read-only until a detail screen exists.
+- **Onboarding step order**, **today/log/onboarding flows** — wired end-to-end through Convex.
+- Out of scope, deferred:
+  - **Sub-tab indexes still on mock data** — `app/(tabs)/plan/index.tsx`, `stats/index.tsx`, and most `me/*.tsx` sub-screens read hardcoded arrays / `AppContext` instead of `api.{plan.active, weighIns.recent, forecast.get, me.get}`. Each is a focused refactor; spawn a follow-up commit per tab.
+  - **Audio playback in confirm screen for voice drafts** — Layer 6 (UX polish).
+  - **Meal detail screen + edit-existing-log flow** — out of scope.
+  - **Push notifications actually firing** — Layer 7 (release).
+
 ## Layer 1 verdict (2026-05-09)
 
 - **Schema** — 18 tables, all userId-scoped except `users`, `mediaAssets` (handled separately in soft-delete), `cronRuns` (system jobs allowed). Stable.

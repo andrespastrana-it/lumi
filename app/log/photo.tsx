@@ -10,6 +10,7 @@ import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
 import { openAppSettings } from '@/lib/permissions';
 import { api } from '@/convex/_generated/api';
+import { describeConvexError } from '@/lib/clientError';
 
 function CornerMark({ y, x }: { y: 0 | 1; x: 0 | 1 }) {
   const base = 12;
@@ -99,8 +100,8 @@ export default function LogPhoto() {
       setBusy('analyzing');
       const { logId } = await draftFromPhoto({ assetId });
       router.replace({ pathname: '/log/confirm', params: { source: 'photo', logId, photoUri: photo.uri } });
-    } catch (e: any) {
-      Alert.alert('Photo log failed', e?.message ?? String(e));
+    } catch (e) {
+      Alert.alert('Photo log failed', describeConvexError(e));
       setBusy(null);
     }
   };

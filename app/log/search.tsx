@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, View, Text, TextInput, Pressable, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Text, TextInput, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAction, useMutation } from 'convex/react';
 import { Header, IconChip } from '@/components';
@@ -7,6 +7,7 @@ import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
 import { api } from '@/convex/_generated/api';
+import { describeConvexError } from '@/lib/clientError';
 
 type Result = {
   name: string;
@@ -25,7 +26,7 @@ export default function LogSearch() {
   const [busy, setBusy] = useState(false);
   const [creating, setCreating] = useState(false);
   const draftFromSearch = useAction(api.logsActions.draftFromSearch);
-  const confirmManual = useMutation(api.logs.confirmManual);
+  const draftSearchPick = useMutation(api.logs.draftSearchPick);
 
   useEffect(() => {
     if (!query.trim()) {
@@ -37,8 +38,9 @@ export default function LogSearch() {
         setBusy(true);
         const out = await draftFromSearch({ q: query });
         setResults(out.results);
-      } catch {
+      } catch (e) {
         setResults([]);
+        Alert.alert('Search failed', describeConvexError(e));
       } finally {
         setBusy(false);
       }
@@ -50,17 +52,18 @@ export default function LogSearch() {
     if (creating) return;
     try {
       setCreating(true);
-      // Skip draft for search; create confirmed log directly.
-      await confirmManual({
+      const logId = await draftSearchPick({
         name: r.name,
         kcal: Math.round(r.kcal),
         proteinG: r.proteinG,
         carbG: r.carbG,
         fatG: r.fatG,
         servingSizeG: r.servingSizeG,
+        confidence: r.confidence,
       });
-      router.dismissAll();
-    } catch {
+      router.replace({ pathname: '/log/confirm', params: { source: 'search', logId } });
+    } catch (e) {
+      Alert.alert('Could not save', describeConvexError(e));
       setCreating(false);
     }
   };

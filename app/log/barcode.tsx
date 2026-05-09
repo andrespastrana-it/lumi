@@ -10,6 +10,7 @@ import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
 import { openAppSettings } from '@/lib/permissions';
 import { api } from '@/convex/_generated/api';
+import { describeConvexError } from '@/lib/clientError';
 
 function ScanBar() {
   const t = useSharedValue(0);
@@ -75,7 +76,7 @@ export default function LogBarcode() {
       const { logId } = await draftFromBarcode({ ean: r.data });
       router.replace({ pathname: '/log/confirm', params: { source: 'barcode', logId, barcode: r.data } });
     } catch (e: any) {
-      Alert.alert('Lookup failed', e?.message ?? String(e));
+      Alert.alert('Lookup failed', describeConvexError(e));
       scannedRef.current = false;
       setBusy(false);
     }
@@ -125,24 +126,26 @@ export default function LogBarcode() {
         </Pressable>
       </View>
 
-      <View style={{ position: 'absolute', bottom: 40, left: 22, right: 22 }}>
-        <CtaButton
-          label="Test scan (5449000000996)"
-          disabled={busy}
-          onPress={async () => {
-            scannedRef.current = true;
-            try {
-              setBusy(true);
-              const { logId } = await draftFromBarcode({ ean: '5449000000996' });
-              router.replace({ pathname: '/log/confirm', params: { source: 'barcode', logId, barcode: '5449000000996' } });
-            } catch (e: any) {
-              Alert.alert('Lookup failed', e?.message ?? String(e));
-              scannedRef.current = false;
-              setBusy(false);
-            }
-          }}
-        />
-      </View>
+      {__DEV__ ? (
+        <View style={{ position: 'absolute', bottom: 40, left: 22, right: 22 }}>
+          <CtaButton
+            label="Test scan (5449000000996)"
+            disabled={busy}
+            onPress={async () => {
+              scannedRef.current = true;
+              try {
+                setBusy(true);
+                const { logId } = await draftFromBarcode({ ean: '5449000000996' });
+                router.replace({ pathname: '/log/confirm', params: { source: 'barcode', logId, barcode: '5449000000996' } });
+              } catch (e: any) {
+                Alert.alert('Lookup failed', describeConvexError(e));
+                scannedRef.current = false;
+                setBusy(false);
+              }
+            }}
+          />
+        </View>
+      ) : null}
     </View>
   );
 }

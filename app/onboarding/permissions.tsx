@@ -2,6 +2,7 @@ import { View, Text, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Camera } from 'expo-camera';
 import { requestRecordingPermissionsAsync } from 'expo-audio';
+import { useMutation } from 'convex/react';
 import { Header, IconChip, Em, CtaButton } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
@@ -9,6 +10,7 @@ import { C } from '@/lib/tokens';
 import { requestNotificationPermission } from '@/lib/permissions';
 import { requestHealthPermission } from '@/lib/health';
 import { useApp, AppState } from '@/context/AppContext';
+import { api } from '@/convex/_generated/api';
 
 type PermKey = keyof AppState['permissions'];
 
@@ -37,16 +39,20 @@ async function requestNative(k: PermKey): Promise<boolean> {
 export default function Permissions() {
   const router = useRouter();
   const { state, set } = useApp();
+  const setGrant = useMutation(api.permissionGrants.set);
 
   const onToggle = async (k: PermKey) => {
     const cur = state.permissions[k];
     if (cur) {
-      // Turning off: just flip local state. iOS doesn't let you revoke from app.
+      // Turning off: flip local state + persist. iOS won't actually revoke,
+      // but the user's intent is recorded so backend logic respects it.
       set('permissions', { ...state.permissions, [k]: false });
+      setGrant({ key: k, value: false }).catch(() => {});
       return;
     }
     const granted = await requestNative(k);
     set('permissions', { ...state.permissions, [k]: granted });
+    setGrant({ key: k, value: granted }).catch(() => {});
   };
 
   return (

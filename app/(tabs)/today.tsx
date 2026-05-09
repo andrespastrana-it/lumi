@@ -145,7 +145,6 @@ function sourceIcon(s: Meal['source']): string {
 }
 
 function MealsList({ meals }: { meals: Meal[] }) {
-  const router = useRouter();
   if (meals.length === 0) {
     return (
       <View style={{ paddingHorizontal: 22, paddingTop: 22, paddingBottom: 8 }}>
@@ -171,10 +170,8 @@ function MealsList({ meals }: { meals: Meal[] }) {
         {meals.map((m, i) => {
           const time = new Date(m.consumedAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
           return (
-            <Pressable
+            <View
               key={String(m.id)}
-              onPress={() => router.push('/(tabs)/plan')}
-              accessibilityRole="button"
               accessibilityLabel={`${m.name}, ${time}, ${m.kcal} kilocalories`}
               style={{
                 flexDirection: 'row',
@@ -199,7 +196,7 @@ function MealsList({ meals }: { meals: Meal[] }) {
                 <Text style={{ fontSize: 14, color: C.ink, fontFamily: 'Fraunces_400Regular' }}>{m.kcal}</Text>
                 <Text style={{ fontSize: 9, color: C.dim, letterSpacing: 1, textTransform: 'uppercase', fontFamily: 'DMSans_400Regular' }}>kcal</Text>
               </View>
-            </Pressable>
+            </View>
           );
         })}
       </View>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, View, Text, Image, TextInput, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Text, Image, TextInput, ActivityIndicator, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useQuery, useMutation } from 'convex/react';
 import { Header, IconChip, FoodPlate, CtaButton } from '@/components';
@@ -8,6 +8,7 @@ import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
+import { describeConvexError } from '@/lib/clientError';
 
 type Source = 'photo' | 'voice' | 'barcode' | 'search' | 'manual';
 
@@ -16,7 +17,6 @@ interface Params {
   logId?: string;
   photoUri?: string;
   barcode?: string;
-  name?: string;
 }
 
 export default function LogConfirm() {
@@ -59,8 +59,9 @@ export default function LogConfirm() {
         },
       });
       router.dismissAll();
-    } catch {
+    } catch (e) {
       setBusy(false);
+      Alert.alert('Could not save', describeConvexError(e));
     }
   };
 

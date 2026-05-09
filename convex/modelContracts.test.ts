@@ -189,6 +189,43 @@ describe('database model contracts', () => {
     });
   });
 
+  test('logs.draftSearchPick inserts a draft with source=search and respects bounds', async () => {
+    const t = testDb();
+    const userId = await seedUser(t, 'search_pick_user');
+
+    const logId = await asUser(t, 'search_pick_user').mutation(api.logs.draftSearchPick, {
+      name: 'Greek yogurt',
+      kcal: 150,
+      proteinG: 18,
+      carbG: 10,
+      fatG: 4,
+      servingSizeG: 200,
+      confidence: 0.7,
+    });
+
+    const log = await t.run(async (ctx) => await ctx.db.get(logId));
+    expect(log).toMatchObject({
+      userId,
+      name: 'Greek yogurt',
+      kcal: 150,
+      proteinG: 18,
+      source: 'search',
+      status: 'draft',
+      confidence: 0.7,
+      servingSizeG: 200,
+    });
+
+    await expect(
+      asUser(t, 'search_pick_user').mutation(api.logs.draftSearchPick, {
+        name: 'absurd',
+        kcal: 99999,
+        proteinG: 0,
+        carbG: 0,
+        fatG: 0,
+      }),
+    ).rejects.toMatchObject({ data: { code: 'INVALID_ARGUMENT', field: 'kcal' } });
+  });
+
   test('weighIns.create rejects out-of-range body weights', async () => {
     const t = testDb();
     await seedUser(t, 'bounds_user');

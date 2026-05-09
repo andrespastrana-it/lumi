@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAudioRecorder, useAudioRecorderState, RecordingPresets, requestRecordingPermissionsAsync, getRecordingPermissionsAsync } from 'expo-audio';
+import { useAction, useMutation } from 'convex/react';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, withDelay, Easing } from 'react-native-reanimated';
 import { Blob, CtaButton } from '@/components';
 import { Icon } from '@/lib/icons';
@@ -10,6 +11,8 @@ import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
 import { openAppSettings } from '@/lib/permissions';
 import { useState } from 'react';
+import { api } from '@/convex/_generated/api';
+import { describeConvexError } from '@/lib/clientError';
 
 function PulseRing({ delay = 0 }: { delay?: number }) {
   const v = useSharedValue(0);
@@ -50,8 +53,12 @@ function Bar({ i }: { i: number }) {
 export default function LogVoice() {
   const router = useRouter();
   const [permission, setPermission] = useState<'unknown' | 'granted' | 'denied'>('unknown');
+  const [busy, setBusy] = useState<null | 'uploading' | 'analyzing'>(null);
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const recorderState = useAudioRecorderState(recorder);
+  const generateUploadUrl = useMutation(api.upload.generate);
+  const claimUpload = useMutation(api.upload.claim);
+  const draftFromVoice = useAction(api.logsActions.draftFromVoice);
 
   useEffect(() => {
     (async () => {
@@ -85,14 +92,42 @@ export default function LogVoice() {
   }, [permission]);
 
   const stopAndConfirm = async () => {
+    if (busy) return;
     let uri = '';
     try {
       if (recorderState.isRecording) await recorder.stop();
       uri = recorder.uri ?? '';
     } catch {
-      // ignore — recorder may already be stopped on hot reload
+      // recorder may already be stopped on hot reload — fall through and check uri
     }
-    router.replace({ pathname: '/log/confirm', params: { source: 'voice', audioUri: uri } });
+    if (!uri) {
+      Alert.alert('No audio captured', 'Try again — we did not capture any sound.');
+      return;
+    }
+    try {
+      setBusy('uploading');
+      const blob = await (await fetch(uri)).blob();
+      const uploadUrl = await generateUploadUrl();
+      const upRes = await fetch(uploadUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': blob.type || 'audio/m4a' },
+        body: blob,
+      });
+      if (!upRes.ok) throw new Error(`Upload failed: ${upRes.status}`);
+      const { storageId } = (await upRes.json()) as { storageId: string };
+      const { assetId } = await claimUpload({
+        storageId: storageId as any,
+        kind: 'audio',
+        mime: blob.type || 'audio/m4a',
+        bytes: blob.size,
+      });
+      setBusy('analyzing');
+      const { logId } = await draftFromVoice({ assetId });
+      router.replace({ pathname: '/log/confirm', params: { source: 'voice', logId } });
+    } catch (e) {
+      Alert.alert('Voice log failed', describeConvexError(e));
+      setBusy(null);
+    }
   };
 
   if (permission === 'denied') {
@@ -142,7 +177,11 @@ export default function LogVoice() {
         </View>
 
         <Text style={[S.eyebrow, { color: 'rgba(255,246,238,.5)' }]}>
-          {recorderState.isRecording ? 'Listening' : permission === 'granted' ? 'Tap stop when done' : 'Preparing…'}
+          {busy === 'uploading' ? 'Uploading…'
+            : busy === 'analyzing' ? 'Pip is listening…'
+            : recorderState.isRecording ? 'Listening'
+            : permission === 'granted' ? 'Tap stop when done'
+            : 'Preparing…'}
         </Text>
         <Text style={[S.h1, { color: C.paper, fontSize: 36, marginTop: 16, lineHeight: 38, textAlign: 'center' }]}>
           “Two eggs &amp;{'\n'}
@@ -155,7 +194,7 @@ export default function LogVoice() {
       </View>
 
       <View style={{ marginTop: 60, width: 240 }}>
-        <CtaButton label="Stop & log" onPress={stopAndConfirm} />
+        <CtaButton label={busy ? 'Working…' : 'Stop & log'} disabled={!!busy} onPress={stopAndConfirm} />
       </View>
     </LinearGradient>
   );
