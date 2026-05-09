@@ -38,6 +38,22 @@ Rule: finish lower layers before polishing higher layers.
   - **Meal detail screen + edit-existing-log flow** — out of scope.
   - **Push notifications actually firing** — Layer 7 (release).
 
+## Layer 4 partial verdict (2026-05-09)
+
+Layer 4 (AI: prompts / structured outputs / fallbacks / cost telemetry) — partially done. See `docs/AI-FIXES-PLAN.md` for the full phase plan and `docs/PLAN-GEN-RELIABILITY-ISSUE.md` for the open issue.
+
+- **Provider registry expanded** — `convex/ai/index.ts` adds a `free` provider (NVIDIA NIM via `@ai-sdk/openai-compatible`) alongside anthropic / openai / groq. All three language-model tasks (`coach`, `vision`, `plan-gen`) default to `free:nvidia/nemotron-3-nano-omni-30b-a3b-reasoning`; flip per task with `AI_<TASK>_MODEL=<provider>:<model>` on Convex env.
+- **Structured-output workaround** — AI SDK v6 dropped `generateObject({ mode: 'tool' })`. `generateObjectViaTool` routes through `generateText` + forced tool call when provider is `free`, with iterative `JSON.parse` to handle NIM's double-encoded tool args.
+- **Per-task settings** — `TASK_SETTINGS` map applies temperature / topP / maxOutputTokens / providerOptions per task (e.g. disables `chat_template_kwargs.enable_thinking` to keep reasoning models from breaking structured output).
+- **Telemetry: real model id** — `convex/logsActions.ts` records `providerModel: visionTask.modelId` (no longer hardcoded `'anthropic:claude-sonnet-4-6'`).
+- **Smoke tests** — `convex/smoke.ts` exposes `testCoach` / `testVision` / `testPlanGen` internal actions for `npx convex run` verification of each task in isolation.
+- **Fail-fast key validation** — module-load assertion catches missing/placeholder API keys with a clear message instead of leaking a vendor 401 mid-request.
+- **Open issues, not yet fixed:**
+  - **Rate-limit telemetry gap** — only `draftFromPhoto` writes `aiCalls` rows. `draftFromVoice`, `draftFromSearch`, `profileSetup.commit` still skip the insert, so the rate limiter sees count=0 for `coach`/`stt`/`plan-gen` and never throttles those tasks. Highest-value fix.
+  - **Plan-gen reliability** — ~50% pass rate against NVIDIA NIM (see `docs/PLAN-GEN-RELIABILITY-ISSUE.md`). Existing fallback at `profileSetup.ts:101-114` masks failures with a stub plan; users get a silently degraded "personalized" plan. Resolution options: tighter temp + retry / split schema by day / switch plan-gen to anthropic.
+  - **Fallback chain** — no automatic retry on 429 / 5xx with a backup provider.
+  - **Cost telemetry summaries** — `aiCalls` rows are written but no aggregation / monthly-spend report.
+
 ## Layer 1 verdict (2026-05-09)
 
 - **Schema** — 18 tables, all userId-scoped except `users`, `mediaAssets` (handled separately in soft-delete), `cronRuns` (system jobs allowed). Stable.

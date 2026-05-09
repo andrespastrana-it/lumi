@@ -59,9 +59,10 @@ export const draftFromPhoto = action({
     if (!url) throw appError('NOT_FOUND', 'Photo not found');
 
     const t0 = Date.now();
+    const visionTask = ai.task('vision');
     let estimate: z.infer<typeof FoodEstimate>;
     try {
-      const result = await ai.task('vision').generateObject({
+      const result = await visionTask.generateObject({
         schema: FoodEstimate,
         system:
           'You estimate kcal + macros from a meal photo. Return one JSON object. Confidence 0-1 reflects certainty. If multiple items visible, sum them and use a descriptive composite name.',
@@ -79,7 +80,7 @@ export const draftFromPhoto = action({
       await logAi(ctx, {
         userId,
         task: 'vision',
-        providerModel: 'anthropic:claude-sonnet-4-6',
+        providerModel: visionTask.modelId,
         inputTokens: result.usage?.inputTokens ?? 0,
         outputTokens: result.usage?.outputTokens ?? 0,
         ms: Date.now() - t0,
@@ -89,7 +90,7 @@ export const draftFromPhoto = action({
       await logAi(ctx, {
         userId,
         task: 'vision',
-        providerModel: 'anthropic:claude-sonnet-4-6',
+        providerModel: visionTask.modelId,
         inputTokens: 0,
         outputTokens: 0,
         ms: Date.now() - t0,

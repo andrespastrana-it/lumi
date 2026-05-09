@@ -25,7 +25,9 @@ npx convex env set AI_COACH_MODEL groq:llama-3.3-70b-versatile
 npx convex env unset AI_PLAN_GEN_MODEL
 ```
 
-Defaults live in the `DEFAULTS` map at the top of `convex/ai/index.ts`. Tasks: `coach`, `vision`, `plan-gen`.
+Defaults live in the `DEFAULTS` map at the top of `convex/ai/index.ts`. Tasks: `coach`, `vision`, `plan-gen` — all currently default to `free:nvidia/nemotron-3-nano-omni-30b-a3b-reasoning` (multimodal, JSON output, tool calling, 256k context — covers all three tasks).
+
+Registered providers: `anthropic`, `openai`, `groq`, `free` (NVIDIA NIM via OpenAI-compatible adapter — set `FREE_API_KEY` on Convex env). Anthropic / OpenAI / Groq are still wired and ready to use as overrides — just set the corresponding key and flip a task via `AI_<TASK>_MODEL`.
 
 The router also fails fast at module load if a needed API key is missing or still a placeholder — the action errors with a clear message instead of leaking a 401 from the AI vendor.
 

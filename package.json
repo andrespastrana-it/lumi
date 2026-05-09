@@ -17,6 +17,7 @@
     "@ai-sdk/anthropic": "^3.0.74",
     "@ai-sdk/groq": "^3.0.38",
     "@ai-sdk/openai": "^3.0.58",
+    "@ai-sdk/openai-compatible": "^2.0.47",
     "@clerk/expo": "^3.2.7",
     "@clerk/types": "^4.101.23",
     "@convex-dev/rate-limiter": "^0.3.2",
