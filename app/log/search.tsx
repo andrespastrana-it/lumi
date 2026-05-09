@@ -1,26 +1,69 @@
-import { useState } from 'react';
-import { ScrollView, View, Text, TextInput, Pressable } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ScrollView, View, Text, TextInput, Pressable, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useAction, useMutation } from 'convex/react';
 import { Header, IconChip } from '@/components';
-import type { ToneName } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
+import { api } from '@/convex/_generated/api';
 
-const FOOD_ITEMS: ReadonlyArray<readonly [string, string, ToneName, string]> = [
-  ['Greek yogurt',   '100g · 59 kcal',          'apricot', 'breakfast'],
-  ['Banana',         '1 medium · 105 kcal',     'butter',  'snack'],
-  ['Chicken breast', '100g · 165 kcal',         'green',   'dinner'],
-  ['Almonds',        '12 nuts · 84 kcal',       'cream',   'snack'],
-  ['Olive oil',      '1 tbsp · 119 kcal',       'butter',  'breakfast'],
-  ['Salmon',         '100g · 208 kcal',         'apricot', 'lunch'],
-  ['Quinoa',         '60g cooked · 71 kcal',    'green',   'breakfast'],
-  ['Espresso',       '1 shot · 3 kcal',         'cream',   'flame'],
-];
+type Result = {
+  name: string;
+  kcal: number;
+  proteinG: number;
+  carbG: number;
+  fatG: number;
+  servingSizeG?: number;
+  confidence: number;
+};
 
 export default function LogSearch() {
   const router = useRouter();
   const [query, setQuery] = useState('');
+  const [results, setResults] = useState<Result[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const draftFromSearch = useAction(api.logsActions.draftFromSearch);
+  const confirmManual = useMutation(api.logs.confirmManual);
+
+  useEffect(() => {
+    if (!query.trim()) {
+      setResults([]);
+      return;
+    }
+    const handle = setTimeout(async () => {
+      try {
+        setBusy(true);
+        const out = await draftFromSearch({ q: query });
+        setResults(out.results);
+      } catch {
+        setResults([]);
+      } finally {
+        setBusy(false);
+      }
+    }, 400);
+    return () => clearTimeout(handle);
+  }, [query, draftFromSearch]);
+
+  const pick = async (r: Result) => {
+    if (creating) return;
+    try {
+      setCreating(true);
+      // Skip draft for search; create confirmed log directly.
+      await confirmManual({
+        name: r.name,
+        kcal: Math.round(r.kcal),
+        proteinG: r.proteinG,
+        carbG: r.carbG,
+        fatG: r.fatG,
+        servingSizeG: r.servingSizeG,
+      });
+      router.dismissAll();
+    } catch {
+      setCreating(false);
+    }
+  };
 
   return (
     <View style={S.page}>
@@ -33,36 +76,50 @@ export default function LogSearch() {
             autoFocus
             value={query}
             onChangeText={setQuery}
-            placeholder="Search 250k foods…"
+            placeholder="Search foods…"
             placeholderTextColor={C.dim}
             style={{ flex: 1, fontSize: 16, fontFamily: 'Fraunces_300Light_Italic', fontStyle: 'italic', color: C.ink, padding: 0 }}
           />
+          {busy ? <ActivityIndicator color={C.apricot} /> : null}
         </View>
 
-        <Text style={[S.eyebrow, { marginTop: 24 }]}>Recents</Text>
-        <ScrollView style={[S.pillow, { padding: 0, marginTop: 10 }]}>
-          {FOOD_ITEMS.map(([name, sub, tone, icon], i) => (
+        <Text style={[S.eyebrow, { marginTop: 24 }]}>
+          {query.trim() ? 'Results' : 'Type to search'}
+        </Text>
+
+        {results.length === 0 && !busy && query.trim() ? (
+          <Text style={{ marginTop: 24, fontSize: 13, color: C.muted, fontStyle: 'italic', fontFamily: 'Fraunces_300Light_Italic', textAlign: 'center' }}>
+            No matches.
+          </Text>
+        ) : null}
+
+        <ScrollView style={results.length > 0 ? [S.pillow, { padding: 0, marginTop: 10 }] : { marginTop: 10 }}>
+          {results.map((r, i) => (
             <Pressable
-              key={name}
-              onPress={() => router.replace({ pathname: '/log/confirm', params: { source: 'search', name } })}
+              key={`${r.name}-${i}`}
+              onPress={() => pick(r)}
+              disabled={creating}
               accessibilityRole="button"
-              accessibilityLabel={`${name}, ${sub}`}
+              accessibilityLabel={`${r.name}, ${r.kcal} kilocalories`}
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
                 gap: 12,
                 paddingHorizontal: 18,
                 paddingVertical: 12,
-                borderBottomWidth: i < FOOD_ITEMS.length - 1 ? 1 : 0,
+                borderBottomWidth: i < results.length - 1 ? 1 : 0,
                 borderBottomColor: C.hair,
+                opacity: creating ? 0.5 : 1,
               }}
             >
-              <IconChip tone={tone} size={36}>
-                <Icon name={icon} color={C.apricotDk} size={18} />
+              <IconChip tone="apricot" size={36}>
+                <Icon name="snack" color={C.apricotDk} size={18} />
               </IconChip>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 14, color: C.ink, fontFamily: 'Fraunces_400Regular' }}>{name}</Text>
-                <Text style={{ fontSize: 11, color: C.dim, marginTop: 2, fontFamily: 'DMSans_400Regular' }}>{sub}</Text>
+                <Text style={{ fontSize: 14, color: C.ink, fontFamily: 'Fraunces_400Regular' }}>{r.name}</Text>
+                <Text style={{ fontSize: 11, color: C.dim, marginTop: 2, fontFamily: 'DMSans_400Regular' }}>
+                  {r.servingSizeG ? `${r.servingSizeG}g · ` : ''}{Math.round(r.kcal)} kcal · P {r.proteinG}/C {r.carbG}/F {r.fatG}
+                </Text>
               </View>
               <Icon name="add" color={C.dim} size={16} />
             </Pressable>

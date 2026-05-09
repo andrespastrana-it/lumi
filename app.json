@@ -49,14 +49,14 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#FAF6F0",
-          "resizeMode": "contain"
+          "backgroundColor": "#FAF6F0"
         }
       ],
       "expo-image",
       "expo-secure-store",
       "expo-asset",
-      "expo-localization"
+      "expo-localization",
+      "expo-web-browser"
     ]
   }
 }

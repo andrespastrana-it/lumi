@@ -35,8 +35,8 @@ export default function Welcome() {
       </View>
 
       <View style={{ paddingHorizontal: 22, paddingBottom: 28, gap: 4 }}>
-        <CtaButton label={t.cta.letsBegin} onPress={() => router.push('/onboarding/goal')} />
-        <CtaButton label={t.cta.haveAccount} variant="line" onPress={() => router.replace('/(tabs)/today')} />
+        <CtaButton label={t.cta.letsBegin} onPress={() => router.push('/auth/sign-up' as any)} />
+        <CtaButton label={t.cta.haveAccount} variant="line" onPress={() => router.push('/auth/sign-in' as any)} />
       </View>
     </View>
   );

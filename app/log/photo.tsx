@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, Pressable, Alert } from 'react-native';
+import { View, Text, Pressable, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useMutation, useAction } from 'convex/react';
 import { CtaButton } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
 import { openAppSettings } from '@/lib/permissions';
+import { api } from '@/convex/_generated/api';
 
 function CornerMark({ y, x }: { y: 0 | 1; x: 0 | 1 }) {
   const base = 12;
@@ -34,8 +36,11 @@ function CornerMark({ y, x }: { y: 0 | 1; x: 0 | 1 }) {
 export default function LogPhoto() {
   const router = useRouter();
   const [permission, requestPermission] = useCameraPermissions();
-  const [capturing, setCapturing] = useState(false);
+  const [busy, setBusy] = useState<null | 'capturing' | 'uploading' | 'analyzing'>(null);
   const cameraRef = useRef<CameraView | null>(null);
+  const generateUploadUrl = useMutation(api.upload.generate);
+  const claimUpload = useMutation(api.upload.claim);
+  const draftFromPhoto = useAction(api.logsActions.draftFromPhoto);
 
   useEffect(() => {
     if (permission && !permission.granted && permission.canAskAgain) {
@@ -68,14 +73,35 @@ export default function LogPhoto() {
   }
 
   const capture = async () => {
-    if (!cameraRef.current || capturing) return;
-    setCapturing(true);
+    if (!cameraRef.current || busy) return;
     try {
+      setBusy('capturing');
       const photo = await cameraRef.current.takePictureAsync({ quality: 0.7, skipProcessing: true });
-      router.replace({ pathname: '/log/confirm', params: { source: 'photo', photoUri: photo?.uri ?? '' } });
-    } catch (e) {
-      Alert.alert('Capture failed', String(e));
-      setCapturing(false);
+      if (!photo?.uri) throw new Error('No photo captured');
+
+      setBusy('uploading');
+      const uploadUrl = await generateUploadUrl();
+      const blob = await (await fetch(photo.uri)).blob();
+      const upRes = await fetch(uploadUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': blob.type || 'image/jpeg' },
+        body: blob,
+      });
+      if (!upRes.ok) throw new Error(`Upload failed: ${upRes.status}`);
+      const { storageId } = (await upRes.json()) as { storageId: string };
+      const { assetId } = await claimUpload({
+        storageId: storageId as any,
+        kind: 'photo',
+        mime: blob.type || 'image/jpeg',
+        bytes: blob.size,
+      });
+
+      setBusy('analyzing');
+      const { logId } = await draftFromPhoto({ assetId });
+      router.replace({ pathname: '/log/confirm', params: { source: 'photo', logId, photoUri: photo.uri } });
+    } catch (e: any) {
+      Alert.alert('Photo log failed', e?.message ?? String(e));
+      setBusy(null);
     }
   };
 
@@ -83,7 +109,6 @@ export default function LogPhoto() {
     <View style={{ flex: 1, backgroundColor: '#000' }}>
       <CameraView ref={cameraRef} facing="back" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
 
-      {/* Vignette overlay */}
       <LinearGradient
         colors={['rgba(0,0,0,.45)', 'rgba(0,0,0,0)', 'rgba(0,0,0,.5)']}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
@@ -119,6 +144,11 @@ export default function LogPhoto() {
 
       <View style={{ position: 'absolute', top: 30, left: 0, right: 0, alignItems: 'center' }}>
         <Text style={[S.eyebrow, { color: 'rgba(255,255,255,.85)' }]}>Photo log</Text>
+        {busy ? (
+          <Text style={{ color: 'rgba(255,255,255,.85)', fontSize: 12, fontFamily: 'DMSans_500Medium', marginTop: 4 }}>
+            {busy === 'capturing' ? 'Capturing…' : busy === 'uploading' ? 'Uploading…' : 'Analyzing meal…'}
+          </Text>
+        ) : null}
       </View>
 
       <View
@@ -141,12 +171,24 @@ export default function LogPhoto() {
         </Pressable>
         <Pressable
           onPress={capture}
-          disabled={capturing}
+          disabled={!!busy}
           accessibilityRole="button"
           accessibilityLabel="Capture photo"
-          accessibilityState={{ disabled: capturing }}
-          style={{ width: 76, height: 76, borderRadius: 999, backgroundColor: '#fff', borderWidth: 5, borderColor: 'rgba(255,255,255,.3)', opacity: capturing ? 0.6 : 1 }}
-        />
+          accessibilityState={{ disabled: !!busy }}
+          style={{
+            width: 76,
+            height: 76,
+            borderRadius: 999,
+            backgroundColor: '#fff',
+            borderWidth: 5,
+            borderColor: 'rgba(255,255,255,.3)',
+            opacity: busy ? 0.6 : 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {busy ? <ActivityIndicator color={C.apricot} /> : null}
+        </Pressable>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Toggle flash"

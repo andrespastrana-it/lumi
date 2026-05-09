@@ -4,12 +4,14 @@ import { useRouter } from 'expo-router';
 
 export type CoachToneType = 'Warm' | 'Direct' | 'Cheerleader' | 'Stoic';
 export type SubscriptionTier = 'annual' | 'monthly' | 'lifetime';
+export type SexType = 'male' | 'female' | 'unspecified';
 
 export interface AppState {
   weight: number;
   height: number;
   age: number;
   target: number;
+  sex: SexType;
   goal: string | null;
   activity: string | null;
   diet: string[];
@@ -40,6 +42,7 @@ const initialState: AppState = {
   height: 178,
   age: 34,
   target: 68,
+  sex: 'unspecified',
   goal: null,
   activity: null,
   diet: [],

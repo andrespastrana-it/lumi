@@ -1,25 +1,108 @@
 import { useEffect, useState } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useAction, useConvexAuth } from 'convex/react';
+import { useAuth } from '@clerk/expo';
 import { Mascot, Blob, Em } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
+import { useApp } from '@/context/AppContext';
+import { getDeviceTimezone } from '@/lib/locale';
+import { api } from '@/convex/_generated/api';
 
 const STEPS = ['Calculating TDEE', 'Setting deficit', 'Choosing meals', 'Building 26-week curve'];
 
+const GOAL_MAP: Record<string, 'lose' | 'maintain' | 'gain'> = {
+  'Lose weight': 'lose',
+  'Maintain': 'maintain',
+  'Build muscle': 'gain',
+  'Eat better': 'maintain',
+};
+
+const ACTIVITY_MAP: Record<string, 'sed' | 'light' | 'mod' | 'active'> = {
+  sed: 'sed',
+  lite: 'light',
+  active: 'mod',
+  athlete: 'active',
+};
+
 export default function Compute() {
   const router = useRouter();
+  const { state } = useApp();
+  const commit = useAction(api.profileSetup.commit);
+  const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
+  const { getToken } = useAuth();
   const [step, setStep] = useState(0);
+  const [actionDone, setActionDone] = useState(false);
+  const [animDone, setAnimDone] = useState(false);
 
+  // Step animation.
   useEffect(() => {
     if (step < STEPS.length - 1) {
-      const t = setTimeout(() => setStep(s => s + 1), 750);
+      const t = setTimeout(() => setStep((s) => s + 1), 750);
       return () => clearTimeout(t);
     }
-    const t = setTimeout(() => router.push('/onboarding/plan-reveal'), 1000);
+    const t = setTimeout(() => setAnimDone(true), 1000);
     return () => clearTimeout(t);
-  }, [step, router]);
+  }, [step]);
+
+  // Backend commit (runs in parallel w/ animation).
+  useEffect(() => {
+    if (authLoading) return;
+    if (!isAuthenticated) {
+      Alert.alert('Not signed in', 'Please sign in again to continue.', [
+        { text: 'OK', onPress: () => router.replace('/auth/sign-in' as any) },
+      ]);
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      try {
+        // DEBUG: log the JWT being sent so we can decode it on jwt.io.
+        try {
+          const tok = await getToken({ template: 'convex' });
+          if (__DEV__) console.log('[JWT convex template]:', tok?.slice(0, 80) + '...');
+        } catch (e) {
+          if (__DEV__) console.warn('[JWT fetch failed]:', e);
+        }
+
+        const goal = GOAL_MAP[state.goal ?? ''] ?? 'lose';
+        const activity = ACTIVITY_MAP[state.activity ?? ''] ?? 'mod';
+        await commit({
+          draft: {
+            goal,
+            weightKg: state.weight,
+            targetKg: state.target,
+            heightCm: state.height,
+            age: state.age,
+            sex: state.sex,
+            activity,
+            diet: state.diet,
+            mealTimes: state.mealTimes,
+            tz: getDeviceTimezone(),
+          },
+        });
+        if (!cancelled) setActionDone(true);
+      } catch (e: any) {
+        if (cancelled) return;
+        Alert.alert('Plan generation failed', e?.message ?? String(e), [
+          { text: 'Back', onPress: () => router.back() },
+        ]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [commit, state, router, authLoading, isAuthenticated, getToken]);
+
+  // Navigate when both done.
+  useEffect(() => {
+    if (actionDone && animDone) {
+      router.replace('/onboarding/plan-reveal');
+    }
+  }, [actionDone, animDone, router]);
 
   return (
     <View style={[S.page, { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 }]}>

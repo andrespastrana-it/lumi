@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { CameraView, useCameraPermissions, BarcodeScanningResult } from 'expo-camera';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
+import { useAction } from 'convex/react';
 import { CtaButton } from '@/components';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
 import { openAppSettings } from '@/lib/permissions';
+import { api } from '@/convex/_generated/api';
 
 function ScanBar() {
   const t = useSharedValue(0);
@@ -30,7 +32,9 @@ function ScanBar() {
 export default function LogBarcode() {
   const router = useRouter();
   const [permission, requestPermission] = useCameraPermissions();
+  const [busy, setBusy] = useState(false);
   const scannedRef = useRef(false);
+  const draftFromBarcode = useAction(api.logsActions.draftFromBarcode);
 
   useEffect(() => {
     if (permission && !permission.granted && permission.canAskAgain) {
@@ -62,11 +66,19 @@ export default function LogBarcode() {
     );
   }
 
-  const onScan = (r: BarcodeScanningResult) => {
+  const onScan = async (r: BarcodeScanningResult) => {
     if (scannedRef.current) return;
     scannedRef.current = true;
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    router.replace({ pathname: '/log/confirm', params: { source: 'barcode', barcode: r.data } });
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+    try {
+      setBusy(true);
+      const { logId } = await draftFromBarcode({ ean: r.data });
+      router.replace({ pathname: '/log/confirm', params: { source: 'barcode', logId, barcode: r.data } });
+    } catch (e: any) {
+      Alert.alert('Lookup failed', e?.message ?? String(e));
+      scannedRef.current = false;
+      setBusy(false);
+    }
   };
 
   return (
@@ -78,7 +90,6 @@ export default function LogBarcode() {
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
 
-      {/* Dim overlay around scan window */}
       <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.55)' }} />
 
       <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 30 }}>
@@ -98,7 +109,7 @@ export default function LogBarcode() {
       <View style={{ position: 'absolute', top: 30, left: 0, right: 0, alignItems: 'center' }}>
         <Text style={[S.eyebrow, { color: 'rgba(255,255,255,.85)' }]}>Scan barcode</Text>
         <Text style={{ fontSize: 13, color: 'rgba(255,255,255,.6)', marginTop: 8, fontStyle: 'italic', fontFamily: 'Fraunces_300Light_Italic' }}>
-          Center the code in the frame
+          {busy ? 'Looking up product…' : 'Center the code in the frame'}
         </Text>
       </View>
 
@@ -116,10 +127,19 @@ export default function LogBarcode() {
 
       <View style={{ position: 'absolute', bottom: 40, left: 22, right: 22 }}>
         <CtaButton
-          label="Simulate scan"
-          onPress={() => {
+          label="Test scan (5449000000996)"
+          disabled={busy}
+          onPress={async () => {
             scannedRef.current = true;
-            router.replace({ pathname: '/log/confirm', params: { source: 'barcode', barcode: 'simulated' } });
+            try {
+              setBusy(true);
+              const { logId } = await draftFromBarcode({ ean: '5449000000996' });
+              router.replace({ pathname: '/log/confirm', params: { source: 'barcode', logId, barcode: '5449000000996' } });
+            } catch (e: any) {
+              Alert.alert('Lookup failed', e?.message ?? String(e));
+              scannedRef.current = false;
+              setBusy(false);
+            }
           }}
         />
       </View>
