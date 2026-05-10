@@ -16,7 +16,7 @@ This plan addresses six follow-ups uncovered while wiring the registry. Phases a
 |---|---|---|---|---|
 | `coach` | ✓ | ~2s | reliable | `{name: "grilled chicken wrap with avocado and side salad", kcal:550, proteinG:35, ...}` for "grilled chicken wrap with avocado and a side salad" |
 | `vision` | ✓ | ~2s | reliable | `{name: "Salad Bowl with Tofu, Eggs, and Vegetables", kcal:550, proteinG:25, ...}` for an Unsplash food photo |
-| `plan-gen` | ⚠ | ~3 min | ~50% pass rate | When it works: 21 recipes with proper structure; when it doesn't: ZodError or bare CLI "Error" (likely action timeout). Pre-existing fallback at `profileSetup.ts:101-114` already produces a stub plan on failure, so onboarding doesn't break. |
+| `plan-gen` | ⚠ | ~3 min | ~50% pass rate | When it works: 21 recipes with proper structure; when it doesn't: ZodError or bare CLI "Error" (likely action timeout). No fallback — failures throw `AI_FAILED` and onboarding shows an error alert with a Back button. See `docs/PLAN-GEN-IMPROVEMENT-PLAN.md` Phase 3.1 for the planned rules-based fallback. |
 
 **Issues uncovered + fixed in `convex/ai/index.ts`:**
 
@@ -26,7 +26,7 @@ This plan addresses six follow-ups uncovered while wiring the registry. Phases a
 4. **`top_k: 1` makes the model degenerate** (echoed system prompt as a `{type:'text', text:'...'}` object). **Fix:** dropped `top_k` from settings; rely on `temperature: 0.2` alone for determinism.
 5. **AI SDK auto-downloads remote image URLs before sending.** Wikimedia hot-link blocked it (400). Worked fine with Unsplash. Convex storage URLs from `ctx.storage.getUrl()` are signed and should be hot-linkable, but worth watching for the first real photo log in production.
 
-**Status of telemetry fix (Phase 1):** the `aiUsage` table now records `providerModel: visionTask.modelId` which resolves to `free:nvidia/nemotron-3-nano-omni-30b-a3b-reasoning` (or whatever the env override sets). Verified during smoke runs.
+**Status of telemetry fix (Phase 1):** the `aiCalls` table now records `providerModel: visionTask.modelId` which resolves to `free:nvidia/nemotron-3-nano-omni-30b-a3b-reasoning` (or whatever the env override sets). Verified during smoke runs.
 
 **Goal:** confirm current state works end-to-end on `free` before fixing anything that may not be broken.
 
@@ -39,7 +39,7 @@ This plan addresses six follow-ups uncovered while wiring the registry. Phases a
 3. Tail logs: `npx convex logs --tail`.
 
 **Pass criteria:**
-- `plan-gen` returns ≥14 recipes (no fallback stub at `profileSetup.ts:104`).
+- `plan-gen` returns exactly 21 recipes (validated by Zod `length(21)` + uniqueness refine).
 - `vision` returns a `FoodEstimate` with realistic kcal/macros.
 - `coach` returns a parsed estimate.
 - No `[ERROR]` lines mentioning AI calls.
@@ -54,7 +54,7 @@ This plan addresses six follow-ups uncovered while wiring the registry. Phases a
 
 ## Phase 1 — Telemetry: drop the hardcoded model id (DONE)
 
-**Goal:** `aiUsage` rows reflect the actual model used, not a stale string.
+**Goal:** `aiCalls` rows reflect the actual model used, not a stale string.
 
 **Files:**
 - `convex/ai/index.ts` — expose the resolved `modelId` from `ai.task(t)`.
@@ -88,7 +88,7 @@ await logAi(ctx, {
 });
 ```
 
-**Verify:** trigger one of each task, query `aiUsage` table — `providerModel` column should show `free:nvidia/...`, not anthropic.
+**Verify:** trigger one of each task, query `aiCalls` table — `providerModel` column should show `free:nvidia/...`, not anthropic.
 
 ## Phase 2 — Bake NVIDIA recommended params (DONE)
 
@@ -126,7 +126,7 @@ Merge `TASK_SETTINGS[t]` into the opts passed to `generateText` / `generateObjec
 
 **Caveat:** `providerOptions: { free: ... }` only takes effect when the resolved provider is `free`. If a task gets overridden to `openai:gpt-4o` via env, the NVIDIA-specific keys are ignored — desired behavior, no change needed.
 
-**Verify:** trigger plan-gen, check that `aiUsage.outputTokens` is meaningfully > 0 and the recipe descriptions look detailed (reasoning improves quality).
+**Verify:** trigger plan-gen, check that `aiCalls.outputTokens` is meaningfully > 0 and the recipe descriptions look detailed (reasoning improves quality).
 
 **Skip this phase if:** Phase 0 output already looks good. Don't tune for tuning's sake.
 
@@ -183,7 +183,7 @@ function withFallback(primary: LanguageModel, fallback: LanguageModel): Language
 
 **Prerequisite:** real `ANTHROPIC_API_KEY` (or `OPENAI_API_KEY`) on Convex deployment, otherwise the fallback is paper-only.
 
-**Verify:** force a 429 by hammering the action in a tight loop, confirm the second attempt lands on the fallback provider (`aiUsage.providerModel` shows the fallback id).
+**Verify:** force a 429 by hammering the action in a tight loop, confirm the second attempt lands on the fallback provider (`aiCalls.providerModel` shows the fallback id).
 
 **Skip this phase if:** Phase 0 didn't show rate limits. Don't pre-build resilience that isn't needed.
 
@@ -244,7 +244,7 @@ npx convex dev
 npx convex logs --tail
 ```
 
-Expected: every action succeeds, `aiUsage` rows show the actual resolved model id, no hardcoded `'anthropic:claude-sonnet-4-6'` strings remain in the codebase, no placeholder env values trigger the fail-fast assertion at call time.
+Expected: every action succeeds, `aiCalls` rows show the actual resolved model id, no hardcoded `'anthropic:claude-sonnet-4-6'` strings remain in the codebase, no placeholder env values trigger the fail-fast assertion at call time.
 
 ```powershell
 # confirm no stale hardcoded model ids

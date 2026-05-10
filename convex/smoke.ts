@@ -1,6 +1,8 @@
 'use node';
 import { v } from 'convex/values';
 import { internalAction } from './_generated/server';
+import { internal } from './_generated/api';
+import type { Id } from './_generated/dataModel';
 import { z } from 'zod';
 import { ai } from './ai';
 
@@ -111,16 +113,24 @@ export const testVision = internalAction({
 
 const PlanRecipeOut = z.object({
   day: z.number().int().min(0).max(6),
-  slot: z.enum(['breakfast', 'lunch', 'dinner', 'snack']),
-  name: z.string(),
-  kcal: z.number(),
-  proteinG: z.number(),
-  carbG: z.number(),
-  fatG: z.number(),
-  ingredients: z.array(z.object({ name: z.string(), qty: z.string() })).min(1),
-  method: z.array(z.string()).min(1),
+  slot: z.enum(['breakfast', 'lunch', 'dinner']),
+  name: z.string().min(3).max(120),
+  kcal: z.number().int().min(150).max(1500),
+  proteinG: z.number().min(0).max(150),
+  carbG: z.number().min(0).max(200),
+  fatG: z.number().min(0).max(100),
+  ingredients: z
+    .array(z.object({ name: z.string().min(1), qty: z.string().min(1) }))
+    .min(1)
+    .max(20),
+  method: z.array(z.string().min(3)).min(1).max(15),
 });
-const PlanResultSchema = z.object({ recipes: z.array(PlanRecipeOut).min(14).max(28) });
+const PlanResultSchema = z
+  .object({ recipes: z.array(PlanRecipeOut).length(21) })
+  .refine(
+    (r) => new Set(r.recipes.map((x) => `${x.day}-${x.slot}`)).size === 21,
+    { message: 'Each (day, slot) must appear exactly once' },
+  );
 
 async function runPlanGenOnce() {
   const t0 = Date.now();
@@ -154,6 +164,125 @@ async function runPlanGenOnce() {
 export const testPlanGen = internalAction({
   args: {},
   handler: async () => runPlanGenOnce(),
+});
+
+// Dev-only: list active users with their Clerk IDs so you can pick one to seed.
+//   npx convex run smoke:listUsers
+export const listUsers = internalAction({
+  args: {},
+  handler: async (
+    ctx,
+  ): Promise<{ _id: Id<'users'>; clerkUserId: string; email: string }[]> => {
+    return await ctx.runQuery(internal.users.listAllWithClerk, {});
+  },
+});
+
+// Seed a signed-in dev user with profile + 2 weigh-ins, then run the forecast
+// producer for them. Exercises the AI narrative path end-to-end. Run via:
+//   npx convex run smoke:seedForForecast '{"clerkUserId":"user_XXXX"}'
+export const seedForForecast = internalAction({
+  args: {
+    clerkUserId: v.string(),
+    startKg: v.optional(v.number()),
+    endKg: v.optional(v.number()),
+    daysApart: v.optional(v.number()),
+    targetKg: v.optional(v.number()),
+    heightCm: v.optional(v.number()),
+    age: v.optional(v.number()),
+    goal: v.optional(
+      v.union(v.literal('lose'), v.literal('maintain'), v.literal('gain')),
+    ),
+  },
+  handler: async (
+    ctx,
+    args,
+  ): Promise<
+    | { ok: false; reason: 'user_not_found' | 'user_deleted' }
+    | {
+        ok: true;
+        userId: Id<'users'>;
+        seededWeighIns: number;
+        existingWeighIns: number;
+        result:
+          | { ok: true; snapshotId: Id<'forecastSnapshots'> }
+          | { skipped: 'no_profile' | 'insufficient_data' };
+      }
+  > => {
+    const user = await ctx.runQuery(internal.users.getByClerkId, {
+      clerkUserId: args.clerkUserId,
+    });
+    if (!user) return { ok: false, reason: 'user_not_found' };
+    if (user.deletedAt !== undefined) {
+      return { ok: false, reason: 'user_deleted' };
+    }
+
+    const startKg = args.startKg ?? 82.0;
+    const endKg = args.endKg ?? 80.6;
+    const targetKg = args.targetKg ?? 75.0;
+    const daysApart = args.daysApart ?? 14;
+
+    await ctx.runMutation(internal.profile.create, {
+      userId: user._id,
+      goal: args.goal ?? 'lose',
+      heightCm: args.heightCm ?? 178,
+      startWeightKg: startKg,
+      targetWeightKg: targetKg,
+      age: args.age ?? 32,
+      activity: 'mod',
+      diet: [],
+      mealTimes: {
+        wake: '07:00',
+        breakfast: '08:00',
+        lunch: '13:00',
+        dinner: '19:00',
+        sleep: '23:00',
+      },
+      coachTone: 'Warm',
+      units: {
+        mass: 'kg',
+        height: 'cm',
+        energy: 'kcal',
+        volume: 'ml',
+        firstDay: 'mon',
+        lang: 'en',
+      },
+      privacy: { analytics: true, share: false, research: false },
+      tz: 'Europe/Madrid',
+    });
+
+    const existingCount = await ctx.runQuery(internal.weighIns.countForUser, {
+      userId: user._id,
+    });
+    let seededWeighIns = 0;
+    if (existingCount < 2) {
+      const now = Date.now();
+      const earlier = now - daysApart * 24 * 60 * 60 * 1000;
+      await ctx.runMutation(internal.weighIns.createForUser, {
+        userId: user._id,
+        weightKg: startKg,
+        measuredAt: earlier,
+      });
+      await ctx.runMutation(internal.weighIns.createForUser, {
+        userId: user._id,
+        weightKg: endKg,
+        measuredAt: now,
+      });
+      seededWeighIns = 2;
+    }
+
+    const result = await ctx.runAction(
+      internal.forecastActions.generateForUser,
+      { userId: user._id },
+    );
+
+    return {
+      ok: true,
+      userId: user._id,
+      seededWeighIns,
+      existingWeighIns: existingCount,
+      result,
+    };
+  },
 });
 
 export const testPlanGenRepeat = internalAction({

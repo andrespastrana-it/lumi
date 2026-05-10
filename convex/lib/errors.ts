@@ -9,7 +9,8 @@ export type ErrorCode =
   | 'INVALID_STATE'
   | 'CONFLICT'
   | 'NO_ACTIVE_PLAN'
-  | 'AI_FAILED';
+  | 'AI_FAILED'
+  | 'INPUT_OUT_OF_RANGE';
 
 export function appError(
   code: ErrorCode,

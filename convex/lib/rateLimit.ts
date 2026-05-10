@@ -11,7 +11,7 @@ const DAY = 24 * HOUR;
 const LIMITS: Record<AiTask, { max: number; windowMs: number }> = {
   vision: { max: 30, windowMs: HOUR },
   coach: { max: 60, windowMs: HOUR },
-  'plan-gen': { max: 5, windowMs: DAY },
+  'plan-gen': { max: 10, windowMs: DAY },
   stt: { max: 30, windowMs: HOUR },
   embed: { max: 200, windowMs: HOUR },
 };
