@@ -9,8 +9,19 @@ import { C } from '@/lib/tokens';
 import { api } from '@/convex/_generated/api';
 
 type WeighIn = { measuredAt: number; weightKg: number };
+type ProjectionPoint = { weekIso: string; kg: number };
 
-function ForecastChart({ points, target, latest }: { points: WeighIn[]; target: number; latest: number }) {
+function ForecastChart({
+  points,
+  target,
+  latest,
+  projection,
+}: {
+  points: WeighIn[];
+  target: number;
+  latest: number;
+  projection?: ProjectionPoint[];
+}) {
   const W = 320;
   const H = 160;
 
@@ -25,22 +36,37 @@ function ForecastChart({ points, target, latest }: { points: WeighIn[]; target: 
   }
 
   const sorted = [...points].sort((a, b) => a.measuredAt - b.measuredAt);
-  const minW = Math.min(target, ...sorted.map((p) => p.weightKg));
-  const maxW = Math.max(...sorted.map((p) => p.weightKg));
+  const projKgs = projection?.map((p) => p.kg) ?? [];
+  const allKgs = [target, ...sorted.map((p) => p.weightKg), ...projKgs];
+  const minW = Math.min(...allKgs);
+  const maxW = Math.max(...allKgs);
   const padTop = 20, padBottom = 24;
   const range = Math.max(0.01, maxW - minW);
 
-  const xFor = (i: number) => sorted.length === 1 ? W / 2 : (i / (sorted.length - 1)) * W;
+  const totalCols = sorted.length + (projection?.length ?? 0);
+  const xFor = (i: number) => (totalCols <= 1 ? W / 2 : (i / (totalCols - 1)) * W);
   const yFor = (kg: number) => padTop + ((maxW - kg) / range) * (H - padTop - padBottom);
 
-  let path = '';
+  let pastPath = '';
   sorted.forEach((p, i) => {
     const x = xFor(i);
     const y = yFor(p.weightKg);
-    path += i === 0 ? `M${x},${y}` : ` L${x},${y}`;
+    pastPath += i === 0 ? `M${x},${y}` : ` L${x},${y}`;
   });
-  const fillPath = `${path} L${xFor(sorted.length - 1)},${H} L0,${H} Z`;
 
+  let projPath = '';
+  if (projection && projection.length > 0) {
+    const startX = xFor(sorted.length - 1);
+    const startY = yFor(latest);
+    projPath = `M${startX},${startY}`;
+    projection.forEach((p, i) => {
+      const x = xFor(sorted.length + i);
+      const y = yFor(p.kg);
+      projPath += ` L${x},${y}`;
+    });
+  }
+
+  const fillPath = `${pastPath} L${xFor(sorted.length - 1)},${H} L0,${H} Z`;
   const targetY = yFor(target);
   const latestX = xFor(sorted.length - 1);
   const latestY = yFor(latest);
@@ -56,7 +82,19 @@ function ForecastChart({ points, target, latest }: { points: WeighIn[]; target: 
       <Line x1="0" y1={H - padBottom} x2={W} y2={H - padBottom} stroke={C.hair} />
       <Line x1="0" y1={targetY} x2={W} y2={targetY} stroke={C.green} strokeDasharray="2 4" />
       <Path d={fillPath} fill="url(#curve)" />
-      <Path d={path} stroke={C.apricot} strokeWidth={3} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d={pastPath} stroke={C.apricot} strokeWidth={3} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      {projPath ? (
+        <Path
+          d={projPath}
+          stroke={C.apricot}
+          strokeWidth={2}
+          strokeDasharray="3 3"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          opacity={0.55}
+        />
+      ) : null}
       <Circle cx={latestX} cy={latestY} r={6} fill="#fff" stroke={C.apricot} strokeWidth={2.5} />
       <SvgText x={latestX - 4} y={latestY - 10} fontSize={10} fill={C.ink} fontFamily="DMSans_600SemiBold" textAnchor="end">
         today · {latest.toFixed(1)}
@@ -72,8 +110,9 @@ export default function Forecast() {
   const router = useRouter();
   const me = useQuery(api.me.get);
   const weighIns = useQuery(api.weighIns.recent, { limit: 30 });
+  const snapshot = useQuery(api.forecast.get, { range: '30d' });
 
-  if (me === undefined || weighIns === undefined) {
+  if (me === undefined || weighIns === undefined || snapshot === undefined) {
     return (
       <View style={[S.page, { alignItems: 'center', justifyContent: 'center' }]}>
         <ActivityIndicator color={C.apricot} />
@@ -106,6 +145,24 @@ export default function Forecast() {
 
   const headlineKg = sorted.length > 0 ? latest : startKg;
 
+  const payload = snapshot?.payload as
+    | {
+        kind?: string;
+        projection?: ProjectionPoint[];
+        headline?: string;
+        detail?: string;
+        onTrack?: boolean;
+      }
+    | null
+    | undefined;
+  const projection =
+    payload?.kind === 'weight' && Array.isArray(payload.projection)
+      ? payload.projection
+      : undefined;
+  const narrativeHeadline = payload?.headline;
+  const narrativeDetail = payload?.detail;
+  const narrativeMascot = payload?.onTrack ? 'proud' : 'curious';
+
   return (
     <View style={S.page}>
       <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ paddingBottom: 110 }}>
@@ -119,7 +176,12 @@ export default function Forecast() {
 
         <View style={{ paddingHorizontal: 22, paddingTop: 18 }}>
           <View style={[S.pillow, { padding: 20 }]}>
-            <ForecastChart points={weighIns as WeighIn[]} target={targetKg} latest={headlineKg} />
+            <ForecastChart
+              points={weighIns as WeighIn[]}
+              target={targetKg}
+              latest={headlineKg}
+              projection={projection}
+            />
           </View>
         </View>
 
@@ -135,6 +197,20 @@ export default function Forecast() {
             </View>
           ))}
         </View>
+
+        {narrativeHeadline ? (
+          <View style={{ paddingHorizontal: 22, paddingTop: 18 }}>
+            <View style={[S.pillow, { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18 }]}>
+              <Mascot mood={narrativeMascot} size={64} />
+              <View style={{ flex: 1 }}>
+                <Text style={[S.h2, { fontSize: 18 }]}>{narrativeHeadline}</Text>
+                {narrativeDetail ? (
+                  <Text style={[S.body, { marginTop: 6, fontSize: 13 }]}>{narrativeDetail}</Text>
+                ) : null}
+              </View>
+            </View>
+          </View>
+        ) : null}
 
         <View style={{ paddingHorizontal: 22, paddingTop: 28, paddingBottom: 22, gap: 4 }}>
           <CtaButton label="Log a weigh-in" onPress={() => router.push('/(tabs)/stats/weigh-in')} />

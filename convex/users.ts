@@ -1,5 +1,5 @@
 import { v } from 'convex/values';
-import { internalMutation, mutation } from './_generated/server';
+import { internalMutation, internalQuery, mutation } from './_generated/server';
 import { appError } from './lib/errors';
 import { OWNED_TABLES, MEDIA_TABLE } from './lib/ownership';
 
@@ -70,6 +70,18 @@ export const upsert = internalMutation({
       clerkUserId: args.clerkUserId,
       email: args.email,
     });
+  },
+});
+
+export const listActive = internalQuery({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, { limit }) => {
+    const cap = Math.min(limit ?? 1000, 5000);
+    const rows = await ctx.db
+      .query('users')
+      .filter((q) => q.eq(q.field('deletedAt'), undefined))
+      .take(cap);
+    return rows.map((r) => r._id);
   },
 });
 

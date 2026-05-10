@@ -1,5 +1,5 @@
 import { v } from 'convex/values';
-import { mutation, query } from './_generated/server';
+import { mutation, query, internalQuery } from './_generated/server';
 import { getUserOrNull, requireUser } from './lib/auth';
 import { assertRange, BODY_BOUNDS } from './lib/bounds';
 import type { Doc } from './_generated/dataModel';
@@ -42,6 +42,18 @@ export const recent = query({
       .withIndex('by_user_measuredAt', (q) => q.eq('userId', user._id))
       .order('desc')
       .take(Math.min(limit ?? 10, 50));
+    return rows.map(weighInDto);
+  },
+});
+
+export const recentForUser = internalQuery({
+  args: { userId: v.id('users'), limit: v.optional(v.number()) },
+  handler: async (ctx, { userId, limit }) => {
+    const rows = await ctx.db
+      .query('weighIns')
+      .withIndex('by_user_measuredAt', (q) => q.eq('userId', userId))
+      .order('desc')
+      .take(Math.min(limit ?? 30, 100));
     return rows.map(weighInDto);
   },
 });

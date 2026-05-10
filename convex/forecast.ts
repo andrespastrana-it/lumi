@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
-import { query } from './_generated/server';
+import { query, internalMutation } from './_generated/server';
 import { getUserOrNull } from './lib/auth';
+import { claimCronRun } from './lib/cronGuard';
 import type { Doc } from './_generated/dataModel';
 
 function forecastDto(row: Doc<'forecastSnapshots'>) {
@@ -24,5 +25,28 @@ export const get = query({
       .order('desc')
       .first();
     return row ? forecastDto(row) : null;
+  },
+});
+
+export const upsertSnapshot = internalMutation({
+  args: {
+    userId: v.id('users'),
+    range: v.union(v.literal('7d'), v.literal('30d')),
+    payload: v.any(),
+  },
+  handler: async (ctx, { userId, range, payload }) => {
+    return await ctx.db.insert('forecastSnapshots', {
+      userId,
+      range,
+      generatedAt: Date.now(),
+      payload,
+    });
+  },
+});
+
+export const claimProducerRun = internalMutation({
+  args: { jobName: v.string(), scopeKey: v.string() },
+  handler: async (ctx, { jobName, scopeKey }) => {
+    return await claimCronRun(ctx, jobName, scopeKey);
   },
 });

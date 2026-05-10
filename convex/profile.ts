@@ -1,5 +1,5 @@
 import { v } from 'convex/values';
-import { mutation, internalMutation } from './_generated/server';
+import { mutation, internalMutation, internalQuery } from './_generated/server';
 import { requireUser } from './lib/auth';
 import { appError } from './lib/errors';
 import { assertRange, BODY_BOUNDS } from './lib/bounds';
@@ -48,6 +48,17 @@ const profileFields = {
   tz: v.string(),
   activePlanId: v.optional(v.id('plans')),
 };
+
+export const getForUser = internalQuery({
+  args: { userId: v.id('users') },
+  handler: async (ctx, { userId }) => {
+    return await ctx.db
+      .query('profiles')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .order('desc')
+      .first();
+  },
+});
 
 export const create = internalMutation({
   args: { userId: v.id('users'), ...profileFields },

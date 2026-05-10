@@ -33,5 +33,10 @@ crons.daily(
   { hourUTC: 3, minuteUTC: 50 },
   internal.retention.purgeArchivedPlansDaily,
 );
+crons.daily(
+  'produceForecastSnapshots',
+  { hourUTC: 4, minuteUTC: 0 },
+  internal.forecastActions.produceSnapshotsDaily,
+);
 
 export default crons;

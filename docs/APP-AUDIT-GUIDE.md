@@ -38,21 +38,49 @@ Rule: finish lower layers before polishing higher layers.
   - **Meal detail screen + edit-existing-log flow** — out of scope.
   - **Push notifications actually firing** — Layer 7 (release).
 
-## Layer 4 partial verdict (2026-05-09)
+## Layer 5 verdict (2026-05-09)
 
-Layer 4 (AI: prompts / structured outputs / fallbacks / cost telemetry) — partially done. See `docs/AI-FIXES-PLAN.md` for the full phase plan and `docs/PLAN-GEN-RELIABILITY-ISSUE.md` for the open issue.
+Layer 5 (frontend data wiring — replace mock/local state with real backend) — **done**. Most of Layer 5 was delivered alongside Layer 3; this round closed the remaining gaps.
 
-- **Provider registry expanded** — `convex/ai/index.ts` adds a `free` provider (NVIDIA NIM via `@ai-sdk/openai-compatible`) alongside anthropic / openai / groq. All three language-model tasks (`coach`, `vision`, `plan-gen`) default to `free:nvidia/nemotron-3-nano-omni-30b-a3b-reasoning`; flip per task with `AI_<TASK>_MODEL=<provider>:<model>` on Convex env.
-- **Structured-output workaround** — AI SDK v6 dropped `generateObject({ mode: 'tool' })`. `generateObjectViaTool` routes through `generateText` + forced tool call when provider is `free`, with iterative `JSON.parse` to handle NIM's double-encoded tool args.
-- **Per-task settings** — `TASK_SETTINGS` map applies temperature / topP / maxOutputTokens / providerOptions per task (e.g. disables `chat_template_kwargs.enable_thinking` to keep reasoning models from breaking structured output).
-- **Telemetry: real model id** — `convex/logsActions.ts` records `providerModel: visionTask.modelId` (no longer hardcoded `'anthropic:claude-sonnet-4-6'`).
-- **Smoke tests** — `convex/smoke.ts` exposes `testCoach` / `testVision` / `testPlanGen` internal actions for `npx convex run` verification of each task in isolation.
-- **Fail-fast key validation** — module-load assertion catches missing/placeholder API keys with a clear message instead of leaking a vendor 401 mid-request.
-- **Open issues, not yet fixed:**
-  - **Rate-limit telemetry gap** — only `draftFromPhoto` writes `aiCalls` rows. `draftFromVoice`, `draftFromSearch`, `profileSetup.commit` still skip the insert, so the rate limiter sees count=0 for `coach`/`stt`/`plan-gen` and never throttles those tasks. Highest-value fix.
-  - **Plan-gen reliability** — ~50% pass rate against NVIDIA NIM (see `docs/PLAN-GEN-RELIABILITY-ISSUE.md`). Existing fallback at `profileSetup.ts:101-114` masks failures with a stub plan; users get a silently degraded "personalized" plan. Resolution options: tighter temp + retry / split schema by day / switch plan-gen to anthropic.
-  - **Fallback chain** — no automatic retry on 429 / 5xx with a backup provider.
-  - **Cost telemetry summaries** — `aiCalls` rows are written but no aggregation / monthly-spend report.
+- **Forecast snapshot producer shipped** — `convex/forecastActions.ts` (`'use node'`) exposes `generateForUser({ userId })` (per-user) and `produceSnapshotsDaily()` (cron). `produceSnapshotsDaily` is registered at `convex/crons.ts` for `04:00 UTC` daily, claims a `cronRuns` row via `internal.forecast.claimProducerRun` for idempotency, then iterates `internal.users.listActive` (cap 1000) and calls `generateForUser` per user.
+- **Forecast math** — weekly delta from last 4 weigh-ins, 12-week linear projection, ETA week ISO if goal direction matches. Deterministic; no AI for the numbers.
+- **AI-augmented narrative** — `generateForUser` calls `ai.task('coach')` (currently `gemini-3-flash-preview`) wrapped in `withAiTelemetry` for a 2-field structured output `{ headline ≤ 100, detail ≤ 200 }`. Cost lands in `aiCalls` per user per day. Falls back to a deterministic headline/detail pair on AI failure so the snapshot still writes.
+- **Snapshot consumer** — `app/(tabs)/stats/index.tsx` reads `api.forecast.get({ range: '30d' })`. When present, the chart renders past weigh-ins (solid) plus the 12-week projection (dashed) extending past the latest dot, and a narrative pillow (mascot mood `proud` if on-track else `curious`) appears above the CTA buttons. When `null`, the screen falls back to its previous client-side linear render — no regression for users with insufficient data.
+- **New internal queries** — `internal.users.listActive`, `internal.profile.getForUser`, `internal.weighIns.recentForUser`. Each `withIndex`-scoped, cap-bounded.
+- **Schema unchanged** — `forecastSnapshots` already existed; no migration. Retention cron at `convex/retention.ts:purgeForecastSnapshotsDaily` already prunes after 30d.
+- **Activity tab honest** — `app/(tabs)/stats/activity.tsx` no longer ships hardcoded fake workouts. Reads `api.me.get` → `permissionGrants.health` + `integrations.appleHealth`/`googleFit`, branches between three honest empty states (no permission / permission but unlinked / linked but stub-pending). CTA points at `/(tabs)/me/integrations`. HealthKit real wiring deferred to Layer 7 per CLAUDE.md (`lib/health.ts` is still a stub).
+- **Plateau orphan deleted** — `app/(tabs)/stats/plateau.tsx` was unreachable (zero inbound `router.push`); removed. Re-create with real plateau-detection backend later if a flow needs it.
+- **Mascot gallery kept** — `app/(tabs)/stats/mascot-gallery.tsx` is a 12-mood design reference linked from "Meet Pip" on `me/index.tsx`. Static is correct; not user-state.
+- **Verification (live)**:
+  - `npm run typecheck` exit 0.
+  - `npm run test:once` 28/28 passes.
+  - `npm run lint` exit 0 (only pre-existing warnings).
+  - `npx convex dev --once` push successful.
+  - `npx convex run forecastActions:produceSnapshotsDaily` → `{ ran: 0, skipped: 3, failed: 0 }` against current dev DB (3 active user rows, none with profile + weigh-ins yet — all hit the `no_profile` skip path).
+  - `npx convex run forecastActions:generateForUser '{"userId":"..."}'` → `{ skipped: "no_profile" }` confirms the early-return contract.
+- **Out of scope, deferred:**
+  - Seeded test user → live AI-narrative E2E run. Drive any one user through onboarding + 2 weigh-ins, then re-trigger producer to populate `forecastSnapshots` and `aiCalls` for the `coach` task.
+  - Real HealthKit / Google Fit pull — Layer 7.
+  - Plateau detection + recreated screen — future, pending real signal.
+
+## Layer 4 verdict (2026-05-09)
+
+Layer 4 (AI: prompts / structured outputs / fallbacks / cost telemetry) — **done**. Full smoke transcript + 0-100 scoring at `docs/LAYER4-SMOKE-VERDICT.md` (aggregate **92/100**). Original phase plan at `docs/AI-FIXES-PLAN.md`; plan-gen issue resolved per `docs/PLAN-GEN-RELIABILITY-ISSUE.md`.
+
+- **Provider — Gemini Flash** — `convex/ai/index.ts` defaults all three language-model tasks (`coach`, `vision`, `plan-gen`) to `google:gemini-3-flash-preview`. Has free tier; per-1M pricing $0.50 in / $3 out. Override per task with `AI_<TASK>_MODEL=<provider>:<model>`. NVIDIA NIM (`free`) + Anthropic + OpenAI + Groq remain registered for opt-in fallback.
+- **Pro deferred** — `gemini-3.1-pro-preview` has no Gemini-API free tier (`limit: 0`); blocks until billing is linked at https://aistudio.google.com/app/apikey. Live test confirmed 429 on coach/vision/plan-gen against the current key (see `LAYER4-SMOKE-VERDICT.md` comparison section).
+- **Per-task settings** — `settingsFor(task, provider)` in `convex/ai/index.ts`. For Google: `thinkingLevel: low` everywhere (Gemini 3 reasons in-band; low keeps latency tight); plan-gen also gets `maxOutputTokens: 32000`. Temperature left at 1.0 default per Gemini-3 migration guidance — lower values caused looping/under-generation in early tests. Nemotron knobs preserved as a fallback when `provider === 'free'`.
+- **Structured output** — Gemini handles `generateObject` natively; the openai-compatible `generateObjectViaTool` workaround is now gated to `provider === 'free'` only.
+- **Plan-gen reliability** — `convex/smoke.ts:testPlanGenRepeat '{"n":5}'` → **5/5 pass, avg 19.4s**, 21 recipes per run. Stub fallback at `profileSetup.ts:101-114` removed; `appError('AI_FAILED', ...)` thrown on real failure. Mobile client maps `AI_FAILED` via `lib/clientError.ts`.
+- **Telemetry helper** — `convex/lib/aiTelemetry.ts:withAiTelemetry` wraps every action call: pre-flight `checkAiRateLimit`, post-call `recordAiCall` with `costUsd` from `convex/ai/pricing.ts:estimateCostUsd`. Wired at `convex/logsActions.ts:draftFromPhoto|Voice|Search` (covers `vision` + `stt` + `coach`) and `convex/profileSetup.ts:commit` (covers `plan-gen`). Closes the rate-limit gap that previously blinded the limiter for voice/search/onboarding.
+- **Cost rollup** — `convex/aiCalls.ts:summarizeSpend({ since, groupBy })` groups `aiCalls` by `task | user | model`; sums calls/tokens/USD. Run via `npx convex run aiCalls:summarizeSpend '{"since":0,"groupBy":"task"}'`. No UI / cron yet — Layer 7.
+- **Schema migration** — `aiCalls.costUsd: v.optional(v.number())` added to `convex/schema.ts:280`. Additive, no backfill needed.
+- **Smoke tests** — `convex/smoke.ts` exposes `testCoach` / `testVision` / `testPlanGen` / `testPlanGenRepeat`. Last live run (Flash): coach **95/100**, vision **91/100**, plan-gen **91/100**.
+- **Out of scope, deferred:**
+  - **Phase 4 fallback chain** — `wrapLanguageModel` middleware to fall back to Anthropic on 429/5xx. Re-enable when `ANTHROPIC_API_KEY` lands on Convex env.
+  - **Pro upgrade** — link billing on the Google API key, then `npx convex env set AI_PLAN_GEN_MODEL google:gemini-3.1-pro-preview` and re-run the smoke battery. Flash already at 92/100 so no urgency.
+  - **Cron-rolled `aiSpendSnapshots`** — Layer 7 work.
+  - **Per-user provider routing** (paid tier → anthropic, free tier → gemini) — needs user-aware router, deferred.
 
 ## Layer 1 verdict (2026-05-09)
 
