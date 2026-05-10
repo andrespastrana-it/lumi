@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, View, Text, Pressable, ActivityIndicator, Alert } from 'react-native';
+import { ScrollView, View, Text, Pressable, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation } from 'convex/react';
-import { Header, Mascot, Em, CtaButton } from '@/components';
+import { Header, Mascot, Em, CtaButton, ScreenLoading } from '@/components';
 import type { MascotMood } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
@@ -33,11 +33,7 @@ export default function CoachTone() {
   }, [me, pick]);
 
   if (me === undefined || pick === null) {
-    return (
-      <View style={[S.page, { alignItems: 'center', justifyContent: 'center' }]}>
-        <ActivityIndicator color={C.apricot} />
-      </View>
-    );
+    return <ScreenLoading />;
   }
 
   const onSave = async () => {

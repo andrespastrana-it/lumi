@@ -1,6 +1,6 @@
-import { ScrollView, View, Text, Switch, ActivityIndicator, Alert } from 'react-native';
+import { ScrollView, View, Text, Switch, Alert } from 'react-native';
 import { useQuery, useMutation } from 'convex/react';
-import { Header } from '@/components';
+import { Header, ScreenLoading } from '@/components';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
 import { api } from '@/convex/_generated/api';
@@ -23,11 +23,7 @@ export default function Notifications() {
   const set = useMutation(api.notifPrefs.set);
 
   if (me === undefined) {
-    return (
-      <View style={[S.page, { alignItems: 'center', justifyContent: 'center' }]}>
-        <ActivityIndicator color={C.apricot} />
-      </View>
-    );
+    return <ScreenLoading />;
   }
 
   const prefs = me?.notifPrefs;

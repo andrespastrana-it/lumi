@@ -1,26 +1,40 @@
-import { useState } from 'react';
-import { View, Text, Pressable, ScrollView, TextInput } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { View, Text, Pressable, ScrollView, TextInput, Alert } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useRouter } from 'expo-router';
-import { Mascot, Header, IconChip } from '@/components';
+import { useAction, useMutation, useQuery } from 'convex/react';
+import { Mascot, Header, IconChip, ScreenLoading } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
 import { C, BTN_SHADOW, PILLOW_SHADOW_SM } from '@/lib/tokens';
+import { api } from '@/convex/_generated/api';
+import { describeConvexError } from '@/lib/clientError';
+import type { Id } from '@/convex/_generated/dataModel';
 
-interface Msg {
-  from: 'lumi' | 'me';
-  text: string;
-  action?: { label: string; to: string };
-}
-
-const PROMPTS: { q: string; icon: string; reply: () => { text: string; action?: Msg['action'] } }[] = [
-  { q: 'Can I drink wine tonight?',                     icon: 'heart',   reply: () => ({ text: "A glass (150ml) is fine — that's ~120 kcal. I'll trim 100 kcal off dinner. Stick to one and water in between." }) },
-  { q: 'Swap my lunch for something lighter',           icon: 'lunch',   reply: () => ({ text: 'How about a salmon poke bowl? 480 kcal, P 32 · C 50 · F 14. Tap to swap.', action: { label: 'Apply swap', to: '/(tabs)/plan' } }) },
-  { q: 'Tapas with friends tonight, what do I order?',  icon: 'sparkle', reply: () => ({ text: "Get: pulpo a la gallega, gambas al ajillo, ensalada mixta. Skip: patatas bravas, chorizo. You'll land at ~620 kcal." }) },
+const STARTER_PROMPTS = [
+  { q: 'Can I drink wine tonight?', icon: 'heart' },
+  { q: 'Swap my lunch for something lighter', icon: 'lunch' },
+  { q: "I'm out for tapas — what should I order?", icon: 'sparkle' },
 ];
 
-function MessageBubble({ m, showMascot, onAction }: { m: Msg; showMascot: boolean; onAction: (to: string) => void }) {
-  const isMe = m.from === 'me';
+type Msg = {
+  _id: string;
+  role: 'user' | 'assistant' | 'tool';
+  content: string;
+  toolCalls?: { action?: { label: string; to: string } } | null;
+};
+
+function MessageBubble({
+  m,
+  showMascot,
+  onAction,
+}: {
+  m: Msg;
+  showMascot: boolean;
+  onAction: (to: string) => void;
+}) {
+  const isMe = m.role === 'user';
+  const action = m.toolCalls?.action;
   return (
     <View
       style={{
@@ -47,14 +61,21 @@ function MessageBubble({ m, showMascot, onAction }: { m: Msg; showMascot: boolea
           boxShadow: PILLOW_SHADOW_SM,
         }}
       >
-        <Text style={{ fontSize: 14, lineHeight: 21, color: isMe ? C.paper : C.ink, fontFamily: 'DMSans_400Regular' }}>
-          {m.text}
+        <Text
+          style={{
+            fontSize: 14,
+            lineHeight: 21,
+            color: isMe ? C.paper : C.ink,
+            fontFamily: 'DMSans_400Regular',
+          }}
+        >
+          {m.content}
         </Text>
-        {m.action && (
+        {action ? (
           <Pressable
-            onPress={() => onAction(m.action!.to)}
+            onPress={() => onAction(action.to)}
             accessibilityRole="button"
-            accessibilityLabel={m.action.label}
+            accessibilityLabel={action.label}
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -69,9 +90,11 @@ function MessageBubble({ m, showMascot, onAction }: { m: Msg; showMascot: boolea
             }}
           >
             <Icon name="check" color="#fff" size={12} />
-            <Text style={{ color: C.paper, fontSize: 12, fontFamily: 'DMSans_600SemiBold' }}>{m.action.label}</Text>
+            <Text style={{ color: C.paper, fontSize: 12, fontFamily: 'DMSans_600SemiBold' }}>
+              {action.label}
+            </Text>
           </Pressable>
-        )}
+        ) : null}
       </View>
     </View>
   );
@@ -79,40 +102,83 @@ function MessageBubble({ m, showMascot, onAction }: { m: Msg; showMascot: boolea
 
 export default function Coach() {
   const router = useRouter();
-  const [msgs, setMsgs] = useState<Msg[]>([{ from: 'lumi', text: "Hey Marco — what's on your mind?" }]);
+  const ensureThread = useMutation(api.chat.ensureThread);
+  const sendUserMessage = useMutation(api.chat.sendUserMessage);
+  const sendAction = useAction(api.chatActions.send);
+
+  const [threadId, setThreadId] = useState<Id<'chatThreads'> | null>(null);
   const [draft, setDraft] = useState('');
   const [pipTyping, setPipTyping] = useState(false);
+  const startedRef = useRef(false);
 
-  const send = (text: string, replyFn: () => { text: string; action?: Msg['action'] }) => {
-    setMsgs(m => [...m, { from: 'me', text }]);
-    setPipTyping(true);
-    setTimeout(() => {
-      const r = replyFn();
-      setMsgs(m => [...m, { from: 'lumi', text: r.text, action: r.action }]);
-      setPipTyping(false);
-    }, 800);
-  };
+  useEffect(() => {
+    if (startedRef.current) return;
+    startedRef.current = true;
+    ensureThread({})
+      .then((id) => setThreadId(id as Id<'chatThreads'>))
+      .catch((e) => {
+        startedRef.current = false;
+        Alert.alert("Couldn't open chat", describeConvexError(e));
+      });
+  }, [ensureThread]);
 
-  const submitDraft = () => {
-    if (!draft.trim()) return;
-    const text = draft.trim();
+  const messages = useQuery(api.chat.messages, threadId ? { threadId } : 'skip') as
+    | Msg[]
+    | undefined;
+
+  const submit = async (text: string) => {
+    if (!threadId || !text.trim() || pipTyping) return;
+    const trimmed = text.trim();
     setDraft('');
-    send(text, () => ({ text: 'Got it — give me a sec.' }));
+    setPipTyping(true);
+    try {
+      await sendUserMessage({ threadId, text: trimmed });
+      await sendAction({ threadId, text: trimmed });
+    } catch (e) {
+      Alert.alert("Couldn't reach Pip", describeConvexError(e));
+    } finally {
+      setPipTyping(false);
+    }
   };
+
+  if (!threadId || messages === undefined) {
+    return <ScreenLoading />;
+  }
+
+  const sorted = [...messages]; // already in insertion order from index
+  const showStarters = sorted.length === 0 && !pipTyping;
 
   return (
     <KeyboardAvoidingView behavior="padding" style={S.page}>
-      <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ paddingBottom: 110 }}>
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={{ paddingBottom: 110 }}
+      >
         <Header>Coach</Header>
 
         <View style={{ paddingHorizontal: 22, paddingTop: 4, paddingBottom: 14 }}>
           <View style={[S.pillow, { flexDirection: 'row', alignItems: 'center', gap: 14 }]}>
-            <Mascot mood={pipTyping ? 'typing' : msgs.length > 1 ? 'happy' : 'wave'} size={64} />
+            <Mascot
+              mood={pipTyping ? 'typing' : sorted.length > 0 ? 'happy' : 'wave'}
+              size={64}
+            />
             <View style={{ flex: 1 }}>
-              <Text style={{ fontFamily: 'Fraunces_400Regular', fontSize: 22, color: C.ink }}>Pip</Text>
+              <Text style={{ fontFamily: 'Fraunces_400Regular', fontSize: 22, color: C.ink }}>
+                Pip
+              </Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 2 }}>
-                <View style={{ width: 7, height: 7, borderRadius: 999, backgroundColor: C.green }} />
-                <Text style={{ fontSize: 11, color: C.green, fontFamily: 'DMSans_600SemiBold', letterSpacing: 0.6, textTransform: 'uppercase' }}>
+                <View
+                  style={{ width: 7, height: 7, borderRadius: 999, backgroundColor: C.green }}
+                />
+                <Text
+                  style={{
+                    fontSize: 11,
+                    color: C.green,
+                    fontFamily: 'DMSans_600SemiBold',
+                    letterSpacing: 0.6,
+                    textTransform: 'uppercase',
+                  }}
+                >
                   {pipTyping ? 'Typing…' : 'Listening'}
                 </Text>
               </View>
@@ -124,33 +190,50 @@ export default function Coach() {
         </View>
 
         <View style={{ paddingHorizontal: 22, paddingBottom: 8, gap: 10 }}>
-          {msgs.map((m, i) => (
-            <MessageBubble key={i} m={m} showMascot={i === msgs.length - 1} onAction={to => router.push(to as never)} />
+          {sorted.map((m, i) => (
+            <MessageBubble
+              key={m._id}
+              m={m}
+              showMascot={i === sorted.length - 1}
+              onAction={(to) => router.push(to as never)}
+            />
           ))}
         </View>
 
-        <View style={{ paddingHorizontal: 22, paddingTop: 18, paddingBottom: 8 }}>
-          <Text style={S.eyebrow}>Try asking</Text>
-        </View>
-        <View style={{ paddingHorizontal: 22, gap: 8 }}>
-          {PROMPTS.map(p => (
-            <Pressable
-              key={p.q}
-              onPress={() => send(p.q, p.reply)}
-              accessibilityRole="button"
-              accessibilityLabel={`Ask Pip: ${p.q}`}
-              style={[S.pillowSm, { flexDirection: 'row', alignItems: 'center', gap: 12 }]}
-            >
-              <IconChip tone="apricot" size={32}>
-                <Icon name={p.icon} color={C.apricotDk} size={16} />
-              </IconChip>
-              <Text style={{ flex: 1, fontSize: 13.5, color: C.ink, fontStyle: 'italic', fontFamily: 'Fraunces_300Light_Italic' }}>
-                “{p.q}”
-              </Text>
-              <Icon name="add" color={C.apricot} size={16} />
-            </Pressable>
-          ))}
-        </View>
+        {showStarters ? (
+          <>
+            <View style={{ paddingHorizontal: 22, paddingTop: 18, paddingBottom: 8 }}>
+              <Text style={S.eyebrow}>Try asking</Text>
+            </View>
+            <View style={{ paddingHorizontal: 22, gap: 8 }}>
+              {STARTER_PROMPTS.map((p) => (
+                <Pressable
+                  key={p.q}
+                  onPress={() => submit(p.q)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Ask Pip: ${p.q}`}
+                  style={[S.pillowSm, { flexDirection: 'row', alignItems: 'center', gap: 12 }]}
+                >
+                  <IconChip tone="apricot" size={32}>
+                    <Icon name={p.icon} color={C.apricotDk} size={16} />
+                  </IconChip>
+                  <Text
+                    style={{
+                      flex: 1,
+                      fontSize: 13.5,
+                      color: C.ink,
+                      fontStyle: 'italic',
+                      fontFamily: 'Fraunces_300Light_Italic',
+                    }}
+                  >
+                    “{p.q}”
+                  </Text>
+                  <Icon name="add" color={C.apricot} size={16} />
+                </Pressable>
+              ))}
+            </View>
+          </>
+        ) : null}
       </ScrollView>
 
       <View
@@ -170,14 +253,33 @@ export default function Coach() {
           gap: 10,
         }}
       >
-        <View style={[S.pillowSm, { flex: 1, paddingHorizontal: 16, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', gap: 10 }]}>
+        <View
+          style={[
+            S.pillowSm,
+            {
+              flex: 1,
+              paddingHorizontal: 16,
+              paddingVertical: 10,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 10,
+            },
+          ]}
+        >
           <TextInput
             value={draft}
             onChangeText={setDraft}
-            onSubmitEditing={submitDraft}
+            onSubmitEditing={() => submit(draft)}
+            editable={!pipTyping}
             placeholder="Ask Pip anything…"
             placeholderTextColor={C.dim}
-            style={{ flex: 1, fontSize: 14, fontFamily: 'DMSans_400Regular', color: C.ink, padding: 0 }}
+            style={{
+              flex: 1,
+              fontSize: 14,
+              fontFamily: 'DMSans_400Regular',
+              color: C.ink,
+              padding: 0,
+            }}
           />
           <Icon name="mic" color={C.dim} size={18} />
         </View>
@@ -186,7 +288,15 @@ export default function Coach() {
           accessibilityRole="button"
           accessibilityLabel="Log a meal"
           hitSlop={4}
-          style={{ width: 44, height: 44, borderRadius: 999, backgroundColor: C.apricot, alignItems: 'center', justifyContent: 'center', boxShadow: BTN_SHADOW }}
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 999,
+            backgroundColor: C.apricot,
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: BTN_SHADOW,
+          }}
         >
           <Icon name="add" color="#fff" size={18} />
         </Pressable>

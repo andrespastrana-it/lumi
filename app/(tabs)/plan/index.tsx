@@ -1,7 +1,7 @@
-import { ScrollView, View, Text, Pressable, ActivityIndicator, Alert } from 'react-native';
+import { ScrollView, View, Text, Pressable, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation } from 'convex/react';
-import { Header, FoodPlate, Em, CtaButton, Mascot } from '@/components';
+import { Header, FoodPlate, Em, CtaButton, ScreenLoading, ScreenEmpty } from '@/components';
 import type { PlateTone } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
@@ -37,23 +37,17 @@ export default function Plan() {
   const markDone = useMutation(api.plan.markRecipeDone);
 
   if (plan === undefined) {
-    return (
-      <View style={[S.page, { alignItems: 'center', justifyContent: 'center' }]}>
-        <ActivityIndicator color={C.apricot} />
-      </View>
-    );
+    return <ScreenLoading />;
   }
 
   if (plan === null) {
     return (
-      <View style={[S.page, { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, gap: 16 }]}>
-        <Mascot mood="thinking" size={120} />
-        <Text style={[S.h2, { textAlign: 'center' }]}>No plan yet</Text>
-        <Text style={{ fontSize: 14, color: C.muted, textAlign: 'center', maxWidth: 280, fontFamily: 'Fraunces_300Light_Italic' }}>
-          Finish onboarding so Pip can build your plan.
-        </Text>
-        <CtaButton label="Finish onboarding" onPress={() => router.replace('/onboarding/welcome')} />
-      </View>
+      <ScreenEmpty
+        mascot="thinking"
+        title="No plan yet"
+        body="Finish onboarding so Pip can build your plan."
+        cta={{ label: 'Finish onboarding', onPress: () => router.replace('/onboarding/welcome') }}
+      />
     );
   }
 

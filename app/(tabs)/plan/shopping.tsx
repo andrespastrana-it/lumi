@@ -1,7 +1,7 @@
-import { ScrollView, View, Text, Pressable, ActivityIndicator, Alert } from 'react-native';
+import { ScrollView, View, Text, Pressable, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation } from 'convex/react';
-import { Header, IconChip, Em, CtaButton } from '@/components';
+import { Header, IconChip, Em, ScreenLoading, ScreenEmpty } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
@@ -14,25 +14,17 @@ export default function Shopping() {
   const toggleItem = useMutation(api.plan.toggleShoppingItem);
 
   if (plan === undefined) {
-    return (
-      <View style={[S.page, { alignItems: 'center', justifyContent: 'center' }]}>
-        <ActivityIndicator color={C.apricot} />
-      </View>
-    );
+    return <ScreenLoading />;
   }
 
   if (plan === null || plan.shopping.length === 0) {
     return (
-      <View style={S.page}>
-        <Header showBack>This week</Header>
-        <View style={[S.pad, { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14 }]}>
-          <Text style={[S.h2, { textAlign: 'center' }]}>Shopping list is empty</Text>
-          <Text style={{ fontSize: 14, color: C.muted, textAlign: 'center', maxWidth: 280, fontFamily: 'Fraunces_300Light_Italic' }}>
-            Open a recipe and tap &ldquo;Add to shopping list&rdquo; to start.
-          </Text>
-          <CtaButton label="Browse plan" onPress={() => router.replace('/(tabs)/plan')} />
-        </View>
-      </View>
+      <ScreenEmpty
+        mascot="thinking"
+        title="Shopping list is empty"
+        body={'Open a recipe and tap "Add to shopping list" to start.'}
+        cta={{ label: 'Browse plan', onPress: () => router.replace('/(tabs)/plan') }}
+      />
     );
   }
 

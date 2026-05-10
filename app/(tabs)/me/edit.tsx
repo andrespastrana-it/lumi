@@ -1,8 +1,8 @@
-import { ScrollView, View, Text, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useUser } from '@clerk/expo';
 import { useQuery } from 'convex/react';
-import { Header, CtaButton } from '@/components';
+import { Header, CtaButton, ScreenLoading } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
@@ -40,11 +40,7 @@ export default function ProfileEdit() {
   const me = useQuery(api.me.get);
 
   if (me === undefined) {
-    return (
-      <View style={[S.page, { alignItems: 'center', justifyContent: 'center' }]}>
-        <ActivityIndicator color={C.apricot} />
-      </View>
-    );
+    return <ScreenLoading />;
   }
 
   const profile = me?.profile;

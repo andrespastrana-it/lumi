@@ -1,7 +1,7 @@
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery } from 'convex/react';
-import { Header, IconChip, Mascot, Em, CtaButton } from '@/components';
+import { Header, IconChip, Mascot, Em, CtaButton, ScreenLoading, ScreenEmpty } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
@@ -24,11 +24,7 @@ export default function BadDay() {
   const yesterday = useQuery(api.logs.byDate, { date: yesterdayLocalDate() });
 
   if (me === undefined || yesterday === undefined) {
-    return (
-      <View style={[S.page, { alignItems: 'center', justifyContent: 'center' }]}>
-        <ActivityIndicator color={C.apricot} />
-      </View>
-    );
+    return <ScreenLoading />;
   }
 
   const target = me?.activePlan?.dailyKcal ?? 0;
@@ -38,17 +34,12 @@ export default function BadDay() {
 
   if (target === 0) {
     return (
-      <View style={S.page}>
-        <Header showBack>Yesterday</Header>
-        <View style={[S.pad, { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14 }]}>
-          <Mascot mood="thinking" size={120} />
-          <Text style={[S.h2, { textAlign: 'center' }]}>No plan yet</Text>
-          <Text style={{ fontSize: 14, color: C.muted, textAlign: 'center', maxWidth: 280, fontFamily: 'Fraunces_300Light_Italic' }}>
-            Finish onboarding so Pip can compare yesterday to a target.
-          </Text>
-          <CtaButton label="Finish onboarding" onPress={() => router.replace('/onboarding/welcome')} />
-        </View>
-      </View>
+      <ScreenEmpty
+        mascot="thinking"
+        title="No plan yet"
+        body="Finish onboarding so Pip can compare yesterday to a target."
+        cta={{ label: 'Finish onboarding', onPress: () => router.replace('/onboarding/welcome') }}
+      />
     );
   }
 

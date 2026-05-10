@@ -1,7 +1,7 @@
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery } from 'convex/react';
-import { Mascot, IconChip, Blob, Em, CtaButton } from '@/components';
+import { Mascot, IconChip, Blob, Em, CtaButton, ScreenLoading } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
@@ -15,11 +15,7 @@ export default function Milestone() {
   const dismiss = () => router.replace('/(tabs)/today');
 
   if (me === undefined || recent === undefined || today === undefined) {
-    return (
-      <View style={[S.page, { alignItems: 'center', justifyContent: 'center' }]}>
-        <ActivityIndicator color={C.apricot} />
-      </View>
-    );
+    return <ScreenLoading />;
   }
 
   const startKg = me?.profile?.startWeightKg ?? 0;

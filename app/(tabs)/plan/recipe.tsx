@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { ScrollView, View, Text, Pressable, ActivityIndicator, Alert } from 'react-native';
+import { ScrollView, View, Text, Pressable, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useQuery, useMutation } from 'convex/react';
 import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Em, CtaButton } from '@/components';
+import { Em, CtaButton, ScreenLoading } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
 import { C, PILLOW_SHADOW_SM } from '@/lib/tokens';
@@ -93,11 +93,7 @@ export default function Recipe() {
   const [busy, setBusy] = useState<null | 'shopping' | 'log' | 'favorite'>(null);
 
   if (plan === undefined) {
-    return (
-      <View style={[S.page, { alignItems: 'center', justifyContent: 'center' }]}>
-        <ActivityIndicator color={C.apricot} />
-      </View>
-    );
+    return <ScreenLoading />;
   }
 
   const recipe = plan?.recipes.find(

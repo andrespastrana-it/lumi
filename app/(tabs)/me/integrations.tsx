@@ -1,6 +1,6 @@
-import { ScrollView, View, Text, Pressable, ActivityIndicator, Alert } from 'react-native';
+import { ScrollView, View, Text, Pressable, Alert } from 'react-native';
 import { useQuery, useMutation } from 'convex/react';
-import { Header, IconChip } from '@/components';
+import { Header, IconChip, ScreenLoading } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
@@ -26,11 +26,7 @@ export default function Integrations() {
   const toggleMutation = useMutation(api.integrations.toggle);
 
   if (me === undefined) {
-    return (
-      <View style={[S.page, { alignItems: 'center', justifyContent: 'center' }]}>
-        <ActivityIndicator color={C.apricot} />
-      </View>
-    );
+    return <ScreenLoading />;
   }
 
   const conn = me?.integrations;

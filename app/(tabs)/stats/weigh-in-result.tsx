@@ -1,7 +1,7 @@
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery } from 'convex/react';
-import { Header, IconChip, Em, CtaButton } from '@/components';
+import { Header, IconChip, Em, CtaButton, ScreenLoading } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
@@ -13,11 +13,7 @@ export default function WeighInResult() {
   const recent = useQuery(api.weighIns.recent, { limit: 2 });
 
   if (me === undefined || recent === undefined) {
-    return (
-      <View style={[S.page, { alignItems: 'center', justifyContent: 'center' }]}>
-        <ActivityIndicator color={C.apricot} />
-      </View>
-    );
+    return <ScreenLoading />;
   }
 
   const targetKg = me?.profile?.targetWeightKg ?? 0;

@@ -2,7 +2,7 @@ import { ScrollView, View, Text, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery } from 'convex/react';
 import { useUser } from '@clerk/expo';
-import { Mascot, Blob, Em, IconChip, Ring, FoodPlate, FAB, CtaButton } from '@/components';
+import { Mascot, Blob, Em, IconChip, Ring, FoodPlate, FAB, CtaButton, ScreenLoading, ScreenEmpty } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
@@ -229,29 +229,6 @@ function WeighInBanner() {
   );
 }
 
-function LoadingState() {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 }}>
-      <Mascot mood="thinking" size={120} />
-      <Text style={[S.eyebrow, { marginTop: 12 }]}>Loading your day…</Text>
-    </View>
-  );
-}
-
-function NoPlanState() {
-  const router = useRouter();
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, gap: 16 }}>
-      <Mascot mood="thinking" size={120} />
-      <Text style={[S.h2, { textAlign: 'center' }]}>No plan yet</Text>
-      <Text style={{ fontSize: 14, color: C.muted, textAlign: 'center', maxWidth: 280, fontFamily: 'Fraunces_300Light_Italic' }}>
-        Finish onboarding so Pip can build your plan.
-      </Text>
-      <CtaButton label="Finish onboarding" onPress={() => router.replace('/onboarding/welcome')} />
-    </View>
-  );
-}
-
 export default function TodayScreen() {
   const router = useRouter();
   const today = useQuery(api.today.get);
@@ -261,18 +238,17 @@ export default function TodayScreen() {
   const firstName = user?.firstName ?? user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] ?? 'friend';
 
   if (today === undefined) {
-    return (
-      <View style={S.page}>
-        <LoadingState />
-      </View>
-    );
+    return <ScreenLoading label="Loading your day…" />;
   }
 
   if (today === null) {
     return (
-      <View style={S.page}>
-        <NoPlanState />
-      </View>
+      <ScreenEmpty
+        mascot="thinking"
+        title="No plan yet"
+        body="Finish onboarding so Pip can build your plan."
+        cta={{ label: 'Finish onboarding', onPress: () => router.replace('/onboarding/welcome') }}
+      />
     );
   }
 

@@ -10,6 +10,7 @@ import { C } from '@/lib/tokens';
 import { useApp } from '@/context/AppContext';
 import { getDeviceTimezone } from '@/lib/locale';
 import { api } from '@/convex/_generated/api';
+import { describeConvexError } from '@/lib/clientError';
 
 const STEPS = ['Calculating TDEE', 'Setting deficit', 'Choosing meals', 'Building 26-week curve'];
 
@@ -85,9 +86,9 @@ export default function Compute() {
           },
         });
         if (!cancelled) setActionDone(true);
-      } catch (e: any) {
+      } catch (e) {
         if (cancelled) return;
-        Alert.alert('Plan generation failed', e?.message ?? String(e), [
+        Alert.alert('Plan generation failed', describeConvexError(e), [
           { text: 'Back', onPress: () => router.back() },
         ]);
       }

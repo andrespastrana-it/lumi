@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, View, Text, Image, TextInput, ActivityIndicator, Alert } from 'react-native';
+import { ScrollView, View, Text, Image, TextInput, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useQuery, useMutation } from 'convex/react';
-import { Header, IconChip, FoodPlate, CtaButton } from '@/components';
+import { Header, IconChip, FoodPlate, CtaButton, ScreenLoading, ScreenEmpty } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
@@ -66,20 +66,16 @@ export default function LogConfirm() {
   };
 
   if (params.logId && draft === undefined) {
-    return (
-      <View style={[S.page, { alignItems: 'center', justifyContent: 'center' }]}>
-        <ActivityIndicator color={C.apricot} />
-        <Text style={[S.eyebrow, { marginTop: 16 }]}>Pip is recognizing…</Text>
-      </View>
-    );
+    return <ScreenLoading label="Pip is recognizing…" />;
   }
 
   if (params.logId && draft === null) {
     return (
-      <View style={[S.page, { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 22 }]}>
-        <Text style={[S.h2, { textAlign: 'center' }]}>Draft not found</Text>
-        <CtaButton label="Go back" onPress={() => router.back()} style={{ marginTop: 16 }} />
-      </View>
+      <ScreenEmpty
+        mascot="oops"
+        title="Draft not found"
+        cta={{ label: 'Go back', onPress: () => router.back() }}
+      />
     );
   }
 

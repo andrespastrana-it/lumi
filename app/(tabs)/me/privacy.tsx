@@ -1,6 +1,6 @@
-import { ScrollView, View, Text, Switch, Pressable, ActivityIndicator, Alert } from 'react-native';
+import { ScrollView, View, Text, Switch, Pressable, Alert } from 'react-native';
 import { useQuery, useMutation } from 'convex/react';
-import { Header, IconChip } from '@/components';
+import { Header, IconChip, ScreenLoading } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
@@ -23,11 +23,7 @@ export default function Privacy() {
   const patch = useMutation(api.profile.patch);
 
   if (me === undefined) {
-    return (
-      <View style={[S.page, { alignItems: 'center', justifyContent: 'center' }]}>
-        <ActivityIndicator color={C.apricot} />
-      </View>
-    );
+    return <ScreenLoading />;
   }
 
   const current: PrivacyState = me?.profile?.privacy ?? DEFAULT_PRIVACY;

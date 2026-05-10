@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Camera } from 'expo-camera';
 import { requestRecordingPermissionsAsync } from 'expo-audio';
@@ -11,6 +11,7 @@ import { requestNotificationPermission } from '@/lib/permissions';
 import { requestHealthPermission } from '@/lib/health';
 import { useApp, AppState } from '@/context/AppContext';
 import { api } from '@/convex/_generated/api';
+import { describeConvexError } from '@/lib/clientError';
 
 type PermKey = keyof AppState['permissions'];
 
@@ -47,12 +48,16 @@ export default function Permissions() {
       // Turning off: flip local state + persist. iOS won't actually revoke,
       // but the user's intent is recorded so backend logic respects it.
       set('permissions', { ...state.permissions, [k]: false });
-      setGrant({ key: k, value: false }).catch(() => {});
+      setGrant({ key: k, value: false }).catch((e) =>
+        Alert.alert("Couldn't save", describeConvexError(e)),
+      );
       return;
     }
     const granted = await requestNative(k);
     set('permissions', { ...state.permissions, [k]: granted });
-    setGrant({ key: k, value: granted }).catch(() => {});
+    setGrant({ key: k, value: granted }).catch((e) =>
+      Alert.alert("Couldn't save", describeConvexError(e)),
+    );
   };
 
   return (

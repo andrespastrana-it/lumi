@@ -1,9 +1,8 @@
-import { ScrollView, View, Text, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery } from 'convex/react';
-import { Header, Em, CtaButton, Mascot } from '@/components';
+import { Header, Em, CtaButton, Mascot, ScreenLoading } from '@/components';
 import { S } from '@/lib/styles';
-import { C } from '@/lib/tokens';
 import { api } from '@/convex/_generated/api';
 
 export default function Activity() {
@@ -11,11 +10,7 @@ export default function Activity() {
   const me = useQuery(api.me.get);
 
   if (me === undefined) {
-    return (
-      <View style={[S.page, { alignItems: 'center', justifyContent: 'center' }]}>
-        <ActivityIndicator color={C.apricot} />
-      </View>
-    );
+    return <ScreenLoading />;
   }
 
   const healthGranted = me?.permissionGrants?.health === true;

@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
-import { internalMutation, query } from './_generated/server';
-import { getUserOrNull } from './lib/auth';
+import { internalMutation, internalQuery, mutation, query } from './_generated/server';
+import { getUserOrNull, requireUser } from './lib/auth';
 import { appError } from './lib/errors';
 import type { Doc } from './_generated/dataModel';
 
@@ -59,5 +59,71 @@ export const messages = query({
       .withIndex('by_thread', (q) => q.eq('threadId', threadId))
       .collect();
     return rows.map(messageDto);
+  },
+});
+
+export const ensureThread = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const user = await requireUser(ctx);
+    const existing = await ctx.db
+      .query('chatThreads')
+      .withIndex('by_user_lastMessageAt', (q) => q.eq('userId', user._id))
+      .order('desc')
+      .first();
+    if (existing) return existing._id;
+    return await ctx.db.insert('chatThreads', {
+      userId: user._id,
+      title: 'Pip',
+      lastMessageAt: Date.now(),
+    });
+  },
+});
+
+export const sendUserMessage = mutation({
+  args: { threadId: v.id('chatThreads'), text: v.string() },
+  handler: async (ctx, { threadId, text }) => {
+    const user = await requireUser(ctx);
+    const trimmed = text.trim();
+    if (!trimmed) throw appError('INVALID_ARGUMENT', 'Message is empty');
+    if (trimmed.length > 2000) {
+      throw appError('INVALID_ARGUMENT', 'Message too long', { field: 'text' });
+    }
+    const thread = await ctx.db.get(threadId);
+    if (!thread || thread.userId !== user._id) {
+      throw appError('NOT_FOUND', 'Thread not found');
+    }
+    const messageId = await ctx.db.insert('chatMessages', {
+      threadId,
+      userId: user._id,
+      role: 'user',
+      content: trimmed,
+    });
+    await ctx.db.patch(threadId, { lastMessageAt: Date.now() });
+    return messageId;
+  },
+});
+
+export const recentForThread = internalQuery({
+  args: { threadId: v.id('chatThreads'), limit: v.optional(v.number()) },
+  handler: async (ctx, { threadId, limit }) => {
+    const cap = Math.min(limit ?? 12, 40);
+    const rows = await ctx.db
+      .query('chatMessages')
+      .withIndex('by_thread', (q) => q.eq('threadId', threadId))
+      .order('desc')
+      .take(cap);
+    return rows.reverse().map((r) => ({
+      role: r.role,
+      content: r.content,
+    }));
+  },
+});
+
+export const threadOwnerCheck = internalQuery({
+  args: { threadId: v.id('chatThreads'), userId: v.id('users') },
+  handler: async (ctx, { threadId, userId }) => {
+    const thread = await ctx.db.get(threadId);
+    return !!thread && thread.userId === userId;
   },
 });

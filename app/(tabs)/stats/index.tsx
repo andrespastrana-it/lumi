@@ -1,8 +1,8 @@
-import { ScrollView, View, Text, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery } from 'convex/react';
 import Svg, { Defs, LinearGradient as SvgGradient, Stop, Line, Path, Circle, Text as SvgText } from 'react-native-svg';
-import { Header, IconChip, Em, CtaButton, Mascot } from '@/components';
+import { Header, IconChip, Em, CtaButton, Mascot, ScreenLoading, ScreenEmpty } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
@@ -113,20 +113,16 @@ export default function Forecast() {
   const snapshot = useQuery(api.forecast.get, { range: '30d' });
 
   if (me === undefined || weighIns === undefined || snapshot === undefined) {
-    return (
-      <View style={[S.page, { alignItems: 'center', justifyContent: 'center' }]}>
-        <ActivityIndicator color={C.apricot} />
-      </View>
-    );
+    return <ScreenLoading />;
   }
 
   if (!me?.profile) {
     return (
-      <View style={[S.page, { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, gap: 16 }]}>
-        <Mascot mood="thinking" size={120} />
-        <Text style={[S.h2, { textAlign: 'center' }]}>No profile yet</Text>
-        <CtaButton label="Finish onboarding" onPress={() => router.replace('/onboarding/welcome')} />
-      </View>
+      <ScreenEmpty
+        mascot="thinking"
+        title="No profile yet"
+        cta={{ label: 'Finish onboarding', onPress: () => router.replace('/onboarding/welcome') }}
+      />
     );
   }
 

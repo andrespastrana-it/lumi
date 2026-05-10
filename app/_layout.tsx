@@ -11,9 +11,10 @@ import { tokenCache } from '@clerk/expo/token-cache';
 import { useConvexAuth, useMutation } from 'convex/react';
 import { ConvexProviderWithClerk } from 'convex/react-clerk';
 import { AppProvider, useApp } from '@/context/AppContext';
-import { ErrorBoundary } from '@/components';
+import { ErrorBoundary, OfflineBanner } from '@/components';
 import { convex } from '@/lib/convex';
 import { api } from '@/convex/_generated/api';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const CLERK_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 if (!CLERK_KEY) {
@@ -59,26 +60,29 @@ function Gate({ children }: { children: React.ReactNode }) {
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ErrorBoundary>
-        <ClerkProvider publishableKey={CLERK_KEY!} tokenCache={tokenCache}>
-          <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-            <KeyboardProvider>
-              <AppProvider>
-                <Gate>
-                  <StatusBar style="dark" />
-                  <Stack screenOptions={{ headerShown: false }}>
-                    <Stack.Screen name="index" />
-                    <Stack.Screen name="onboarding" />
-                    <Stack.Screen name="auth" />
-                    <Stack.Screen name="(tabs)" />
-                    <Stack.Screen name="log" options={{ presentation: 'modal' }} />
-                  </Stack>
-                </Gate>
-              </AppProvider>
-            </KeyboardProvider>
-          </ConvexProviderWithClerk>
-        </ClerkProvider>
-      </ErrorBoundary>
+      <SafeAreaProvider>
+        <ErrorBoundary>
+          <ClerkProvider publishableKey={CLERK_KEY!} tokenCache={tokenCache}>
+            <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+              <KeyboardProvider>
+                <AppProvider>
+                  <Gate>
+                    <StatusBar style="dark" />
+                    <Stack screenOptions={{ headerShown: false }}>
+                      <Stack.Screen name="index" />
+                      <Stack.Screen name="onboarding" />
+                      <Stack.Screen name="auth" />
+                      <Stack.Screen name="(tabs)" />
+                      <Stack.Screen name="log" options={{ presentation: 'modal' }} />
+                    </Stack>
+                    <OfflineBanner />
+                  </Gate>
+                </AppProvider>
+              </KeyboardProvider>
+            </ConvexProviderWithClerk>
+          </ClerkProvider>
+        </ErrorBoundary>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }

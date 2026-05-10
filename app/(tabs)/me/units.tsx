@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, View, Text, Pressable, ActivityIndicator, Alert } from 'react-native';
+import { ScrollView, View, Text, Pressable, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation } from 'convex/react';
-import { Header, CtaButton } from '@/components';
+import { Header, CtaButton, ScreenLoading } from '@/components';
 import { S } from '@/lib/styles';
 import { C } from '@/lib/tokens';
 import { api } from '@/convex/_generated/api';
@@ -45,11 +45,7 @@ export default function Units() {
   }, [me, units]);
 
   if (me === undefined || units === null) {
-    return (
-      <View style={[S.page, { alignItems: 'center', justifyContent: 'center' }]}>
-        <ActivityIndicator color={C.apricot} />
-      </View>
-    );
+    return <ScreenLoading />;
   }
 
   const setUnit = (k: UnitsKey, v: string) => setUnits({ ...units, [k]: v });

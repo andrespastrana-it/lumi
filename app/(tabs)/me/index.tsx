@@ -1,8 +1,9 @@
-import { ScrollView, View, Text, Pressable, ActivityIndicator } from 'react-native';
+import { useEffect } from 'react';
+import { ScrollView, View, Text, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth, useUser } from '@clerk/expo';
 import { useQuery } from 'convex/react';
-import { Header, IconChip } from '@/components';
+import { Header, IconChip, ScreenLoading, ScreenEmpty } from '@/components';
 import type { ToneName } from '@/components';
 import { Icon } from '@/lib/icons';
 import { S } from '@/lib/styles';
@@ -17,11 +18,24 @@ export default function Profile() {
   const me = useQuery(api.me.get);
   const { state } = useApp();
 
+  useEffect(() => {
+    if (me === null) {
+      signOut().catch(() => {});
+    }
+  }, [me, signOut]);
+
   if (me === undefined) {
+    return <ScreenLoading />;
+  }
+
+  if (me === null) {
     return (
-      <View style={[S.page, { alignItems: 'center', justifyContent: 'center' }]}>
-        <ActivityIndicator color={C.apricot} />
-      </View>
+      <ScreenEmpty
+        mascot="oops"
+        title="Account unavailable"
+        body="This account isn't accessible. Sign in again to continue."
+        cta={{ label: 'Sign in', onPress: () => router.replace('/auth/sign-in') }}
+      />
     );
   }
 

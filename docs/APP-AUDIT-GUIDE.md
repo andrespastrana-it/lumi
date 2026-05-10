@@ -38,6 +38,35 @@ Rule: finish lower layers before polishing higher layers.
   - **Meal detail screen + edit-existing-log flow** — out of scope.
   - **Push notifications actually firing** — Layer 7 (release).
 
+## Layer 6 verdict (2026-05-10)
+
+Layer 6 (UX polish — loading / empty / error / offline / permission / navigation states) — **done**. Three-pronged: shared state components, global offline banner, coach tab wired to real backend.
+
+- **Coach tab now real** — `convex/chatActions.ts:send` (`'use node'`) appends user message via `internal.chat.appendMessage`, reads last 12 messages via `internal.chat.recentForThread`, calls `ai.task('coach')` (Gemini Flash) wrapped in `withAiTelemetry` with a structured `{ reply, action? }` schema where `action.to` is constrained to a known route allow-list. Assistant replies persist as `chatMessages` rows with `toolCalls.action`. Public surface: `convex/chat.ts:ensureThread` + `sendUserMessage` + existing `messages` query. `app/(tabs)/coach.tsx` rewritten — drops the `PROMPTS` mock + `setTimeout` fake reply. Starter prompts now seed real send calls into the empty-state. Errors via `describeConvexError`.
+- **4 shared state components** — `components/{ScreenLoading,ScreenEmpty,ScreenError,OfflineBanner}.tsx`. Re-exported from `components/index.ts`.
+  - `<ScreenLoading label?>` — centered ActivityIndicator, optional label.
+  - `<ScreenEmpty mascot title body? cta? secondaryCta?>` — Mascot + title + body + 1-2 CtaButtons.
+  - `<ScreenError title? error onRetry?>` — Mascot `oops` + title + `describeConvexError(error)` + retry button.
+  - `<OfflineBanner>` — pinned below safe-area insets, subscribes to `convex.subscribeToConnectionState`. Animates in via Reanimated when `isWebSocketConnected === false` (gated on `hasEverConnected` to avoid cold-start flash). Mounted once in `app/_layout.tsx` `Gate`.
+- **17 screens migrated** to shared components — `today.tsx`, `(tabs)/stats/{index,weigh-in-result,milestone,bad-day,activity}.tsx`, `(tabs)/me/{index,edit,coach-tone,units,privacy,notifications,integrations}.tsx`, `(tabs)/plan/{index,recipe,shopping}.tsx`, `log/confirm.tsx`. Each ad-hoc loading/empty block replaced with the shared shape. Camera/audio permission UIs in `log/{photo,voice,barcode}.tsx` left bespoke (dark-themed, fits the camera viewfinder context better than the generic component).
+- **Specific gaps closed**:
+  - `app/onboarding/compute.tsx` now uses `describeConvexError` (was `e?.message`), so plan-gen failures surface as `AI_FAILED` user-facing copy instead of raw error.
+  - `app/onboarding/permissions.tsx` no longer swallows `setGrant` failures with `.catch(() => {})`; surfaces `Alert` with `describeConvexError`.
+  - `app/(tabs)/me/index.tsx` now branches on `me === null` (account deleted / not synced) — calls `signOut` + renders `<ScreenEmpty mascot="oops">` with sign-in CTA. No more infinite spinner.
+- **Backend additions**:
+  - `convex/chat.ts` — `ensureThread` (mutation), `sendUserMessage` (mutation w/ `assertRange`-style length validation), `recentForThread` (internalQuery), `threadOwnerCheck` (internalQuery).
+  - `convex/chatActions.ts` (new, `'use node'`) — single `send` action.
+- **Verification (live)**:
+  - `npm run typecheck` exit 0.
+  - `npm run test:once` 28/28 (unchanged from Layer 5; no new tests added — coach send is exercised in-app).
+  - `npm run lint` exit 0 with 8 pre-existing warnings (baseline preserved).
+  - `npx convex dev --once` push successful — chat schema, mutations, action all deployed.
+  - `npx convex run smoke:testCoach` hit Gemini free-tier rate limit (`limit: 20/min`) during repeated runs in this session — transient, not a code issue.
+- **Out of scope, deferred:**
+  - Streaming chat replies (token-by-token) — current UX renders the full reply once. Acceptable for v1.
+  - Coach tools (function-calling to mutate plan, etc.) — only nav-action suggestions for now.
+  - Migrating the bespoke camera permission UIs in `log/{photo,voice,barcode}.tsx` to `<ScreenError>` — kept separate by design.
+
 ## Layer 5 verdict (2026-05-09)
 
 Layer 5 (frontend data wiring — replace mock/local state with real backend) — **done**. Most of Layer 5 was delivered alongside Layer 3; this round closed the remaining gaps.
