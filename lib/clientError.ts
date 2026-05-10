@@ -18,6 +18,8 @@ export function describeConvexError(e: unknown): string {
       return 'This account has been deleted.';
     case 'USER_NOT_SYNCED':
       return 'Account still syncing — try again in a moment.';
+    case 'AI_FAILED':
+      return err?.data?.message ?? 'AI service failed. Please retry.';
     default:
       return err?.message ?? 'Something went wrong.';
   }

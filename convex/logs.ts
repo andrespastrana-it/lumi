@@ -146,6 +146,7 @@ export const recordAiCall = internalMutation({
     ms: v.number(),
     ok: v.boolean(),
     errorCode: v.optional(v.string()),
+    costUsd: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     await ctx.db.insert('aiCalls', args);

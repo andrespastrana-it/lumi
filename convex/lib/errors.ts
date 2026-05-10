@@ -8,7 +8,8 @@ export type ErrorCode =
   | 'INVALID_ARGUMENT'
   | 'INVALID_STATE'
   | 'CONFLICT'
-  | 'NO_ACTIVE_PLAN';
+  | 'NO_ACTIVE_PLAN'
+  | 'AI_FAILED';
 
 export function appError(
   code: ErrorCode,

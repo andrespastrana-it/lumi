@@ -5,7 +5,7 @@ import { action } from './_generated/server';
 import { internal } from './_generated/api';
 import { dailyKcal, macros, weeksToTarget, type Sex, type Activity, type Goal } from './lib/nutrition';
 import { appError } from './lib/errors';
-import { checkAiRateLimit } from './lib/rateLimit';
+import { withAiTelemetry } from './lib/aiTelemetry';
 import { ai } from './ai';
 
 export const commit = action({
@@ -42,7 +42,6 @@ export const commit = action({
 
     // 1. Ensure user row (idempotent — covers webhook race).
     const userId: any = await ctx.runMutation(internal.users.ensureMeFromIdentity, {});
-    await checkAiRateLimit(ctx, userId, 'plan-gen');
 
     // 2. Persist profile.
     await ctx.runMutation(internal.profile.create, {
@@ -90,28 +89,26 @@ export const commit = action({
     });
     const ResultSchema = z.object({ recipes: z.array(RecipeOut).min(14).max(28) });
 
+    const planTask = ai.task('plan-gen');
     let recipes: z.infer<typeof RecipeOut>[];
     try {
-      const result = await ai.task('plan-gen').generateObject({
-        schema: ResultSchema,
-        system: `You build personal weekly meal plans. Return 7 days × 3 meals (breakfast/lunch/dinner). Optionally add 1 snack/day. Respect dietary tags strictly. Recipes must be simple, real-world. Use metric ingredient quantities (g, ml, count).`,
-        prompt: `Daily target: ${dk} kcal · ${m.proteinG}g P / ${m.carbG}g C / ${m.fatG}g F.\nDietary tags: ${draft.diet.join(', ') || 'none'}.\nMeal times: ${JSON.stringify(draft.mealTimes)}.\nReturn a varied balanced 7-day plan.`,
-      });
-      recipes = result.object.recipes;
+      recipes = await withAiTelemetry(
+        ctx,
+        { userId, task: 'plan-gen', modelId: planTask.modelId },
+        async () => {
+          const result = await planTask.generateObject({
+            schema: ResultSchema,
+            system: `You build personal weekly meal plans. You MUST output exactly 21 recipes covering days 0,1,2,3,4,5,6 with slots breakfast, lunch, dinner for each day (3 recipes per day). Do not stop until all 21 recipes are emitted. Respect dietary tags strictly. Recipes must be simple, real-world. Use metric ingredient quantities (g, ml, count).`,
+            prompt: `Daily target: ${dk} kcal · ${m.proteinG}g P / ${m.carbG}g C / ${m.fatG}g F.\nDietary tags: ${draft.diet.join(', ') || 'none'}.\nMeal times: ${JSON.stringify(draft.mealTimes)}.\nReturn the full 7-day plan now (21 recipes total, days 0-6, each with breakfast+lunch+dinner).`,
+          });
+          return { value: result.object.recipes, usage: result.usage };
+        },
+      );
     } catch (err) {
       console.error('plan-gen failed', err);
-      // Minimal stub plan as fallback so user isn't blocked.
-      recipes = Array.from({ length: 21 }, (_, i) => ({
-        day: Math.floor(i / 3),
-        slot: (['breakfast', 'lunch', 'dinner'] as const)[i % 3],
-        name: 'Generated meal',
-        kcal: Math.round(dk / 3),
-        proteinG: Math.round(m.proteinG / 3),
-        carbG: Math.round(m.carbG / 3),
-        fatG: Math.round(m.fatG / 3),
-        ingredients: [{ name: 'TBD', qty: '1 portion' }],
-        method: ['Plan generation failed; placeholder used.'],
-      }));
+      throw appError('AI_FAILED', 'Plan generation failed, please retry', {
+        detail: String(err).slice(0, 200),
+      });
     }
 
     // 6. Persist plan.

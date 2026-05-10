@@ -9,6 +9,7 @@ import {
 import { anthropic } from '@ai-sdk/anthropic';
 import { openai } from '@ai-sdk/openai';
 import { groq } from '@ai-sdk/groq';
+import { google } from '@ai-sdk/google';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { z } from 'zod';
 
@@ -20,12 +21,14 @@ const free = createOpenAICompatible({
   baseURL: 'https://integrate.api.nvidia.com/v1',
 });
 
-const registry = createProviderRegistry({ anthropic, openai, groq, free });
+const registry = createProviderRegistry({ anthropic, openai, groq, free, google });
 
 const DEFAULTS: Record<Task, string> = {
-  coach: 'free:nvidia/nemotron-3-nano-omni-30b-a3b-reasoning',
-  vision: 'free:nvidia/nemotron-3-nano-omni-30b-a3b-reasoning',
-  'plan-gen': 'free:nvidia/nemotron-3-nano-omni-30b-a3b-reasoning',
+  coach: 'google:gemini-3-flash-preview',
+  vision: 'google:gemini-3-flash-preview',
+  // Pro has no free tier; flash-preview handles 21-recipe nested schema fine.
+  // Override w/ AI_PLAN_GEN_MODEL=google:gemini-3.1-pro-preview when paid tier active.
+  'plan-gen': 'google:gemini-3-flash-preview',
 };
 
 type TaskSetting = {
@@ -54,17 +57,38 @@ const NEMOTRON_LONG: TaskSetting = {
   },
 };
 
-const TASK_SETTINGS: Partial<Record<Task, TaskSetting>> = {
-  'plan-gen': NEMOTRON_LONG,
-  vision: NEMOTRON_SHORT,
-  coach: NEMOTRON_SHORT,
+// Gemini 3 strongly recommends temperature=1.0 (default). Setting it lower
+// causes looping / degraded reasoning. We control latency via thinkingLevel
+// instead. See https://ai.google.dev/gemini-api/docs/gemini-3#temperature
+const GEMINI_FAST: TaskSetting = {
+  providerOptions: {
+    google: { thinkingConfig: { thinkingLevel: 'low' } },
+  },
 };
+
+const GEMINI_PLAN: TaskSetting = {
+  maxOutputTokens: 32000,
+  providerOptions: {
+    google: { thinkingConfig: { thinkingLevel: 'low' } },
+  },
+};
+
+function settingsFor(t: Task, provider: string): TaskSetting {
+  if (provider === 'free') {
+    return t === 'plan-gen' ? NEMOTRON_LONG : NEMOTRON_SHORT;
+  }
+  if (provider === 'google') {
+    return t === 'plan-gen' ? GEMINI_PLAN : GEMINI_FAST;
+  }
+  return {};
+}
 
 const ENV_KEY: Record<string, string> = {
   anthropic: 'ANTHROPIC_API_KEY',
   openai: 'OPENAI_API_KEY',
   groq: 'GROQ_API_KEY',
   free: 'FREE_API_KEY',
+  google: 'GOOGLE_GENERATIVE_AI_API_KEY',
 };
 
 function resolveModelId(t: Task): string {
@@ -114,7 +138,7 @@ export const ai = {
       validated.add(provider);
     }
     const model = registry.languageModel(modelId as ModelId);
-    const settings = TASK_SETTINGS[t] ?? {};
+    const settings = settingsFor(t, provider);
 
     return {
       modelId,

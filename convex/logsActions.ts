@@ -5,7 +5,7 @@ import { action } from './_generated/server';
 import { internal } from './_generated/api';
 import { ai } from './ai';
 import { appError } from './lib/errors';
-import { checkAiRateLimit } from './lib/rateLimit';
+import { withAiTelemetry } from './lib/aiTelemetry';
 
 const FoodEstimate = z.object({
   name: z.string(),
@@ -23,22 +23,6 @@ async function ensureUser(ctx: any): Promise<any> {
   return await ctx.runMutation(internal.users.ensureMeFromIdentity, {});
 }
 
-async function logAi(
-  ctx: any,
-  args: {
-    userId: any;
-    task: string;
-    providerModel: string;
-    inputTokens: number;
-    outputTokens: number;
-    ms: number;
-    ok: boolean;
-    errorCode?: string;
-  },
-): Promise<void> {
-  await ctx.runMutation(internal.logs.recordAiCall, args).catch(() => {});
-}
-
 export const draftFromPhoto = action({
   args: { assetId: v.id('mediaAssets') },
   handler: async (ctx, { assetId }): Promise<{ logId: string }> => {
@@ -53,52 +37,32 @@ export const draftFromPhoto = action({
       kind: 'photo',
     });
     if (existingDraftId) return { logId: existingDraftId };
-    await checkAiRateLimit(ctx, userId, 'vision');
     const storageId = asset.storageId;
     const url = await ctx.storage.getUrl(storageId);
     if (!url) throw appError('NOT_FOUND', 'Photo not found');
 
-    const t0 = Date.now();
     const visionTask = ai.task('vision');
-    let estimate: z.infer<typeof FoodEstimate>;
-    try {
-      const result = await visionTask.generateObject({
-        schema: FoodEstimate,
-        system:
-          'You estimate kcal + macros from a meal photo. Return one JSON object. Confidence 0-1 reflects certainty. If multiple items visible, sum them and use a descriptive composite name.',
-        messages: [
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: 'Estimate kcal and macros for this meal.' },
-              { type: 'image', image: new URL(url) },
-            ],
-          },
-        ],
-      });
-      estimate = result.object;
-      await logAi(ctx, {
-        userId,
-        task: 'vision',
-        providerModel: visionTask.modelId,
-        inputTokens: result.usage?.inputTokens ?? 0,
-        outputTokens: result.usage?.outputTokens ?? 0,
-        ms: Date.now() - t0,
-        ok: true,
-      });
-    } catch (err) {
-      await logAi(ctx, {
-        userId,
-        task: 'vision',
-        providerModel: visionTask.modelId,
-        inputTokens: 0,
-        outputTokens: 0,
-        ms: Date.now() - t0,
-        ok: false,
-        errorCode: String(err).slice(0, 200),
-      });
-      throw err;
-    }
+    const estimate: z.infer<typeof FoodEstimate> = await withAiTelemetry(
+      ctx,
+      { userId, task: 'vision', modelId: visionTask.modelId },
+      async () => {
+        const result = await visionTask.generateObject({
+          schema: FoodEstimate,
+          system:
+            'You estimate kcal + macros from a meal photo. Return one JSON object. Confidence 0-1 reflects certainty. If multiple items visible, sum them and use a descriptive composite name.',
+          messages: [
+            {
+              role: 'user',
+              content: [
+                { type: 'text', text: 'Estimate kcal and macros for this meal.' },
+                { type: 'image', image: new URL(url) },
+              ],
+            },
+          ],
+        });
+        return { value: result.object, usage: result.usage };
+      },
+    );
 
     const logId: string = await ctx.runMutation(internal.logs.insertDraft, {
       userId,
@@ -136,52 +100,67 @@ export const draftFromVoice = action({
     if (existingDraftId) {
       return { logId: existingDraftId, transcript: '' };
     }
-    await checkAiRateLimit(ctx, userId, 'stt');
-    await checkAiRateLimit(ctx, userId, 'coach');
     const storageId = asset.storageId;
     const url = await ctx.storage.getUrl(storageId);
     if (!url) throw appError('NOT_FOUND', 'Audio not found');
 
-    // STT.
-    const sttRes = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}` },
-      body: (() => {
-        const form = new FormData();
-        form.append('model', 'whisper-large-v3');
-        form.append('file', url);
-        return form;
-      })(),
-    }).catch(() => null);
-
-    let transcript = '';
-    if (sttRes?.ok) {
-      const data = (await sttRes.json()) as { text?: string };
-      transcript = data.text ?? '';
-    }
-    if (!transcript) transcript = 'unknown meal';
+    // STT (groq whisper).
+    const transcript: string = await withAiTelemetry(
+      ctx,
+      { userId, task: 'stt', modelId: 'groq:whisper-large-v3' },
+      async () => {
+        const sttRes = await fetch(
+          'https://api.groq.com/openai/v1/audio/transcriptions',
+          {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}` },
+            body: (() => {
+              const form = new FormData();
+              form.append('model', 'whisper-large-v3');
+              form.append('file', url);
+              return form;
+            })(),
+          },
+        ).catch(() => null);
+        let text = '';
+        if (sttRes?.ok) {
+          const data = (await sttRes.json()) as { text?: string };
+          text = data.text ?? '';
+        }
+        if (!text) text = 'unknown meal';
+        return { value: text };
+      },
+    );
 
     // Parse transcript → food fields.
-    const parsed = await ai.task('coach').generateObject({
-      schema: FoodEstimate,
-      system:
-        'You parse a spoken meal description into kcal/macros. Use real-world averages. Confidence 0-1.',
-      prompt: `User said: "${transcript}". Estimate kcal and macros.`,
-    });
+    const coachTask = ai.task('coach');
+    const parsedObject = await withAiTelemetry(
+      ctx,
+      { userId, task: 'coach', modelId: coachTask.modelId },
+      async () => {
+        const parsed = await coachTask.generateObject({
+          schema: FoodEstimate,
+          system:
+            'You parse a spoken meal description into kcal/macros. Use real-world averages. Confidence 0-1.',
+          prompt: `User said: "${transcript}". Estimate kcal and macros.`,
+        });
+        return { value: parsed.object, usage: parsed.usage };
+      },
+    );
 
     const logId: string = await ctx.runMutation(internal.logs.insertDraft, {
       userId,
       consumedAt: Date.now(),
       draft: {
         source: 'voice',
-        name: parsed.object.name,
-        kcal: Math.round(parsed.object.kcal),
-        proteinG: parsed.object.proteinG,
-        carbG: parsed.object.carbG,
-        fatG: parsed.object.fatG,
+        name: parsedObject.name,
+        kcal: Math.round(parsedObject.kcal),
+        proteinG: parsedObject.proteinG,
+        carbG: parsedObject.carbG,
+        fatG: parsedObject.fatG,
         audioAssetId: assetId,
-        confidence: parsed.object.confidence,
-        rawAi: { transcript, parsed: parsed.object },
+        confidence: parsedObject.confidence,
+        rawAi: { transcript, parsed: parsedObject },
       },
     });
     return { logId, transcript };
@@ -241,14 +220,22 @@ export const draftFromSearch = action({
   handler: async (ctx, { q }): Promise<{ results: z.infer<typeof FoodEstimate>[] }> => {
     const userId = await ensureUser(ctx);
     if (!q.trim()) return { results: [] };
-    await checkAiRateLimit(ctx, userId, 'coach');
 
     const ResultsSchema = z.object({ items: z.array(FoodEstimate).max(8) });
-    const out = await ai.task('coach').generateObject({
-      schema: ResultsSchema,
-      system: 'Return up to 8 likely food matches for the search query. kcal/macros are typical-serving averages.',
-      prompt: `Search: "${q}"`,
-    });
-    return { results: out.object.items };
+    const coachTask = ai.task('coach');
+    const items = await withAiTelemetry(
+      ctx,
+      { userId, task: 'coach', modelId: coachTask.modelId },
+      async () => {
+        const out = await coachTask.generateObject({
+          schema: ResultsSchema,
+          system:
+            'Return up to 8 likely food matches for the search query. kcal/macros are typical-serving averages.',
+          prompt: `Search: "${q}"`,
+        });
+        return { value: out.object.items, usage: out.usage };
+      },
+    );
+    return { results: items };
   },
 });

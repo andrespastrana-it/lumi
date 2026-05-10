@@ -286,6 +286,7 @@ export default defineSchema({
     ms: v.number(),
     ok: v.boolean(),
     errorCode: v.optional(v.string()),
+    costUsd: v.optional(v.number()),
   }).index('by_user', ['userId']),
 
   integrationSecrets: defineTable({
